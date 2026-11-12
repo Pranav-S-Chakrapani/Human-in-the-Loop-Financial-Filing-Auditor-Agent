@@ -225,7 +225,13 @@ export const ReviewWorkbenchScreen: React.FC = () => {
 
           <div
             className="flex-1 overflow-auto bg-slate-950 p-4 rounded-lg border border-slate-800 font-sans text-xs leading-relaxed text-slate-300"
-            dangerouslySetInnerHTML={{ __html: detail?.statement_html || '<div class="text-slate-500">No statement HTML available</div>' }}
+            dangerouslySetInnerHTML={{
+              __html: detail?.statement_html
+                ? (detail.statement_html.trim().startsWith('<table')
+                    ? detail.statement_html
+                    : `<table class="w-full text-xs text-left border-collapse"><tbody>${detail.statement_html}</tbody></table>`)
+                : '<div class="text-slate-500">No statement HTML available</div>'
+            }}
           />
         </div>
 
