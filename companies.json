@@ -1,0 +1,162 @@
+[
+  {
+    "ticker": "AAPL",
+    "name": "Apple Inc.",
+    "cik": "0000320193",
+    "accession": "0000320193-26-000026",
+    "filing_date": "2026-11-03",
+    "report_date": "2026-09-26",
+    "primary_document": "aapl-20260926.htm",
+    "fixture_path": "data/fixtures/AAPL",
+    "notes": {
+      "has_total_liabilities": true,
+      "has_nci": false,
+      "has_gross_profit": true,
+      "has_segment_table": true,
+      "scale": "in millions",
+      "equity_label": "Total shareholders’ equity",
+      "revenue_label": "Total net sales",
+      "net_income_label": "Net income"
+    }
+  },
+  {
+    "ticker": "MSFT",
+    "name": "MICROSOFT CORP",
+    "cik": "0000789019",
+    "accession": "0001193125-26-323660",
+    "filing_date": "2026-07-29",
+    "report_date": "2026-06-30",
+    "primary_document": "msft-20260630.htm",
+    "fixture_path": "data/fixtures/MSFT",
+    "notes": {
+      "has_total_liabilities": true,
+      "has_nci": false,
+      "has_gross_profit": true,
+      "has_segment_table": true,
+      "scale": "in millions",
+      "equity_label": "Total stockholders’ equity",
+      "revenue_label": "Total revenue",
+      "net_income_label": "Net income"
+    }
+  },
+  {
+    "ticker": "NKE",
+    "name": "NIKE, Inc.",
+    "cik": "0000320187",
+    "accession": "0000320187-26-000088",
+    "filing_date": "2026-07-15",
+    "report_date": "2026-05-31",
+    "primary_document": "nke-20260531.htm",
+    "fixture_path": "data/fixtures/NKE",
+    "notes": {
+      "has_total_liabilities": true,
+      "has_nci": false,
+      "has_gross_profit": true,
+      "has_segment_table": true,
+      "scale": "in millions",
+      "equity_label": "Total shareholders' equity",
+      "revenue_label": "TOTAL NIKE BRAND / Revenues",
+      "net_income_label": "Net income"
+    }
+  },
+  {
+    "ticker": "PEP",
+    "name": "PEPSICO INC",
+    "cik": "0000077476",
+    "accession": "0000077476-26-000007",
+    "filing_date": "2026-02-03",
+    "report_date": "2025-12-27",
+    "primary_document": "pep-20251227.htm",
+    "fixture_path": "data/fixtures/PEP",
+    "notes": {
+      "has_total_liabilities": true,
+      "has_nci": true,
+      "has_gross_profit": true,
+      "has_segment_table": true,
+      "scale": "in millions",
+      "equity_label": "Total PepsiCo Shareholders’ Equity",
+      "revenue_label": "Net Revenue",
+      "net_income_label": "Net Income Attributable to PepsiCo"
+    }
+  },
+  {
+    "ticker": "JNJ",
+    "name": "JOHNSON & JOHNSON",
+    "cik": "0000200406",
+    "accession": "0000200406-26-000016",
+    "filing_date": "2026-02-11",
+    "report_date": "2025-12-28",
+    "primary_document": "jnj-20251228.htm",
+    "fixture_path": "data/fixtures/JNJ",
+    "notes": {
+      "has_total_liabilities": true,
+      "has_nci": false,
+      "has_gross_profit": true,
+      "has_segment_table": true,
+      "scale": "in millions",
+      "equity_label": "Total shareholders’ equity",
+      "revenue_label": "Sales to customers",
+      "net_income_label": "Net earnings"
+    }
+  },
+  {
+    "ticker": "KO",
+    "name": "COCA COLA CO",
+    "cik": "0000021344",
+    "accession": "0001628280-26-010047",
+    "filing_date": "2026-02-20",
+    "report_date": "2025-12-31",
+    "primary_document": "ko-20251231.htm",
+    "fixture_path": "data/fixtures/KO",
+    "notes": {
+      "has_total_liabilities": false,
+      "has_nci": true,
+      "has_gross_profit": true,
+      "has_segment_table": true,
+      "scale": "in millions",
+      "equity_label": "Equity Attributable to Shareowners of The Coca-Cola Company",
+      "revenue_label": "Net Operating Revenues",
+      "net_income_label": "Net Income Attributable to Shareowners of The Coca-Cola Company"
+    }
+  },
+  {
+    "ticker": "AMZN",
+    "name": "AMAZON COM INC",
+    "cik": "0001018724",
+    "accession": "0001018724-26-000004",
+    "filing_date": "2026-02-06",
+    "report_date": "2025-12-31",
+    "primary_document": "amzn-20251231.htm",
+    "fixture_path": "data/fixtures/AMZN",
+    "notes": {
+      "has_total_liabilities": false,
+      "has_nci": false,
+      "has_gross_profit": false,
+      "has_segment_table": true,
+      "scale": "in millions",
+      "equity_label": "Total stockholders’ equity",
+      "revenue_label": "Total net sales",
+      "net_income_label": "Net income"
+    }
+  },
+  {
+    "ticker": "GOOGL",
+    "name": "Alphabet Inc.",
+    "cik": "0001652044",
+    "accession": "0001652044-26-000018",
+    "filing_date": "2026-02-05",
+    "report_date": "2025-12-31",
+    "primary_document": "goog-20251231.htm",
+    "fixture_path": "data/fixtures/GOOGL",
+    "notes": {
+      "has_total_liabilities": true,
+      "has_nci": false,
+      "has_gross_profit": false,
+      "has_segment_table": true,
+      "scale": "in millions",
+      "equity_label": "Total stockholders’ equity",
+      "revenue_label": "Revenues",
+      "net_income_label": "Net income"
+    }
+  }
+]

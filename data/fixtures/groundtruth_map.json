@@ -1,0 +1,810 @@
+{
+  "AAPL": {
+    "revenue": {
+      "concept": "RevenueFromContractWithCustomerExcludingAssessedTax",
+      "current": {
+        "value": 478834000000,
+        "end": "2026-09-26",
+        "accn": "0000320193-26-000026"
+      },
+      "prior": {
+        "value": 416161000000,
+        "end": "2025-09-27",
+        "accn": "0000320193-26-000026"
+      }
+    },
+    "net_income": {
+      "concept": "NetIncomeLoss",
+      "current": {
+        "value": 132175000000,
+        "end": "2026-09-26",
+        "accn": "0000320193-26-000026"
+      },
+      "prior": {
+        "value": 112010000000,
+        "end": "2025-09-27",
+        "accn": "0000320193-26-000026"
+      }
+    },
+    "total_assets": {
+      "concept": "Assets",
+      "current": {
+        "value": 404548000000,
+        "end": "2026-09-26",
+        "accn": "0000320193-26-000026"
+      },
+      "prior": {
+        "value": 359241000000,
+        "end": "2025-09-27",
+        "accn": "0000320193-26-000026"
+      }
+    },
+    "total_liabilities": {
+      "concept": "Liabilities",
+      "current": {
+        "value": 292455000000,
+        "end": "2026-09-26",
+        "accn": "0000320193-26-000026"
+      },
+      "prior": {
+        "value": 285508000000,
+        "end": "2025-09-27",
+        "accn": "0000320193-26-000026"
+      }
+    },
+    "shareholders_equity": {
+      "concept": "StockholdersEquity",
+      "current": {
+        "value": 112093000000,
+        "end": "2026-09-26",
+        "accn": "0000320193-26-000026"
+      },
+      "prior": {
+        "value": 73733000000,
+        "end": "2025-09-27",
+        "accn": "0000320193-26-000026"
+      }
+    },
+    "operating_cash_flow": {
+      "concept": "NetCashProvidedByUsedInOperatingActivities",
+      "current": {
+        "value": 145097000000,
+        "end": "2026-09-26",
+        "accn": "0000320193-26-000026"
+      },
+      "prior": {
+        "value": 111482000000,
+        "end": "2025-09-27",
+        "accn": "0000320193-26-000026"
+      }
+    },
+    "gross_profit": {
+      "concept": "GrossProfit",
+      "current": {
+        "value": 233602000000,
+        "end": "2026-09-26",
+        "accn": "0000320193-26-000026"
+      },
+      "prior": {
+        "value": 195201000000,
+        "end": "2025-09-27",
+        "accn": "0000320193-26-000026"
+      }
+    },
+    "diluted_eps": {
+      "concept": "EarningsPerShareDiluted",
+      "current": {
+        "value": 8.98,
+        "end": "2026-09-26",
+        "accn": "0000320193-26-000026"
+      },
+      "prior": {
+        "value": 7.46,
+        "end": "2025-09-27",
+        "accn": "0000320193-26-000026"
+      }
+    }
+  },
+  "MSFT": {
+    "revenue": {
+      "concept": "RevenueFromContractWithCustomerExcludingAssessedTax",
+      "current": {
+        "value": 331839000000,
+        "end": "2026-06-30",
+        "accn": "0001193125-26-323660"
+      },
+      "prior": {
+        "value": 281724000000,
+        "end": "2025-06-30",
+        "accn": "0001193125-26-323660"
+      }
+    },
+    "net_income": {
+      "concept": "NetIncomeLoss",
+      "current": {
+        "value": 133749000000,
+        "end": "2026-06-30",
+        "accn": "0001193125-26-323660"
+      },
+      "prior": {
+        "value": 101832000000,
+        "end": "2025-06-30",
+        "accn": "0001193125-26-323660"
+      }
+    },
+    "total_assets": {
+      "concept": "Assets",
+      "current": {
+        "value": 758376000000,
+        "end": "2026-06-30",
+        "accn": "0001193125-26-323660"
+      },
+      "prior": {
+        "value": 619003000000,
+        "end": "2025-06-30",
+        "accn": "0001193125-26-323660"
+      }
+    },
+    "total_liabilities": {
+      "concept": "Liabilities",
+      "current": {
+        "value": 315989000000,
+        "end": "2026-06-30",
+        "accn": "0001193125-26-323660"
+      },
+      "prior": {
+        "value": 275524000000,
+        "end": "2025-06-30",
+        "accn": "0001193125-26-323660"
+      }
+    },
+    "shareholders_equity": {
+      "concept": "StockholdersEquity",
+      "current": {
+        "value": 442387000000,
+        "end": "2026-06-30",
+        "accn": "0001193125-26-323660"
+      },
+      "prior": {
+        "value": 343479000000,
+        "end": "2025-06-30",
+        "accn": "0001193125-26-323660"
+      }
+    },
+    "operating_cash_flow": {
+      "concept": "NetCashProvidedByUsedInOperatingActivities",
+      "current": {
+        "value": 182935000000,
+        "end": "2026-06-30",
+        "accn": "0001193125-26-323660"
+      },
+      "prior": {
+        "value": 136162000000,
+        "end": "2025-06-30",
+        "accn": "0001193125-26-323660"
+      }
+    },
+    "gross_profit": {
+      "concept": "GrossProfit",
+      "current": {
+        "value": 225465000000,
+        "end": "2026-06-30",
+        "accn": "0001193125-26-323660"
+      },
+      "prior": {
+        "value": 193893000000,
+        "end": "2025-06-30",
+        "accn": "0001193125-26-323660"
+      }
+    },
+    "diluted_eps": {
+      "concept": "EarningsPerShareDiluted",
+      "current": {
+        "value": 17.95,
+        "end": "2026-06-30",
+        "accn": "0001193125-26-323660"
+      },
+      "prior": {
+        "value": 13.64,
+        "end": "2025-06-30",
+        "accn": "0001193125-26-323660"
+      }
+    }
+  },
+  "NKE": {
+    "revenue": {
+      "concept": "RevenueFromContractWithCustomerExcludingAssessedTax",
+      "current": {
+        "value": 46398000000,
+        "end": "2026-05-31",
+        "accn": "0000320187-26-000088"
+      },
+      "prior": {
+        "value": 46309000000,
+        "end": "2025-05-31",
+        "accn": "0000320187-26-000088"
+      }
+    },
+    "net_income": {
+      "concept": "NetIncomeLoss",
+      "current": {
+        "value": 3108000000,
+        "end": "2026-05-31",
+        "accn": "0000320187-26-000088"
+      },
+      "prior": {
+        "value": 3219000000,
+        "end": "2025-05-31",
+        "accn": "0000320187-26-000088"
+      }
+    },
+    "total_assets": {
+      "concept": "Assets",
+      "current": {
+        "value": 38410000000,
+        "end": "2026-05-31",
+        "accn": "0000320187-26-000088"
+      },
+      "prior": {
+        "value": 36579000000,
+        "end": "2025-05-31",
+        "accn": "0000320187-26-000088"
+      }
+    },
+    "total_liabilities": {
+      "concept": null,
+      "current": null,
+      "prior": null
+    },
+    "shareholders_equity": {
+      "concept": "StockholdersEquity",
+      "current": {
+        "value": 14865000000,
+        "end": "2026-05-31",
+        "accn": "0000320187-26-000088"
+      },
+      "prior": {
+        "value": 13213000000,
+        "end": "2025-05-31",
+        "accn": "0000320187-26-000088"
+      }
+    },
+    "operating_cash_flow": {
+      "concept": "NetCashProvidedByUsedInOperatingActivities",
+      "current": {
+        "value": 2868000000,
+        "end": "2026-05-31",
+        "accn": "0000320187-26-000088"
+      },
+      "prior": {
+        "value": 3698000000,
+        "end": "2025-05-31",
+        "accn": "0000320187-26-000088"
+      }
+    },
+    "gross_profit": {
+      "concept": "GrossProfit",
+      "current": {
+        "value": 19911000000,
+        "end": "2026-05-31",
+        "accn": "0000320187-26-000088"
+      },
+      "prior": {
+        "value": 19790000000,
+        "end": "2025-05-31",
+        "accn": "0000320187-26-000088"
+      }
+    },
+    "diluted_eps": {
+      "concept": "EarningsPerShareDiluted",
+      "current": {
+        "value": 2.1,
+        "end": "2026-05-31",
+        "accn": "0000320187-26-000088"
+      },
+      "prior": {
+        "value": 2.16,
+        "end": "2025-05-31",
+        "accn": "0000320187-26-000088"
+      }
+    }
+  },
+  "PEP": {
+    "revenue": {
+      "concept": "Revenues",
+      "current": {
+        "value": 93925000000,
+        "end": "2025-12-27",
+        "accn": "0000077476-26-000007"
+      },
+      "prior": {
+        "value": 91854000000,
+        "end": "2024-12-28",
+        "accn": "0000077476-26-000007"
+      }
+    },
+    "net_income": {
+      "concept": "NetIncomeLoss",
+      "current": {
+        "value": 8240000000,
+        "end": "2025-12-27",
+        "accn": "0000077476-26-000007"
+      },
+      "prior": {
+        "value": 9578000000,
+        "end": "2024-12-28",
+        "accn": "0000077476-26-000007"
+      }
+    },
+    "total_assets": {
+      "concept": "Assets",
+      "current": {
+        "value": 107399000000,
+        "end": "2025-12-27",
+        "accn": "0000077476-26-000007"
+      },
+      "prior": {
+        "value": 99467000000,
+        "end": "2024-12-28",
+        "accn": "0000077476-26-000007"
+      }
+    },
+    "total_liabilities": {
+      "concept": "Liabilities",
+      "current": {
+        "value": 86852000000,
+        "end": "2025-12-27",
+        "accn": "0000077476-26-000007"
+      },
+      "prior": {
+        "value": 81296000000,
+        "end": "2024-12-28",
+        "accn": "0000077476-26-000007"
+      }
+    },
+    "shareholders_equity": {
+      "concept": "StockholdersEquity",
+      "current": {
+        "value": 20406000000,
+        "end": "2025-12-27",
+        "accn": "0000077476-26-000007"
+      },
+      "prior": {
+        "value": 18041000000,
+        "end": "2024-12-28",
+        "accn": "0000077476-26-000007"
+      }
+    },
+    "operating_cash_flow": {
+      "concept": "NetCashProvidedByUsedInOperatingActivities",
+      "current": {
+        "value": 12087000000,
+        "end": "2025-12-27",
+        "accn": "0000077476-26-000007"
+      },
+      "prior": {
+        "value": 12507000000,
+        "end": "2024-12-28",
+        "accn": "0000077476-26-000007"
+      }
+    },
+    "gross_profit": {
+      "concept": "GrossProfit",
+      "current": {
+        "value": 50859000000,
+        "end": "2025-12-27",
+        "accn": "0000077476-26-000007"
+      },
+      "prior": {
+        "value": 50110000000,
+        "end": "2024-12-28",
+        "accn": "0000077476-26-000007"
+      }
+    },
+    "diluted_eps": {
+      "concept": "EarningsPerShareDiluted",
+      "current": {
+        "value": 6,
+        "end": "2025-12-27",
+        "accn": "0000077476-26-000007"
+      },
+      "prior": {
+        "value": 6.95,
+        "end": "2024-12-28",
+        "accn": "0000077476-26-000007"
+      }
+    }
+  },
+  "JNJ": {
+    "revenue": {
+      "concept": "RevenueFromContractWithCustomerExcludingAssessedTax",
+      "current": {
+        "value": 94193000000,
+        "end": "2025-12-28",
+        "accn": "0000200406-26-000016"
+      },
+      "prior": {
+        "value": 88821000000,
+        "end": "2024-12-29",
+        "accn": "0000200406-26-000016"
+      }
+    },
+    "net_income": {
+      "concept": "NetIncomeLoss",
+      "current": {
+        "value": 26804000000,
+        "end": "2025-12-28",
+        "accn": "0000200406-26-000016"
+      },
+      "prior": {
+        "value": 14066000000,
+        "end": "2024-12-29",
+        "accn": "0000200406-26-000016"
+      }
+    },
+    "total_assets": {
+      "concept": "Assets",
+      "current": {
+        "value": 199210000000,
+        "end": "2025-12-28",
+        "accn": "0000200406-26-000016"
+      },
+      "prior": {
+        "value": 180104000000,
+        "end": "2024-12-29",
+        "accn": "0000200406-26-000016"
+      }
+    },
+    "total_liabilities": {
+      "concept": "Liabilities",
+      "current": {
+        "value": 117666000000,
+        "end": "2025-12-28",
+        "accn": "0000200406-26-000016"
+      },
+      "prior": {
+        "value": 108614000000,
+        "end": "2024-12-29",
+        "accn": "0000200406-26-000016"
+      }
+    },
+    "shareholders_equity": {
+      "concept": "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+      "current": {
+        "value": 81544000000,
+        "end": "2025-12-28",
+        "accn": "0000200406-26-000016"
+      },
+      "prior": {
+        "value": 71490000000,
+        "end": "2024-12-29",
+        "accn": "0000200406-26-000016"
+      }
+    },
+    "operating_cash_flow": {
+      "concept": "NetCashProvidedByUsedInOperatingActivities",
+      "current": {
+        "value": 24530000000,
+        "end": "2025-12-28",
+        "accn": "0000200406-26-000016"
+      },
+      "prior": {
+        "value": 24266000000,
+        "end": "2024-12-29",
+        "accn": "0000200406-26-000016"
+      }
+    },
+    "gross_profit": {
+      "concept": "GrossProfit",
+      "current": {
+        "value": 63937000000,
+        "end": "2025-12-28",
+        "accn": "0000200406-26-000016"
+      },
+      "prior": {
+        "value": 61350000000,
+        "end": "2024-12-29",
+        "accn": "0000200406-26-000016"
+      }
+    },
+    "diluted_eps": {
+      "concept": "EarningsPerShareDiluted",
+      "current": {
+        "value": 11.03,
+        "end": "2025-12-28",
+        "accn": "0000200406-26-000016"
+      },
+      "prior": {
+        "value": 5.79,
+        "end": "2024-12-29",
+        "accn": "0000200406-26-000016"
+      }
+    }
+  },
+  "KO": {
+    "revenue": {
+      "concept": "Revenues",
+      "current": {
+        "value": 47941000000,
+        "end": "2025-12-31",
+        "accn": "0001628280-26-010047"
+      },
+      "prior": {
+        "value": 47061000000,
+        "end": "2024-12-31",
+        "accn": "0001628280-26-010047"
+      }
+    },
+    "net_income": {
+      "concept": "NetIncomeLoss",
+      "current": {
+        "value": 13107000000,
+        "end": "2025-12-31",
+        "accn": "0001628280-26-010047"
+      },
+      "prior": {
+        "value": 10631000000,
+        "end": "2024-12-31",
+        "accn": "0001628280-26-010047"
+      }
+    },
+    "total_assets": {
+      "concept": "Assets",
+      "current": {
+        "value": 104816000000,
+        "end": "2025-12-31",
+        "accn": "0001628280-26-010047"
+      },
+      "prior": {
+        "value": 100549000000,
+        "end": "2024-12-31",
+        "accn": "0001628280-26-010047"
+      }
+    },
+    "total_liabilities": {
+      "concept": null,
+      "current": null,
+      "prior": null
+    },
+    "shareholders_equity": {
+      "concept": "StockholdersEquity",
+      "current": {
+        "value": 32169000000,
+        "end": "2025-12-31",
+        "accn": "0001628280-26-010047"
+      },
+      "prior": {
+        "value": 24856000000,
+        "end": "2024-12-31",
+        "accn": "0001628280-26-010047"
+      }
+    },
+    "operating_cash_flow": {
+      "concept": "NetCashProvidedByUsedInOperatingActivities",
+      "current": {
+        "value": 7408000000,
+        "end": "2025-12-31",
+        "accn": "0001628280-26-010047"
+      },
+      "prior": {
+        "value": 6805000000,
+        "end": "2024-12-31",
+        "accn": "0001628280-26-010047"
+      }
+    },
+    "gross_profit": {
+      "concept": "GrossProfit",
+      "current": {
+        "value": 29544000000,
+        "end": "2025-12-31",
+        "accn": "0001628280-26-010047"
+      },
+      "prior": {
+        "value": 28737000000,
+        "end": "2024-12-31",
+        "accn": "0001628280-26-010047"
+      }
+    },
+    "diluted_eps": {
+      "concept": "EarningsPerShareDiluted",
+      "current": {
+        "value": 3.04,
+        "end": "2025-12-31",
+        "accn": "0001628280-26-010047"
+      },
+      "prior": {
+        "value": 2.46,
+        "end": "2024-12-31",
+        "accn": "0001628280-26-010047"
+      }
+    }
+  },
+  "AMZN": {
+    "revenue": {
+      "concept": "RevenueFromContractWithCustomerExcludingAssessedTax",
+      "current": {
+        "value": 716924000000,
+        "end": "2025-12-31",
+        "accn": "0001018724-26-000004"
+      },
+      "prior": {
+        "value": 637959000000,
+        "end": "2024-12-31",
+        "accn": "0001018724-26-000004"
+      }
+    },
+    "net_income": {
+      "concept": "NetIncomeLoss",
+      "current": {
+        "value": 77670000000,
+        "end": "2025-12-31",
+        "accn": "0001018724-26-000004"
+      },
+      "prior": {
+        "value": 59248000000,
+        "end": "2024-12-31",
+        "accn": "0001018724-26-000004"
+      }
+    },
+    "total_assets": {
+      "concept": "Assets",
+      "current": {
+        "value": 818042000000,
+        "end": "2025-12-31",
+        "accn": "0001018724-26-000004"
+      },
+      "prior": {
+        "value": 624894000000,
+        "end": "2024-12-31",
+        "accn": "0001018724-26-000004"
+      }
+    },
+    "total_liabilities": {
+      "concept": null,
+      "current": null,
+      "prior": null
+    },
+    "shareholders_equity": {
+      "concept": "StockholdersEquity",
+      "current": {
+        "value": 411065000000,
+        "end": "2025-12-31",
+        "accn": "0001018724-26-000004"
+      },
+      "prior": {
+        "value": 285970000000,
+        "end": "2024-12-31",
+        "accn": "0001018724-26-000004"
+      }
+    },
+    "operating_cash_flow": {
+      "concept": "NetCashProvidedByUsedInOperatingActivities",
+      "current": {
+        "value": 139514000000,
+        "end": "2025-12-31",
+        "accn": "0001018724-26-000004"
+      },
+      "prior": {
+        "value": 115877000000,
+        "end": "2024-12-31",
+        "accn": "0001018724-26-000004"
+      }
+    },
+    "gross_profit": {
+      "concept": null,
+      "current": null,
+      "prior": null
+    },
+    "diluted_eps": {
+      "concept": "EarningsPerShareDiluted",
+      "current": {
+        "value": 7.17,
+        "end": "2025-12-31",
+        "accn": "0001018724-26-000004"
+      },
+      "prior": {
+        "value": 5.53,
+        "end": "2024-12-31",
+        "accn": "0001018724-26-000004"
+      }
+    }
+  },
+  "GOOGL": {
+    "revenue": {
+      "concept": "Revenues",
+      "current": {
+        "value": 402836000000,
+        "end": "2025-12-31",
+        "accn": "0001652044-26-000018"
+      },
+      "prior": {
+        "value": 350018000000,
+        "end": "2024-12-31",
+        "accn": "0001652044-26-000018"
+      }
+    },
+    "net_income": {
+      "concept": "NetIncomeLoss",
+      "current": {
+        "value": 132170000000,
+        "end": "2025-12-31",
+        "accn": "0001652044-26-000018"
+      },
+      "prior": {
+        "value": 100118000000,
+        "end": "2024-12-31",
+        "accn": "0001652044-26-000018"
+      }
+    },
+    "total_assets": {
+      "concept": "Assets",
+      "current": {
+        "value": 595281000000,
+        "end": "2025-12-31",
+        "accn": "0001652044-26-000018"
+      },
+      "prior": {
+        "value": 450256000000,
+        "end": "2024-12-31",
+        "accn": "0001652044-26-000018"
+      }
+    },
+    "total_liabilities": {
+      "concept": "Liabilities",
+      "current": {
+        "value": 180016000000,
+        "end": "2025-12-31",
+        "accn": "0001652044-26-000018"
+      },
+      "prior": {
+        "value": 125172000000,
+        "end": "2024-12-31",
+        "accn": "0001652044-26-000018"
+      }
+    },
+    "shareholders_equity": {
+      "concept": "StockholdersEquity",
+      "current": {
+        "value": 415265000000,
+        "end": "2025-12-31",
+        "accn": "0001652044-26-000018"
+      },
+      "prior": {
+        "value": 325084000000,
+        "end": "2024-12-31",
+        "accn": "0001652044-26-000018"
+      }
+    },
+    "operating_cash_flow": {
+      "concept": "NetCashProvidedByUsedInOperatingActivities",
+      "current": {
+        "value": 164713000000,
+        "end": "2025-12-31",
+        "accn": "0001652044-26-000018"
+      },
+      "prior": {
+        "value": 125299000000,
+        "end": "2024-12-31",
+        "accn": "0001652044-26-000018"
+      }
+    },
+    "gross_profit": {
+      "concept": null,
+      "current": null,
+      "prior": null
+    },
+    "diluted_eps": {
+      "concept": "EarningsPerShareDiluted",
+      "current": {
+        "value": 10.81,
+        "end": "2025-12-31",
+        "accn": "0001652044-26-000018"
+      },
+      "prior": {
+        "value": 8.04,
+        "end": "2024-12-31",
+        "accn": "0001652044-26-000018"
+      }
+    }
+  }
+}
