@@ -40,14 +40,17 @@ export const AuditLedgerScreen: React.FC = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header and Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-800 pb-4 gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-white/[0.08] pb-4 gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center space-x-2">
-            <Lock className="w-5 h-5 text-emerald-400" />
+          <div className="inline-flex items-center space-x-2 px-2.5 py-1 rounded-full bg-[rgba(232,179,57,0.1)] border border-[rgba(232,179,57,0.25)] text-[var(--signal,#E8B339)] text-[10px] font-mono uppercase tracking-wider mb-2">
+            <span>IMMUTABLE CRYPTOGRAPHIC HASH CHAIN</span>
+          </div>
+          <h2 className="text-2xl font-display font-bold text-white tracking-[-0.02em] flex items-center space-x-2">
+            <Lock className="w-5 h-5 text-[var(--signal,#E8B339)]" />
             <span>Cryptographic Audit Ledger</span>
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Append-only SQLite log with SHA-256 hash chaining: row_hash = sha256(prev_hash + canonical_json(row)).
+          <p className="text-xs text-slate-400 mt-1 font-sans">
+            Insert-only SQLite audit log protected by database triggers. <code className="text-slate-300 font-mono">row_hash = sha256(prev_hash + canonical_json(row))</code>
           </p>
         </div>
 
@@ -55,104 +58,112 @@ export const AuditLedgerScreen: React.FC = () => {
           <button
             onClick={handleVerify}
             disabled={loading}
-            className="px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center space-x-1.5 transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl border border-emerald-500/40 bg-emerald-500/15 hover:bg-emerald-500/25 active:scale-95 text-emerald-300 text-xs font-mono font-bold flex items-center space-x-2 transition-all cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.2)]"
           >
-            <ShieldCheck className="w-4 h-4" />
-            <span>Verify Integrity</span>
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span>Verify Chain Integrity</span>
           </button>
 
           <button
             onClick={handleTamper}
-            className="px-3.5 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold flex items-center space-x-1.5 transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl border border-rose-500/40 bg-rose-500/15 hover:bg-rose-500/25 active:scale-95 text-rose-300 text-xs font-mono font-bold flex items-center space-x-2 transition-all cursor-pointer shadow-[0_0_15px_rgba(244,63,94,0.2)]"
           >
-            <AlertOctagon className="w-4 h-4" />
-            <span>Attempt Tamper Demo</span>
+            <AlertOctagon className="w-4 h-4 text-rose-400" />
+            <span>Simulate Tamper (Abort Test)</span>
           </button>
         </div>
       </div>
 
       {/* Verify Banner */}
       {verifyStatus && (
-        <div className={`p-4 rounded-xl border flex items-center justify-between ${
+        <div className={`p-4 rounded-2xl border backdrop-blur-xl flex items-center justify-between shadow-lg ${
           verifyStatus.ok
-            ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
-            : 'border-rose-500/40 bg-rose-500/10 text-rose-300'
+            ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-200'
+            : 'border-rose-500/50 bg-rose-500/10 text-rose-200'
         }`}>
-          <div className="flex items-center space-x-2 text-xs font-bold">
-            {verifyStatus.ok ? <CheckCircle2 className="w-5 h-5 text-emerald-400" /> : <XCircle className="w-5 h-5 text-rose-400" />}
+          <div className="flex items-center space-x-3 text-xs font-mono font-bold">
+            {verifyStatus.ok ? <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" /> : <XCircle className="w-5 h-5 text-rose-400 shrink-0" />}
             <span>
               {verifyStatus.ok
-                ? `Cryptographic chain verified: All ${verifyStatus.rows} entries match hash sequence.`
-                : `Chain corrupted at sequence #${verifyStatus.first_bad_seq}!`}
+                ? `Cryptographic chain 100% verified: All ${verifyStatus.rows} entries match sequential SHA-256 digests.`
+                : `Integrity breach: Chain corrupted at sequence #${verifyStatus.first_bad_seq}!`}
             </span>
           </div>
-          <div className="font-mono text-xs text-slate-400 truncate max-w-sm">
-            Head: {verifyStatus.head_hash?.slice(0, 24)}...
+          <div className="font-mono text-[11px] text-slate-400 truncate max-w-sm">
+            Head Hash: <span className="text-white">{verifyStatus.head_hash?.slice(0, 24)}...</span>
           </div>
         </div>
       )}
 
       {/* Tamper Result Modal/Banner */}
       {tamperResult && (
-        <div className="p-4 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-200 text-xs space-y-2">
-          <div className="font-bold flex items-center space-x-1.5 text-amber-300">
+        <div className="p-5 rounded-2xl border border-[var(--signal,#E8B339)]/40 bg-[#141822]/90 text-amber-200 text-xs space-y-2.5 backdrop-blur-xl shadow-xl">
+          <div className="font-bold flex items-center space-x-2 text-[var(--signal,#E8B339)] font-mono text-sm">
             <AlertOctagon className="w-4 h-4" />
-            <span>SQLITE Database Triggers Enforced: Tamper Blocked</span>
+            <span>SQLite Database Triggers Enforced: Mutation Attempt Blocked</span>
           </div>
-          <div className="font-mono text-slate-300 space-y-1">
-            <div>UPDATE blocked: <strong className="text-emerald-400">{tamperResult.update_blocked ? 'TRUE (RAISE ABORT)' : 'FALSE'}</strong></div>
-            <div>DELETE blocked: <strong className="text-emerald-400">{tamperResult.delete_blocked ? 'TRUE (RAISE ABORT)' : 'FALSE'}</strong></div>
-            <div>Trigger Error: <em>"{tamperResult.errors?.[0] || 'audit_log is append-only'}"</em></div>
+          <div className="font-mono text-slate-300 space-y-1.5 p-3 rounded-xl bg-[#0B0E14] border border-white/[0.06]">
+            <div>UPDATE statement blocked: <strong className="text-emerald-400">{tamperResult.update_blocked ? 'TRUE (RAISE ABORT TRIGGERED)' : 'FALSE'}</strong></div>
+            <div>DELETE statement blocked: <strong className="text-emerald-400">{tamperResult.delete_blocked ? 'TRUE (RAISE ABORT TRIGGERED)' : 'FALSE'}</strong></div>
+            <div>Trigger Exception Message: <em className="text-rose-300">"{tamperResult.errors?.[0] || 'audit_log is append-only'}"</em></div>
           </div>
         </div>
       )}
 
       {/* Audit Log Table */}
-      <div className="overflow-x-auto border border-slate-800 rounded-xl bg-slate-900/40 backdrop-blur">
+      <div className="overflow-x-auto border border-white/[0.08] rounded-2xl bg-[#141822]/85 backdrop-blur-xl shadow-xl">
         <table className="w-full text-xs text-left text-slate-300 border-collapse">
-          <thead className="bg-slate-950/80 border-b border-slate-800 text-slate-400 uppercase font-mono tracking-wider text-[11px]">
+          <thead className="bg-[#0B0E14]/90 border-b border-white/[0.08] text-slate-400 uppercase font-mono tracking-wider text-[10px]">
             <tr>
-              <th className="p-3">Seq</th>
-              <th className="p-3">Company</th>
-              <th className="p-3">Metric</th>
-              <th className="p-3 text-right">Original</th>
-              <th className="p-3 text-right">Corrected</th>
-              <th className="p-3 text-center">Decision</th>
-              <th className="p-3">Reviewer / Note</th>
-              <th className="p-3">Row Hash (SHA-256)</th>
+              <th className="p-3.5">Seq</th>
+              <th className="p-3.5">Company</th>
+              <th className="p-3.5">Metric</th>
+              <th className="p-3.5 text-right">Original</th>
+              <th className="p-3.5 text-right">Corrected</th>
+              <th className="p-3.5 text-center">Decision</th>
+              <th className="p-3.5">Reviewer / Note</th>
+              <th className="p-3.5">Row Hash (SHA-256)</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60 font-mono text-xs">
-            {entries.map((entry) => (
-              <tr key={entry.seq} className="hover:bg-slate-800/30 transition-colors">
-                <td className="p-3 font-bold text-sky-400">#{entry.seq}</td>
-                <td className="p-3 font-sans font-medium text-white">{entry.company}</td>
-                <td className="p-3 capitalize text-slate-300">{entry.metric?.replace(/_/g, ' ')}</td>
-                <td className="p-3 text-right text-slate-400">
-                  {entry.original_value != null ? `$${entry.original_value.toLocaleString()}` : '—'}
-                </td>
-                <td className="p-3 text-right text-emerald-400 font-bold">
-                  {entry.corrected_value != null ? `$${entry.corrected_value.toLocaleString()}` : '—'}
-                </td>
-                <td className="p-3 text-center">
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                    entry.decision === 'approve'
-                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                      : entry.decision === 'correct'
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                      : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                  }`}>
-                    {entry.decision}
-                  </span>
-                </td>
-                <td className="p-3 font-sans text-slate-300 text-[11px]">
-                  <strong className="text-slate-100 font-mono">{entry.reviewer}</strong>: {entry.note || 'None'}
-                </td>
-                <td className="p-3 font-mono text-slate-500 text-[10px] truncate max-w-[140px]" title={entry.row_hash}>
-                  {entry.row_hash?.slice(0, 16)}...
+          <tbody className="divide-y divide-white/[0.04] font-mono text-xs">
+            {entries.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="p-12 text-center text-slate-500 font-mono">
+                  No committed audit rows found. Execute a run in Mission Control to generate ledger signatures.
                 </td>
               </tr>
-            ))}
+            ) : (
+              entries.map((entry) => (
+                <tr key={entry.seq} className="hover:bg-white/[0.02] transition-colors">
+                  <td className="p-3.5 font-bold text-[var(--signal,#E8B339)]">#{entry.seq}</td>
+                  <td className="p-3.5 font-sans font-semibold text-white">{entry.company}</td>
+                  <td className="p-3.5 capitalize text-slate-300">{entry.metric?.replace(/_/g, ' ')}</td>
+                  <td className="p-3.5 text-right text-slate-400">
+                    {entry.original_value != null ? `$${entry.original_value.toLocaleString()}` : '—'}
+                  </td>
+                  <td className="p-3.5 text-right text-emerald-400 font-bold">
+                    {entry.corrected_value != null ? `$${entry.corrected_value.toLocaleString()}` : '—'}
+                  </td>
+                  <td className="p-3.5 text-center">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase font-mono ${
+                      entry.decision === 'approve'
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                        : entry.decision === 'correct'
+                        ? 'bg-[var(--signal,#E8B339)]/20 text-amber-300 border border-amber-500/30'
+                        : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                    }`}>
+                      {entry.decision}
+                    </span>
+                  </td>
+                  <td className="p-3.5 font-sans text-slate-300 text-[11px]">
+                    <strong className="text-white font-mono">{entry.reviewer}</strong>: {entry.note || 'None'}
+                  </td>
+                  <td className="p-3.5 font-mono text-slate-500 text-[10px] truncate max-w-[150px]" title={entry.row_hash}>
+                    {entry.row_hash?.slice(0, 16)}...
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

@@ -27,7 +27,8 @@ import {
   Terminal,
 } from 'lucide-react';
 import { MagneticButton } from '../components/MagneticButton';
-import { AuditStageCanvas, SceneId } from '../components/AuditStageCanvas';
+import { SupernovaStage, SceneId } from '../components/SupernovaStage';
+import { ValidatorGrid } from '../components/ValidatorGrid';
 
 // ─── Section Definition ───────────────────────────────────────────────────────
 const SECTIONS: { id: string; sceneId: SceneId; tag: string; label: string }[] = [
@@ -147,7 +148,7 @@ export const IntroScreen: React.FC = () => {
       }}
     >
       {/* ══════════════════════════════════════════════════════════════════════
-          STICKY CANVAS BACKDROP
+          STICKY 3D WEBGL STAGE (Adapted from Aetheris for VantageAudit)
           (Remains pinned in place behind the scroll container)
          ══════════════════════════════════════════════════════════════════════ */}
       <div
@@ -155,10 +156,14 @@ export const IntroScreen: React.FC = () => {
         aria-hidden="true"
         style={{ zIndex: 0 }}
       >
-        <AuditStageCanvas
+        <SupernovaStage
           scene={SECTIONS[activeIdx]?.sceneId ?? 'hero'}
+          accent="#E8B339"
+          paper="#090C12"
           prefersReducedMotion={prefersReducedMotion}
         />
+        {/* Subtle radial depth gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70 pointer-events-none" />
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
@@ -373,77 +378,121 @@ export const IntroScreen: React.FC = () => {
               </p>
             </div>
 
-            {/* 4 Invariant Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {[
-                {
-                  code: 'INV-01',
-                  title: 'Accounting Equation',
-                  formula: 'Assets = Liabilities + Equity (±0.5%)',
-                  desc: 'Enforces the foundational identity across balance sheet lines before ledger write-back.',
-                  icon: Scale,
-                  delay: 0,
-                },
-                {
-                  code: 'INV-02',
-                  title: 'Segment Synthesis',
-                  formula: 'Σ(Segments) == Consolidated Revenue',
-                  desc: 'Disaggregates operating geographic & product segments to ensure internal consistency.',
-                  icon: Layers,
-                  delay: 90,
-                },
-                {
-                  code: 'INV-03',
-                  title: 'Year-on-Year Continuity',
-                  formula: 'Prior_Year(Reported) == Historical(Current)',
-                  desc: 'Audits restatements and variance anomalies exceeding 50% year-over-year bounds.',
-                  icon: TrendingUp,
-                  delay: 180,
-                },
-                {
-                  code: 'INV-04',
-                  title: 'Cross-Statement Reconciliation',
-                  formula: 'Net Income -> Operating Cash Flow Base',
-                  desc: 'Reconciles Income Statement net earnings against cash flow operating starting balances.',
-                  icon: FileSpreadsheet,
-                  delay: 270,
-                },
-              ].map((inv) => {
-                const Icon = inv.icon;
-                return (
-                  <div
-                    key={inv.code}
-                    style={{
-                      opacity: valVisible || prefersReducedMotion ? 1 : 0,
-                      transform: valVisible || prefersReducedMotion ? 'translateY(0)' : 'translateY(16px)',
-                      transition: `opacity 0.4s ease ${inv.delay}ms, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${inv.delay}ms`,
-                    }}
-                    className="p-6 rounded-2xl bg-[#141822]/80 border border-white/[0.08] hover:border-white/[0.16] transition-all backdrop-blur-xl group"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-2">
-                        <div className="p-2 rounded-lg bg-[rgba(232,179,57,0.1)] text-[var(--signal,#E8B339)]">
-                          <Icon className="w-4 h-4" />
+            {/* Layout: Invariants on Left + Live 400-Node Consensus Matrix on Right */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+              {/* Left Column: 4 Invariants */}
+              <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {[
+                  {
+                    code: 'INV-01',
+                    title: 'Accounting Equation',
+                    formula: 'Assets = Liab. + Equity',
+                    desc: 'Enforces fundamental balance sheet identity (±0.5%).',
+                    icon: Scale,
+                    delay: 0,
+                  },
+                  {
+                    code: 'INV-02',
+                    title: 'Segment Synthesis',
+                    formula: 'Σ(Segments) == Revenue',
+                    desc: 'Corroborates disaggregated operating lines.',
+                    icon: Layers,
+                    delay: 70,
+                  },
+                  {
+                    code: 'INV-03',
+                    title: 'Year-on-Year',
+                    formula: 'Prior == Historical(Current)',
+                    desc: 'Detects unexpected variance shifts > ±50%.',
+                    icon: TrendingUp,
+                    delay: 140,
+                  },
+                  {
+                    code: 'INV-04',
+                    title: 'Cross-Statement',
+                    formula: 'Net Income -> Cash Flow',
+                    desc: 'Reconciles operating income to start cash.',
+                    icon: FileSpreadsheet,
+                    delay: 210,
+                  },
+                ].map((inv) => {
+                  const Icon = inv.icon;
+                  return (
+                    <div
+                      key={inv.code}
+                      style={{
+                        opacity: valVisible || prefersReducedMotion ? 1 : 0,
+                        transform: valVisible || prefersReducedMotion ? 'translateY(0)' : 'translateY(14px)',
+                        transition: `opacity 0.4s ease ${inv.delay}ms, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${inv.delay}ms`,
+                      }}
+                      className="p-4 rounded-xl bg-[#141822]/80 border border-white/[0.08] hover:border-white/[0.16] transition-all backdrop-blur-xl group flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center space-x-1.5">
+                            <div className="p-1 rounded-md bg-[rgba(232,179,57,0.1)] text-[var(--signal,#E8B339)]">
+                              <Icon className="w-3.5 h-3.5" />
+                            </div>
+                            <span className="font-mono text-[10px] text-slate-400">{inv.code}</span>
+                          </div>
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+                            VERIFIED
+                          </span>
                         </div>
-                        <span className="font-mono text-xs text-slate-400">{inv.code}</span>
+                        <h3 className="font-display font-bold text-sm text-white mb-1 group-hover:text-[var(--signal,#E8B339)] transition-colors">
+                          {inv.title}
+                        </h3>
+                        <div className="text-[10px] font-mono text-[var(--signal,#E8B339)] bg-[#0E121A] px-2 py-0.5 rounded mb-1.5 inline-block border border-white/[0.04]">
+                          {inv.formula}
+                        </div>
                       </div>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
-                        VERIFIED IDENTITIES
-                      </span>
+                      <p className="text-[11px] text-slate-400 leading-normal font-sans">
+                        {inv.desc}
+                      </p>
                     </div>
+                  );
+                })}
+              </div>
 
-                    <h3 className="font-display font-bold text-lg text-white mb-1.5 group-hover:text-[var(--signal,#E8B339)] transition-colors">
-                      {inv.title}
-                    </h3>
-                    <div className="text-[11px] font-mono text-[var(--signal,#E8B339)] bg-[#0E121A] px-2.5 py-1 rounded-md mb-2.5 inline-block border border-white/[0.04]">
-                      {inv.formula}
+              {/* Right Column: 400-Node Quorum Verification Matrix (from Aetheris) */}
+              <div
+                className="lg:col-span-5 rounded-2xl bg-[#141822]/80 border border-white/[0.08] border-t-2 border-t-[var(--signal,#E8B339)] p-5 backdrop-blur-xl flex flex-col justify-between"
+                style={{
+                  opacity: valVisible || prefersReducedMotion ? 1 : 0,
+                  transform: valVisible || prefersReducedMotion ? 'translateY(0)' : 'translateY(14px)',
+                  transition: 'opacity 0.45s ease 0.15s, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.15s',
+                }}
+              >
+                <div>
+                  <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-white/[0.06]">
+                    <div className="flex items-center space-x-2">
+                      <span className="w-2 h-2 rounded-full bg-[var(--signal,#E8B339)] shadow-[0_0_8px_rgba(232,179,57,0.8)]" />
+                      <span className="font-mono text-xs font-bold text-white">Quorum Verification Matrix</span>
                     </div>
-                    <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                      {inv.desc}
-                    </p>
+                    <span className="text-[10px] font-mono text-slate-400">400 Nodes · Shard 0</span>
                   </div>
-                );
-              })}
+
+                  <div className="h-44 w-full rounded-xl bg-[#0B0E14] border border-white/[0.04] p-2 overflow-hidden mb-3">
+                    <ValidatorGrid
+                      total={400}
+                      quorum={267}
+                      roundMs={600}
+                      accent="#E8B339"
+                      ink="#FFFFFF"
+                      slow={1}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <h4 className="font-display font-bold text-xs text-slate-200">
+                    267 / 400 BLS signatures reach quorum. One aggregated proof finalises the ledger.
+                  </h4>
+                  <p className="text-[11px] text-slate-400 font-sans leading-relaxed">
+                    Algebraic proofs guarantee mathematical integrity across statements before figures commit to the report.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
