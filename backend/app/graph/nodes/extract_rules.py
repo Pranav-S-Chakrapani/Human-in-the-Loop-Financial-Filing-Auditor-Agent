@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from bs4 import BeautifulSoup
 import warnings
@@ -141,6 +142,18 @@ def extract_from_table_soup(
                     }
     return None
 
+def _get_table_soup(info: Optional[Dict[str, Any]]) -> Optional[BeautifulSoup]:
+    if not info:
+        return None
+    if "table_html" in info and info["table_html"]:
+        return BeautifulSoup(info["table_html"], "lxml")
+    if "table_path" in info and info["table_path"]:
+        p = Path(info["table_path"])
+        if p.exists():
+            with open(p, "r", encoding="utf-8", errors="ignore") as f:
+                return BeautifulSoup(f.read(), "lxml")
+    return None
+
 def extract_rules_from_statements(located: Dict[str, Any]) -> Dict[str, Any]:
     extracted = {}
 
@@ -148,9 +161,9 @@ def extract_rules_from_statements(located: Dict[str, Any]) -> Dict[str, Any]:
     is_info = located.get("income_statement")
     cf_info = located.get("cash_flow")
 
-    bs_soup = BeautifulSoup(bs_info["table_html"], "lxml") if bs_info else None
-    is_soup = BeautifulSoup(is_info["table_html"], "lxml") if is_info else None
-    cf_soup = BeautifulSoup(cf_info["table_html"], "lxml") if cf_info else None
+    bs_soup = _get_table_soup(bs_info)
+    is_soup = _get_table_soup(is_info)
+    cf_soup = _get_table_soup(cf_info)
 
     # BS metrics
     if bs_soup and bs_info:

@@ -13,11 +13,12 @@ from backend.app.graph.nodes.parser_utils import detect_scale_multiplier
 def clean_txt(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
-def locate_statements_in_html(html_path: str, accession: str, cik: str) -> Dict[str, Any]:
+def locate_statements_in_html(html_path: str, accession: str, cik: str, run_id: Optional[str] = None) -> Dict[str, Any]:
     """
     Parses visual 10-K HTML to locate Balance Sheet, Income Statement, and Cash Flow statement tables.
     RULES.md #2: Never read ix:* tags, name=, or contextRef. Visual document only.
     Filters out TOC (Table of Contents) hits.
+    RULES.md #7: Writes table HTML to disk cache and returns table_path references instead of raw HTML in state.
     """
     with open(html_path, "r", encoding="utf-8", errors="ignore") as f:
         html = f.read()
@@ -28,6 +29,11 @@ def locate_statements_in_html(html_path: str, accession: str, cik: str) -> Dict[
     cik_no_zero = str(int(cik))
     accn_no_dash = accession.replace("-", "")
     edgar_base_url = f"https://www.sec.gov/Archives/edgar/data/{cik_no_zero}/{accn_no_dash}/"
+
+    cache_dir = Path("data/cache/tables")
+    if run_id:
+        cache_dir = cache_dir / run_id
+    cache_dir.mkdir(parents=True, exist_ok=True)
 
     located = {
         "balance_sheet": None,
@@ -52,10 +58,12 @@ def locate_statements_in_html(html_path: str, accession: str, cik: str) -> Dict[
                ("total liabilities and" in t_low or "liabilities and stockholders" in t_low or "liabilities and shareholders" in t_low or "liabilities and equity" in t_low or "total liabilities" in t_low):
                 if len(txt) < 15000:
                     scale = detect_scale_multiplier(txt)
+                    tbl_path = cache_dir / f"bs_table_{idx}.html"
+                    tbl_path.write_text(str(tbl), encoding="utf-8")
                     located["balance_sheet"] = {
                         "table_id": f"bs_table_{idx}",
                         "scale": scale,
-                        "table_html": str(tbl),
+                        "table_path": str(tbl_path.resolve()),
                         "table_text": txt,
                         "edgar_url": edgar_base_url
                     }
@@ -67,10 +75,12 @@ def locate_statements_in_html(html_path: str, accession: str, cik: str) -> Dict[
                ("operating income" in t_low or "operating profit" in t_low or "cost of sales" in t_low or "costs and expenses" in t_low or "gross margin" in t_low or "gross profit" in t_low):
                 if len(txt) < 10000 and "three months" not in t_low[:300]:
                     scale = detect_scale_multiplier(txt)
+                    tbl_path = cache_dir / f"is_table_{idx}.html"
+                    tbl_path.write_text(str(tbl), encoding="utf-8")
                     located["income_statement"] = {
                         "table_id": f"is_table_{idx}",
                         "scale": scale,
-                        "table_html": str(tbl),
+                        "table_path": str(tbl_path.resolve()),
                         "table_text": txt,
                         "edgar_url": edgar_base_url
                     }
@@ -81,10 +91,12 @@ def locate_statements_in_html(html_path: str, accession: str, cik: str) -> Dict[
                ("investing" in t_low) and ("financing" in t_low):
                 if len(txt) < 12000 and "supplemental" not in t_low[:150]:
                     scale = detect_scale_multiplier(txt)
+                    tbl_path = cache_dir / f"cf_table_{idx}.html"
+                    tbl_path.write_text(str(tbl), encoding="utf-8")
                     located["cash_flow"] = {
                         "table_id": f"cf_table_{idx}",
                         "scale": scale,
-                        "table_html": str(tbl),
+                        "table_path": str(tbl_path.resolve()),
                         "table_text": txt,
                         "edgar_url": edgar_base_url
                     }
@@ -104,7 +116,7 @@ async def locate_node(state: Dict[str, Any]) -> Dict[str, Any]:
     accession = state.get("accession", "")
     cik = state.get("cik", "")
 
-    located = locate_statements_in_html(html_path, accession, cik)
+    located = locate_statements_in_html(html_path, accession, cik, run_id=run_id)
 
     record_node_finish(run_id, "locate", "done")
     await event_bus.emit(

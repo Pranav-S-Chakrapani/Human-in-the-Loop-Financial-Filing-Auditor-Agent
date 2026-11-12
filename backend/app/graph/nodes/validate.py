@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 from bs4 import BeautifulSoup
 import warnings
@@ -11,8 +12,26 @@ from backend.app.events import event_bus
 from backend.app.llm import completion
 from backend.app.graph.nodes.parser_utils import parse_financial_number
 
-def extract_nci_from_bs(bs_html: Optional[str], scale: int) -> float:
+def _load_table_html(info: Optional[Dict[str, Any]]) -> str:
+    if not info:
+        return ""
+    if "table_html" in info and info["table_html"]:
+        return info["table_html"]
+    if "table_path" in info and info["table_path"]:
+        p = Path(info["table_path"])
+        if p.exists():
+            with open(p, "r", encoding="utf-8", errors="ignore") as f:
+                return f.read()
+    return ""
+
+def extract_nci_from_bs(bs_info_or_html: Any, scale: int) -> float:
     """Extracts Non-Controlling Interest (NCI) from Balance Sheet if present."""
+    if not bs_info_or_html:
+        return 0.0
+    if isinstance(bs_info_or_html, dict):
+        bs_html = _load_table_html(bs_info_or_html)
+    else:
+        bs_html = str(bs_info_or_html)
     if not bs_html:
         return 0.0
     soup = BeautifulSoup(bs_html, "lxml")
@@ -65,7 +84,7 @@ async def run_validation_checks(
     # NCI extraction
     bs_info = located.get("balance_sheet")
     bs_scale = bs_info.get("scale", 1_000_000) if bs_info else 1_000_000
-    nci_val = extract_nci_from_bs(bs_info.get("table_html") if bs_info else None, bs_scale)
+    nci_val = extract_nci_from_bs(bs_info, bs_scale)
 
     if liab_val is None and assets_val is not None and equity_val is not None:
         # Derived Total Liabilities (SPEC §9: KO, AMZN, etc.)
@@ -148,18 +167,20 @@ async def run_validation_checks(
     cf_info = located.get("cash_flow")
     ni_m = scored.get("net_income", {})
     if cf_info and ni_m.get("value_dollars") is not None:
-        cf_soup = BeautifulSoup(cf_info.get("table_html", ""), "lxml")
+        cf_html = _load_table_html(cf_info)
+        cf_soup = BeautifulSoup(cf_html, "lxml") if cf_html else None
         cf_first_num = None
-        for tr in cf_soup.find_all("tr"):
-            row_txt = tr.get_text(" ", strip=True).lower()
-            if "net income" in row_txt or "net earnings" in row_txt or "operations" in row_txt:
-                for td in tr.find_all(["td", "th"]):
-                    num = parse_financial_number(td.get_text(" ", strip=True))
-                    if num is not None:
-                        cf_first_num = num * cf_info.get("scale", 1_000_000)
-                        break
-            if cf_first_num is not None:
-                break
+        if cf_soup:
+            for tr in cf_soup.find_all("tr"):
+                row_txt = tr.get_text(" ", strip=True).lower()
+                if "net income" in row_txt or "net earnings" in row_txt or "operations" in row_txt:
+                    for td in tr.find_all(["td", "th"]):
+                        num = parse_financial_number(td.get_text(" ", strip=True))
+                        if num is not None:
+                            cf_first_num = num * cf_info.get("scale", 1_000_000)
+                            break
+                if cf_first_num is not None:
+                    break
 
         if cf_first_num is not None:
             delta = abs(ni_m["value_dollars"] - cf_first_num)

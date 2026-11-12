@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from typing import Any, Dict, Optional
 from langgraph.types import interrupt
 from backend.app.graph.idempotency import is_node_completed, record_node_start, record_node_finish
@@ -40,9 +41,17 @@ def build_review_payload(review_id: str, run_id: str, state: Dict[str, Any]) -> 
         located = state.get("located_statements", {})
         stmt_html = ""
         for st_name in ["balance_sheet", "income_statement", "cash_flow"]:
-            if located.get(st_name):
-                stmt_html = located[st_name].get("table_html", "")
-                break
+            st = located.get(st_name)
+            if st:
+                if st.get("table_path"):
+                    p = Path(st["table_path"])
+                    if p.exists():
+                        with open(p, "r", encoding="utf-8", errors="ignore") as f:
+                            stmt_html = f.read()
+                            break
+                elif st.get("table_html"):
+                    stmt_html = st.get("table_html", "")
+                    break
 
         source_ref = json.loads(m["source_ref"]) if m and m["source_ref"] else {}
         highlight = {"row": source_ref.get("row", 0), "col": source_ref.get("col", 1)}
