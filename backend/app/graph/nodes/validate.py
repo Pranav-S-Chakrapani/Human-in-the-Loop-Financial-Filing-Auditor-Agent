@@ -42,19 +42,14 @@ async def get_yoy_explanation(metric: str, pct_change: float, curr_val: float, p
     except Exception as e:
         return f"{metric.replace('_', ' ').title()} changed {pct_change:+.1f}% YoY."
 
-async def validate_node(state: Dict[str, Any]) -> Dict[str, Any]:
-    run_id = state.get("run_id", "")
-    if is_node_completed(run_id, "validate"):
-        await event_bus.emit("node_skipped", {"node": "validate", "reason": "already_done"}, run_id=run_id)
-        return {}
-
-    record_node_start(run_id, "validate")
-    await event_bus.emit("node_started", {"node": "validate"}, run_id=run_id)
-
+async def run_validation_checks(
+    scored: Dict[str, Any],
+    located: Dict[str, Any],
+    run_id: str,
+    phase: str = "initial"
+) -> List[Dict[str, Any]]:
+    """Runs accounting equation, YoY, cross-statement, and segment checks."""
     cfg = get_config()
-    scored = state.get("scored_metrics", {})
-    located = state.get("located_statements", {})
-
     validations: List[Dict[str, Any]] = []
 
     # 1. Accounting Equation Validation: Assets = Liabilities + Equity (+ NCI)
@@ -99,11 +94,11 @@ async def validate_node(state: Dict[str, Any]) -> Dict[str, Any]:
 
         status = "passed" if delta <= tolerance else "failed"
         val_rec = {
-            "validation_id": f"v_eq_{run_id}",
+            "validation_id": f"v_eq_{phase}_{run_id}",
             "check_type": "equation",
             "metric": "total_assets",
             "status": status,
-            "phase": "initial",
+            "phase": phase,
             "detail": {
                 "assets": assets_val,
                 "liabilities": liab_val,
@@ -115,7 +110,7 @@ async def validate_node(state: Dict[str, Any]) -> Dict[str, Any]:
             "explanation": f"Assets difference delta={delta:.0f} vs tolerance={tolerance:.0f}" if status == "failed" else None
         }
         validations.append(val_rec)
-        await event_bus.emit("validation_result", {"check_type": "equation", "status": status, "metric": "total_assets"}, run_id=run_id)
+        await event_bus.emit("validation_result", {"check_type": "equation", "status": status, "metric": "total_assets", "phase": phase}, run_id=run_id)
 
     # 2. YoY Variance Validation (SPEC §9)
     # Check current vs prior year values for each metric
@@ -133,11 +128,11 @@ async def validate_node(state: Dict[str, Any]) -> Dict[str, Any]:
                 expl = None
 
             val_rec = {
-                "validation_id": f"v_yoy_{run_id}_{m_name}",
+                "validation_id": f"v_yoy_{phase}_{run_id}_{m_name}",
                 "check_type": "yoy",
                 "metric": m_name,
                 "status": status,
-                "phase": "initial",
+                "phase": phase,
                 "detail": {
                     "current": curr_d,
                     "prior": prior_d,
@@ -147,11 +142,9 @@ async def validate_node(state: Dict[str, Any]) -> Dict[str, Any]:
                 "explanation": expl
             }
             validations.append(val_rec)
-            await event_bus.emit("validation_result", {"check_type": "yoy", "status": status, "metric": m_name}, run_id=run_id)
+            await event_bus.emit("validation_result", {"check_type": "yoy", "status": status, "metric": m_name, "phase": phase}, run_id=run_id)
 
     # 3. Cross-Statement Net Income Validation (SPEC §9)
-    # Net income on income statement vs starting line on cash flows
-    # For now, if both extracted, compare net income with IS / CF corroboration
     cf_info = located.get("cash_flow")
     ni_m = scored.get("net_income", {})
     if cf_info and ni_m.get("value_dollars") is not None:
@@ -173,11 +166,11 @@ async def validate_node(state: Dict[str, Any]) -> Dict[str, Any]:
             tol = 0.05 * abs(ni_m["value_dollars"])
             status = "passed" if delta <= tol else "failed"
             val_rec = {
-                "validation_id": f"v_cross_{run_id}",
+                "validation_id": f"v_cross_{phase}_{run_id}",
                 "check_type": "cross_statement",
                 "metric": "net_income",
                 "status": status,
-                "phase": "initial",
+                "phase": phase,
                 "detail": {
                     "income_statement_net_income": ni_m["value_dollars"],
                     "cash_flow_net_income": cf_first_num,
@@ -186,21 +179,36 @@ async def validate_node(state: Dict[str, Any]) -> Dict[str, Any]:
                 "explanation": f"Cross-statement mismatch: IS={ni_m['value_dollars']} vs CF={cf_first_num}" if status == "failed" else None
             }
             validations.append(val_rec)
-            await event_bus.emit("validation_result", {"check_type": "cross_statement", "status": status, "metric": "net_income"}, run_id=run_id)
+            await event_bus.emit("validation_result", {"check_type": "cross_statement", "status": status, "metric": "net_income", "phase": phase}, run_id=run_id)
 
     # 4. Segment Validation (SPEC §9: skip gracefully if no segment table found)
-    # 10-K segment reporting is often in Note disclosures, not main financial statement tables
     val_rec = {
-        "validation_id": f"v_seg_{run_id}",
+        "validation_id": f"v_seg_{phase}_{run_id}",
         "check_type": "segment",
         "metric": "revenue",
         "status": "skipped",
-        "phase": "initial",
+        "phase": phase,
         "detail": {"reason": "no segment table found"},
         "explanation": None
     }
     validations.append(val_rec)
-    await event_bus.emit("validation_result", {"check_type": "segment", "status": "skipped", "metric": "revenue"}, run_id=run_id)
+    await event_bus.emit("validation_result", {"check_type": "segment", "status": "skipped", "metric": "revenue", "phase": phase}, run_id=run_id)
+
+    return validations
+
+async def validate_node(state: Dict[str, Any]) -> Dict[str, Any]:
+    run_id = state.get("run_id", "")
+    if is_node_completed(run_id, "validate"):
+        await event_bus.emit("node_skipped", {"node": "validate", "reason": "already_done"}, run_id=run_id)
+        return {}
+
+    record_node_start(run_id, "validate")
+    await event_bus.emit("node_started", {"node": "validate"}, run_id=run_id)
+
+    scored = state.get("scored_metrics", {})
+    located = state.get("located_statements", {})
+
+    validations = await run_validation_checks(scored, located, run_id, phase="initial")
 
     record_node_finish(run_id, "validate", "done")
     await event_bus.emit("node_completed", {"node": "validate", "summary": f"Completed {len(validations)} validation checks"}, run_id=run_id)

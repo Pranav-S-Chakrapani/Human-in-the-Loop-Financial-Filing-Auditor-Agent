@@ -34,6 +34,8 @@ def list_reviews(
             query += " AND run.company = ?"
             params.append(company)
 
+        query += " ORDER BY r.rowid ASC"
+
         cur.execute(query, params)
         rows = cur.fetchall()
 

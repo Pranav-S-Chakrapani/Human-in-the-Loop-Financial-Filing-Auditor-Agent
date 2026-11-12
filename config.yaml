@@ -9,8 +9,8 @@ scoring_weights:
 max_review_rounds: 2
 llm:
   concurrency: 3
-  model: "openai/gpt-oss-120b"
-  fallback_model: "gemini-3.5-flash"
+  model: openai/gpt-oss-120b
+  fallback_model: gemini-3.5-flash
 edgar:
   max_rps: 5.0
-  user_agent: "FilingAuditor your_real_email@example.com"
+  user_agent: FilingAuditor your_real_email@example.com
