@@ -146,23 +146,54 @@ export async function fetchConfig() {
   return res.json();
 }
 
-// WebSocket / Event listener connection
+// WebSocket / Event listener connection with auto-reconnect and since_seq replay
+let lastSeenSeq = 0;
+
 export function subscribeToEvents(onEvent: (event: any) => void): () => void {
   if (USE_MOCKS) {
-    return mockEventEmitter.subscribe(onEvent);
+    return mockEventEmitter.subscribe((ev) => {
+      if (ev.seq && ev.seq > lastSeenSeq) lastSeenSeq = ev.seq;
+      onEvent(ev);
+    });
   }
 
-  const ws = new WebSocket('ws://localhost:8000/ws/events');
-  ws.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-      onEvent(data);
-    } catch (e) {
-      console.error("WS error parsing event", e);
-    }
+  let ws: WebSocket | null = null;
+  let isClosedManually = false;
+  let reconnectTimer: any = null;
+
+  const connect = () => {
+    if (isClosedManually) return;
+    const url = `ws://localhost:8000/ws/events?since_seq=${lastSeenSeq}`;
+    ws = new WebSocket(url);
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.seq && data.seq > lastSeenSeq) {
+          lastSeenSeq = data.seq;
+        }
+        onEvent(data);
+      } catch (e) {
+        console.error("WS error parsing event", e);
+      }
+    };
+
+    ws.onclose = () => {
+      if (!isClosedManually) {
+        reconnectTimer = setTimeout(connect, 2000);
+      }
+    };
+
+    ws.onerror = () => {
+      ws?.close();
+    };
   };
 
+  connect();
+
   return () => {
-    ws.close();
+    isClosedManually = true;
+    clearTimeout(reconnectTimer);
+    ws?.close();
   };
 }

@@ -9,9 +9,14 @@ import {
   ReportScreen,
 } from './screens';
 import { fetchCounters, USE_MOCKS, subscribeToEvents } from './api';
-import { Shield, RefreshCw } from 'lucide-react';
+import { Shield, RefreshCw, HelpCircle, Monitor } from 'lucide-react';
+import { ShortcutsModal } from './components/ShortcutsModal';
 
-const NavigationBar: React.FC = () => {
+const NavigationBar: React.FC<{
+  isPresenterMode: boolean;
+  onTogglePresenter: () => void;
+  onOpenShortcuts: () => void;
+}> = ({ isPresenterMode, onTogglePresenter, onOpenShortcuts }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [counters, setCounters] = useState<{ llm_calls: number; audit_rows: number; events: number } | null>(null);
@@ -19,6 +24,10 @@ const NavigationBar: React.FC = () => {
 
   useEffect(() => {
     fetchCounters().then(setCounters).catch(() => null);
+    const unsub = subscribeToEvents(() => {
+      fetchCounters().then(setCounters).catch(() => null);
+    });
+    return () => unsub();
   }, []);
 
   const handleLogoClick = (e: React.MouseEvent) => {
@@ -41,7 +50,7 @@ const NavigationBar: React.FC = () => {
     <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
         <div className="flex items-center space-x-6">
-          {/* Logo with subtle scale-down-then-up on click (prompt req) */}
+          {/* Logo with subtle scale-down-then-up on click */}
           <button
             onClick={handleLogoClick}
             style={{
@@ -80,13 +89,41 @@ const NavigationBar: React.FC = () => {
               MOCK
             </span>
           )}
+
+          {/* Presenter Mode enlarged counters or compact counters */}
           {counters && (
-            <div className="flex space-x-3 text-slate-400 font-mono text-[11px]">
-              <span>LLM: <strong className="text-slate-200">{counters.llm_calls}</strong></span>
-              <span>Audit: <strong className="text-slate-200">{counters.audit_rows}</strong></span>
-              <span>Events: <strong className="text-slate-200">{counters.events}</strong></span>
+            <div className={`flex items-center space-x-3 font-mono transition-all ${
+              isPresenterMode
+                ? 'bg-sky-500/10 border border-sky-500/30 px-3 py-1 rounded-lg text-sm font-bold text-sky-300'
+                : 'text-slate-400 text-[11px]'
+            }`}>
+              <span>LLM: <strong className="text-slate-100">{counters.llm_calls}</strong></span>
+              <span>Audit: <strong className="text-slate-100">{counters.audit_rows}</strong></span>
+              <span>Events: <strong className="text-slate-100">{counters.events}</strong></span>
             </div>
           )}
+
+          {/* Toggle Presenter Mode button */}
+          <button
+            onClick={onTogglePresenter}
+            title="Toggle Presenter Mode (P)"
+            className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+              isPresenterMode
+                ? 'bg-sky-500/20 border-sky-400 text-sky-300'
+                : 'border-slate-800 text-slate-400 hover:text-white'
+            }`}
+          >
+            <Monitor className="w-3.5 h-3.5" />
+          </button>
+
+          {/* Keyboard Shortcuts helper button */}
+          <button
+            onClick={onOpenShortcuts}
+            title="Keyboard Shortcuts (?)"
+            className="p-1.5 rounded-lg border border-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+          >
+            <HelpCircle className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
     </header>
@@ -95,23 +132,54 @@ const NavigationBar: React.FC = () => {
 
 export const App: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<'info' | 'error'>('info');
   const [lastCheckpointTime, setLastCheckpointTime] = useState<string>('Just now');
+  const [isPresenterMode, setIsPresenterMode] = useState<boolean>(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const unsub = subscribeToEvents((event) => {
       if (event.type === 'system_recovered') {
+        setToastType('info');
         setToastMessage(`System Recovered: Resumed ${event.payload.resumed_runs?.length || 1} run(s) from checkpointer`);
         setTimeout(() => setToastMessage(null), 6000);
+      } else if (event.type === 'run_failed') {
+        setToastType('error');
+        setToastMessage(`Run Failed: ${event.payload.error || 'Pipeline error'}`);
+        setTimeout(() => setToastMessage(null), 8000);
       }
       setLastCheckpointTime(new Date().toLocaleTimeString());
     });
     return () => unsub();
   }, []);
 
+  // Global keyboard shortcuts (? and P)
+  useEffect(() => {
+    const handleGlobalKeys = (e: KeyboardEvent) => {
+      if (['input', 'textarea'].includes((e.target as HTMLElement).tagName.toLowerCase())) return;
+      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+        e.preventDefault();
+        setIsShortcutsOpen((prev) => !prev);
+      } else if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        setIsPresenterMode((prev) => !prev);
+      } else if (e.key === 'Escape') {
+        setIsShortcutsOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeys);
+    return () => window.removeEventListener('keydown', handleGlobalKeys);
+  }, []);
+
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-[#070b12] text-slate-100 flex flex-col font-sans">
-        <NavigationBar />
+        <NavigationBar
+          isPresenterMode={isPresenterMode}
+          onTogglePresenter={() => setIsPresenterMode(!isPresenterMode)}
+          onOpenShortcuts={() => setIsShortcutsOpen(true)}
+        />
+
         <main className="flex-1 pb-12">
           <Routes>
             <Route path="/" element={<IntroScreen />} />
@@ -123,15 +191,21 @@ export const App: React.FC = () => {
           </Routes>
         </main>
 
-        {/* System Recovered Toast */}
+        <ShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
+
+        {/* System Recovered / Error Toasts */}
         {toastMessage && (
-          <div className="fixed bottom-10 right-6 z-50 p-4 rounded-xl border border-emerald-500/50 bg-slate-900/95 text-emerald-300 shadow-2xl flex items-center space-x-3 text-xs font-mono animate-bounce">
-            <RefreshCw className="w-4 h-4 text-emerald-400 animate-spin" />
+          <div className={`fixed bottom-10 right-6 z-50 p-4 rounded-xl border shadow-2xl flex items-center space-x-3 text-xs font-mono animate-bounce ${
+            toastType === 'error'
+              ? 'border-rose-500/50 bg-slate-900/95 text-rose-300'
+              : 'border-emerald-500/50 bg-slate-900/95 text-emerald-300'
+          }`}>
+            <RefreshCw className="w-4 h-4 animate-spin" />
             <span>{toastMessage}</span>
           </div>
         )}
 
-        {/* Always-visible footer chip (PROMPT & SPEC §15) */}
+        {/* Always-visible footer chip */}
         <footer className="fixed bottom-2 left-6 z-40 pointer-events-none">
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-slate-800 bg-slate-950/80 backdrop-blur text-[10px] font-mono text-slate-400">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
