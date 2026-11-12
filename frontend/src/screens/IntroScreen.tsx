@@ -1,33 +1,22 @@
 /**
- * IntroScreen — Aetheris-inspired scroll-snap narrative with sticky canvas backdrop.
+ * IntroScreen — Elevated Editorial Scrollytelling for VantageAudit.
  *
- * Architecture (matches Aetheris scrollytelling pattern):
- *   ┌─ outer wrapper (relative, overflow-y scroll-snap) ──────────────────────┐
- *   │  ┌─ sticky stage (position: sticky, top: 0, h: 100%) ─────────────────┐ │
- *   │  │  AuditStageCanvas (position: absolute, inset-0)                    │ │
- *   │  └─────────────────────────────────────────────────────────────────────┘ │
- *   │  ┌─ scenes overlay (margin-top: -100%, each section scroll-snap-start) ┐ │
- *   │  │  Section 1: Hero                                                    │ │
- *   │  │  Section 2: Dual Extraction                                         │ │
- *   │  │  Section 3: Four Checks (Validation)                                │ │
- *   │  │  Section 4: Human Review (HITL)                                     │ │
- *   │  │  Section 5: Durability                                              │ │
- *   │  │  Section 6: Final CTA                                               │ │
- *   │  └─────────────────────────────────────────────────────────────────────┘ │
- *   └────────────────────────────────────────────────────────────────────────────┘
- *
- * Scene detection: native scroll listener + getBoundingClientRect on each section.
- * IntersectionObserver re-arms section-specific reveals (cell animation, card fadein).
+ * Design Language:
+ * - Architected for clarity & elegance over stuffiness (Linear / Stripe Press meets high-precision financial auditing)
+ * - Strict spacing rhythm ("Same spacing everywhere"): uniform gaps, unified card architecture
+ * - Distinctive typography hierarchy: Space Grotesk display + JetBrains Mono telemetry + Inter copy
+ * - Two-tone editorial punch headlines (Off-white / Electric Amber)
+ * - Tactile interaction states ("Taps should answer back"): magnetic button with press dip
+ * - Sticky dynamic canvas background (`AuditStageCanvas`) synchronized with active scroll scene
  */
+
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  ShieldCheck,
   ArrowRight,
   RefreshCw,
   CheckCircle2,
-  Play,
   Pause,
   Scale,
   TrendingUp,
@@ -35,141 +24,134 @@ import {
   Layers,
   Cpu,
   Database,
+  Terminal,
 } from 'lucide-react';
 import { MagneticButton } from '../components/MagneticButton';
 import { AuditStageCanvas, SceneId } from '../components/AuditStageCanvas';
 
-// ─── Section registry ─────────────────────────────────────────────────────────
-const SECTIONS: { id: string; sceneId: SceneId; label: string }[] = [
-  { id: 'scene-hero',       sceneId: 'hero',       label: 'Hero' },
-  { id: 'scene-extraction', sceneId: 'extraction', label: 'Extraction' },
-  { id: 'scene-validation', sceneId: 'validation', label: 'Validation' },
-  { id: 'scene-hitl',       sceneId: 'hitl',       label: 'Human Review' },
-  { id: 'scene-durability', sceneId: 'durability', label: 'Durability' },
-  { id: 'scene-cta',        sceneId: 'cta',        label: 'Enter' },
+// ─── Section Definition ───────────────────────────────────────────────────────
+const SECTIONS: { id: string; sceneId: SceneId; tag: string; label: string }[] = [
+  { id: 'scene-hero',       sceneId: 'hero',       tag: '01 // THESIS',        label: 'Autonomous Trust' },
+  { id: 'scene-extraction', sceneId: 'extraction', tag: '02 // CONSENSUS',     label: 'Dual Extractor' },
+  { id: 'scene-validation', sceneId: 'validation', tag: '03 // INVARIANTS',    label: 'Four Checks' },
+  { id: 'scene-hitl',       sceneId: 'hitl',       tag: '04 // INTERRUPT',     label: 'Human-in-the-Loop' },
+  { id: 'scene-durability', sceneId: 'durability', tag: '05 // PERSISTENCE',   label: 'Zero Data Loss' },
+  { id: 'scene-cta',        sceneId: 'cta',        tag: '06 // DEPLOYMENT',    label: 'Mission Control' },
 ];
 
-// ─── Glass card style (Aetheris-inspired, using VA tokens) ───────────────────
-const glassCard = [
-  'rounded-2xl',
-  'bg-[rgba(27,31,40,0.78)]',
-  'border border-[rgba(232,179,57,0.14)]',
-  'backdrop-blur-[20px]',
-  'shadow-[0_8px_40px_rgba(0,0,0,0.5)]',
-].join(' ');
-
-const glassCardLedger = [
-  'rounded-2xl',
-  'bg-[rgba(27,31,40,0.78)]',
-  'border-x border-b border-[rgba(232,179,57,0.14)]',
-  'border-t-2 border-t-[rgba(232,179,57,0.50)]',
-  'backdrop-blur-[20px]',
-  'shadow-[0_8px_40px_rgba(0,0,0,0.5)]',
-].join(' ');
-
-// ─── Component ─────────────────────────────────────────────────────────────────
 export const IntroScreen: React.FC = () => {
   const navigate = useNavigate();
-  const [activeIdx, setActiveIdx]   = useState(0);
+  const [activeIdx, setActiveIdx] = useState(0);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
-  // per-section reveal state
+  // Per-section animated reveal triggers
   const [dualVisible, setDualVisible] = useState(false);
-  const [valVisible,  setValVisible]  = useState(false);
+  const [valVisible, setValVisible]   = useState(false);
   const [hitlVisible, setHitlVisible] = useState(false);
-  const [durVisible,  setDurVisible]  = useState(false);
+  const [durVisible, setDurVisible]   = useState(false);
 
-  const outerRef = useRef<HTMLDivElement>(null); // the scroll container
+  // HITL interactive demo state in Section 4
+  const [hitlAction, setHitlAction] = useState<'pending' | 'approved' | 'corrected' | 'rejected'>('pending');
+
+  const outerRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
 
-  // ── reduced-motion ────────────────────────────────────────────────────────
+  // ── Reduced motion listener ─────────────────────────────────────────────────
   useEffect(() => {
     const q = window.matchMedia('(prefers-reduced-motion: reduce)');
     setPrefersReducedMotion(q.matches);
-    const h = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
-    q.addEventListener('change', h);
-    return () => q.removeEventListener('change', h);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    q.addEventListener('change', handler);
+    return () => q.removeEventListener('change', handler);
   }, []);
 
-  // ── Scene detection: scroll listener on outer container ───────────────────
+  // ── Scene detection on scroll ───────────────────────────────────────────────
   useEffect(() => {
     const el = outerRef.current;
     if (!el) return;
 
-    const detect = () => {
-      const ch = el.clientHeight;
-      let best = 0;
-      let bestDist = Infinity;
-      sectionRefs.current.forEach((sec, i) => {
+    const onScroll = () => {
+      const vpHalf = el.clientHeight / 2;
+      let closestIdx = 0;
+      let minDistance = Infinity;
+
+      sectionRefs.current.forEach((sec, idx) => {
         if (!sec) return;
         const rect = sec.getBoundingClientRect();
-        // how close is this section's center to the viewport center?
-        const secCenter = rect.top + rect.height / 2;
-        const vpCenter  = ch / 2;
-        const dist = Math.abs(secCenter - vpCenter);
-        if (dist < bestDist) { bestDist = dist; best = i; }
+        const center = rect.top + rect.height / 2;
+        const dist = Math.abs(center - vpHalf);
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestIdx = idx;
+        }
       });
-      setActiveIdx(best);
+      setActiveIdx(closestIdx);
     };
 
-    el.addEventListener('scroll', detect, { passive: true });
-    detect();
-    return () => el.removeEventListener('scroll', detect);
+    el.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => el.removeEventListener('scroll', onScroll);
   }, []);
 
-  // ── IntersectionObserver for per-section reveals ───────────────────────────
+  // ── IntersectionObserver for staggered reveals ─────────────────────────────
   useEffect(() => {
-    const opts = { threshold: 0.5 };
+    const options = { threshold: 0.45 };
 
-    const makeObserver = (
-      idx: number,
+    const observeSection = (
+      index: number,
       onEnter: () => void,
       onLeave?: () => void
     ) => {
-      const sec = sectionRefs.current[idx];
-      if (!sec) return null;
+      const el = sectionRefs.current[index];
+      if (!el) return null;
       const io = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting) onEnter();
-        else onLeave?.();
-      }, opts);
-      io.observe(sec);
+        if (entry.isIntersecting) {
+          onEnter();
+        } else if (onLeave) {
+          onLeave();
+        }
+      }, options);
+      io.observe(el);
       return io;
     };
 
-    const ios = [
-      makeObserver(1, () => setDualVisible(true), () => setDualVisible(false)),
-      makeObserver(2, () => setValVisible(true),  () => setValVisible(false)),
-      makeObserver(3, () => setHitlVisible(true), () => setHitlVisible(false)),
-      makeObserver(4, () => setDurVisible(true),  () => setDurVisible(false)),
+    const observers = [
+      observeSection(1, () => setDualVisible(true), () => setDualVisible(false)),
+      observeSection(2, () => setValVisible(true),  () => setValVisible(false)),
+      observeSection(3, () => setHitlVisible(true), () => setHitlVisible(false)),
+      observeSection(4, () => setDurVisible(true),  () => setDurVisible(false)),
     ];
-    return () => ios.forEach(io => io?.disconnect());
+
+    return () => observers.forEach((io) => io?.disconnect());
   }, []);
 
-  // ── Scroll to section ─────────────────────────────────────────────────────
-  const scrollToSection = useCallback((idx: number) => {
-    const sec = sectionRefs.current[idx];
-    if (!sec) return;
-    sec.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-  }, [prefersReducedMotion]);
+  const scrollToSection = useCallback(
+    (index: number) => {
+      const target = sectionRefs.current[index];
+      if (!target) return;
+      target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+    },
+    [prefersReducedMotion]
+  );
 
-  const SH = 'h-[calc(100vh-3.5rem)]'; // section height shorthand
+  const SECTION_HEIGHT = 'h-[calc(100vh-3.5rem)]';
 
   return (
     <div
       ref={outerRef}
-      className={`relative w-full ${SH} overflow-y-auto`}
+      className={`relative w-full ${SECTION_HEIGHT} overflow-y-auto selection:bg-[var(--signal,#E8B339)] selection:text-black`}
       style={{
         scrollSnapType: prefersReducedMotion ? 'none' : 'y mandatory',
         scrollBehavior: prefersReducedMotion ? 'auto' : 'smooth',
-        background: 'var(--ink, #12151C)',
+        background: '#090C12',
       }}
     >
-      {/* ════════════════════════════════════════════════════════════════════
-          STICKY BACKDROP — always visible, scene-driven canvas animation
-          (Aetheris pattern: position:sticky + margin-top:-100% on scenes)
-         ════════════════════════════════════════════════════════════════════ */}
+      {/* ══════════════════════════════════════════════════════════════════════
+          STICKY CANVAS BACKDROP
+          (Remains pinned in place behind the scroll container)
+         ══════════════════════════════════════════════════════════════════════ */}
       <div
-        className={`sticky top-0 ${SH} overflow-hidden pointer-events-none`}
+        className={`sticky top-0 ${SECTION_HEIGHT} overflow-hidden pointer-events-none select-none`}
         aria-hidden="true"
         style={{ zIndex: 0 }}
       >
@@ -179,9 +161,9 @@ export const IntroScreen: React.FC = () => {
         />
       </div>
 
-      {/* ════════════════════════════════════════════════════════════════════
-          SCENES OVERLAY — overlaps sticky layer via negative margin
-         ════════════════════════════════════════════════════════════════════ */}
+      {/* ══════════════════════════════════════════════════════════════════════
+          SCENES CONTAINER (Negative margin matches viewport height)
+         ══════════════════════════════════════════════════════════════════════ */}
       <div
         style={{
           marginTop: `calc(-1 * (100vh - 3.5rem))`,
@@ -189,188 +171,167 @@ export const IntroScreen: React.FC = () => {
           zIndex: 1,
         }}
       >
-        {/* ── SECTION 1: HERO ─────────────────────────────────────────────── */}
+        {/* ── SECTION 1: HERO ───────────────────────────────────────────────── */}
         <section
           id="scene-hero"
           ref={(el) => { sectionRefs.current[0] = el; }}
-          className={`relative w-full ${SH} flex flex-col items-center justify-center text-center px-6`}
+          className={`relative w-full ${SECTION_HEIGHT} flex flex-col items-center justify-center text-center px-6 md:px-12`}
           style={{ scrollSnapAlign: 'start' }}
         >
           <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center">
-            {/* Badge */}
+            {/* Minimalist Top Index Badge */}
             <motion.div
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.05 }}
-              className="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-slate-700/60 bg-[#1B1F28]/90 text-slate-300 text-xs font-medium tracking-wide mb-6 backdrop-blur-sm"
+              transition={{ duration: 0.4 }}
+              className="inline-flex items-center space-x-2.5 px-3.5 py-1.5 rounded-full border border-white/[0.08] bg-[#141822]/80 backdrop-blur-md text-xs font-mono tracking-wider text-slate-300 mb-8 shadow-sm"
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-[var(--signal,#E8B339)]" />
-              <span>
-                PS-01 <span className="text-slate-500 font-light mx-0.5">|</span>{' '}
-                Human-in-the-Loop Financial Filing Auditor
-              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--signal,#E8B339)] shadow-[0_0_8px_rgba(232,179,57,0.8)]" />
+              <span>PS-01</span>
+              <span className="text-white/20">|</span>
+              <span className="text-slate-400">FINANCIAL FILING AUDITOR</span>
             </motion.div>
 
-            {/* Headline */}
-            <h1 className="font-display font-bold text-5xl md:text-6xl tracking-tight text-white mb-6 leading-[1.12]">
-              <motion.span
-                className="block"
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.38, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-              >
-                A financial AI that knows
-              </motion.span>
-              <motion.span
-                className="block text-[var(--signal,#E8B339)]"
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.42, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              >
-                when to distrust itself
-              </motion.span>
+            {/* Main Typographic Headline */}
+            <h1 className="font-display font-bold text-5xl md:text-7xl tracking-[-0.03em] text-white mb-6 leading-[1.08]">
+              <span className="block text-slate-100">A financial AI that knows</span>
+              <span className="block text-[var(--signal,#E8B339)] mt-1">
+                when to distrust itself.
+              </span>
             </h1>
 
-            {/* Subtext */}
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.32 }}
-              className="font-sans text-lg md:text-xl text-slate-300/80 max-w-3xl mb-10 leading-relaxed font-normal"
-            >
-              VantageAudit parses SEC 10-K HTML visually, corroborates dual independent extractors,
-              validates accounting identities, pauses durably for human review, and mathematically
-              proves survival through unexpected mid-run kills.
-            </motion.p>
+            {/* Editorial Body Text */}
+            <p className="font-sans text-lg md:text-xl text-slate-300/80 max-w-2xl mb-10 leading-relaxed font-normal">
+              VantageAudit parses SEC 10-K filings as visual documents, corroborates dual independent extractors, enforces strict accounting theorems, and halts execution before uncertainty reaches the ledger.
+            </p>
 
-            {/* CTA */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.38 }}
-              className="mb-6"
-            >
+            {/* Primary Action Button (Tactile Dip & Magnetic Feel) */}
+            <div className="flex flex-col items-center space-y-3">
               <MagneticButton
                 maxShift={8}
                 onClick={() => navigate('/mission')}
-                className="px-8 py-4 rounded-xl bg-[var(--signal,#E8B339)] text-[#12151C] font-bold text-base hover:shadow-[0_0_28px_-4px_rgba(232,179,57,0.5)] hover:brightness-105 flex items-center space-x-3 transition-all cursor-pointer font-sans"
+                className="px-8 py-4 rounded-xl bg-[var(--signal,#E8B339)] text-[#0E121A] font-bold text-base hover:brightness-110 active:scale-[0.98] transition-all flex items-center space-x-3 cursor-pointer shadow-[0_0_30px_rgba(232,179,57,0.35)]"
               >
                 <span>Enter Mission Control</span>
-                <ArrowRight className="w-5 h-5 text-[#12151C]" />
+                <ArrowRight className="w-5 h-5 text-[#0E121A]" />
               </MagneticButton>
-              <div className="text-xs text-slate-400/60 mt-2 font-mono">
+              <span className="text-[11px] font-mono text-slate-500 tracking-wider">
                 10-15s skippable demo intro
-              </div>
-            </motion.div>
+              </span>
+            </div>
 
-            {/* Scroll hint */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.2, duration: 0.6 }}
-              className="flex flex-col items-center text-slate-500 mt-2"
-            >
-              <span className="text-[10px] font-mono tracking-widest uppercase mb-1">scroll</span>
-              <svg width="14" height="20" viewBox="0 0 14 20" className="animate-bounce" aria-hidden>
-                <rect x="5" y="2" width="4" height="4" rx="2" fill="currentColor" opacity="0.5" />
-                <rect x="6" y="1" width="2" height="18" rx="1" fill="currentColor" opacity="0.15" />
-              </svg>
-            </motion.div>
+            {/* Downward Scroll Cue */}
+            <div className="absolute bottom-6 flex flex-col items-center text-slate-500">
+              <span className="text-[10px] font-mono tracking-widest uppercase mb-1.5 text-slate-500">
+                scroll to explore
+              </span>
+              <div className="w-px h-6 bg-gradient-to-b from-white/30 to-transparent" />
+            </div>
           </div>
         </section>
 
-        {/* ── SECTION 2: DUAL EXTRACTION ──────────────────────────────────── */}
+        {/* ── SECTION 2: DUAL EXTRACTION ────────────────────────────────────── */}
         <section
           id="scene-extraction"
           ref={(el) => { sectionRefs.current[1] = el; }}
-          className={`relative w-full ${SH} flex flex-col items-center justify-center px-6`}
+          className={`relative w-full ${SECTION_HEIGHT} flex flex-col items-center justify-center px-6 md:px-12`}
           style={{ scrollSnapAlign: 'start' }}
         >
-          <div className="max-w-5xl w-full mx-auto flex flex-col items-center">
-            <div className="text-xs font-mono uppercase tracking-widest text-[var(--signal,#E8B339)] mb-2 opacity-80">
-              Consensus Protocol · Independent Corroboration
+          <div className="max-w-5xl w-full mx-auto">
+            {/* Editorial Section Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-4 border-b border-white/[0.08]">
+              <div>
+                <span className="text-[11px] font-mono tracking-widest text-[var(--signal,#E8B339)] uppercase block mb-1">
+                  SEC // 02 — CONSENSUS ENGINE
+                </span>
+                <h2 className="font-display font-bold text-3xl md:text-5xl text-white tracking-[-0.02em]">
+                  Two extractors. <span className="text-[var(--signal,#E8B339)]">One truth.</span>
+                </h2>
+              </div>
+              <p className="text-xs md:text-sm font-sans text-slate-400 max-w-md mt-2 md:mt-0 leading-relaxed">
+                Deterministic regex rules corroborate temperature-0 LLM visual parsing. If models diverge, confidence collapses to 0.40 and quarantine triggers.
+              </p>
             </div>
-            <h2 className="font-display font-bold text-4xl md:text-5xl text-white mb-4 text-center tracking-tight">
-              Two extractors. One truth.
-            </h2>
-            <p className="text-sm md:text-base text-slate-400/90 max-w-2xl text-center mb-10 font-sans">
-              Regex rule matching runs parallel to temperature-0 LLM visual parsing.
-              Extractor disagreement caps confidence at&nbsp;0.40.
-            </p>
 
-            {/* Comparison grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full max-w-4xl">
-              {/* Rules engine */}
-              <div className={`p-6 ${glassCardLedger}`}>
-                <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800/70">
-                  <div className="flex items-center space-x-2">
-                    <Cpu className="w-4 h-4 text-sky-400" />
-                    <span className="font-display font-bold text-sm text-slate-200">Rules Extractor</span>
+            {/* Dual Column Architecture */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Rules Extractor Column */}
+              <div className="rounded-2xl bg-[#141822]/80 border border-white/[0.08] border-t-2 border-t-sky-400/60 p-6 backdrop-blur-xl">
+                <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/[0.06]">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="p-1.5 rounded-lg bg-sky-500/10 text-sky-400">
+                      <Cpu className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-display font-bold text-sm text-white">Rules Engine</h3>
+                      <span className="text-[10px] font-mono text-slate-400">AST & Regular Expressions</span>
+                    </div>
                   </div>
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                    Deterministic RegEx
+                    PASS · ZERO LATENCY
                   </span>
                 </div>
-                <div className="space-y-2.5">
+
+                <div className="space-y-2">
                   {[
-                    { label: 'Revenue (Current)',    val: '$391,035M', delay: 0 },
-                    { label: 'Net Income (Current)', val: '$93,736M',  delay: 80 },
-                    { label: 'Total Assets',         val: '$364,980M', delay: 160 },
-                    { label: 'Total Liabilities',    val: '$308,030M', delay: 240 },
-                  ].map((row) => (
+                    { label: 'Revenue (Consolidated)', val: '$391,035M', delay: 0 },
+                    { label: 'Net Income', val: '$93,736M', delay: 80 },
+                    { label: 'Total Assets', val: '$364,980M', delay: 160 },
+                    { label: 'Total Liabilities', val: '$308,030M', delay: 240 },
+                  ].map((item) => (
                     <div
-                      key={row.label}
+                      key={item.label}
                       style={{
-                        animationDelay:
-                          prefersReducedMotion || !dualVisible ? '0ms' : `${row.delay}ms`,
+                        animationDelay: prefersReducedMotion || !dualVisible ? '0ms' : `${item.delay}ms`,
                       }}
-                      className={`flex items-center justify-between p-2.5 rounded-lg border border-slate-800/80 text-xs transition-colors ${
-                        dualVisible && !prefersReducedMotion
-                          ? 'animate-cell-reveal'
-                          : 'bg-[#12151C] opacity-100'
+                      className={`flex items-center justify-between p-3 rounded-xl border border-white/[0.04] bg-[#0E121A]/70 text-xs ${
+                        dualVisible && !prefersReducedMotion ? 'animate-cell-reveal' : ''
                       }`}
                     >
-                      <span className="text-slate-400 font-sans">{row.label}</span>
-                      <span className="font-mono font-medium text-slate-200">{row.val}</span>
+                      <span className="text-slate-400 font-sans">{item.label}</span>
+                      <span className="font-mono font-medium text-slate-200">{item.val}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* LLM parser */}
-              <div className={`p-6 ${glassCardLedger}`}>
-                <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800/70">
-                  <div className="flex items-center space-x-2">
-                    <Database className="w-4 h-4 text-emerald-400" />
-                    <span className="font-display font-bold text-sm text-slate-200">LLM Visual Parser</span>
+              {/* LLM Visual Parser Column */}
+              <div className="rounded-2xl bg-[#141822]/80 border border-white/[0.08] border-t-2 border-t-emerald-400/60 p-6 backdrop-blur-xl">
+                <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/[0.06]">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
+                      <Database className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-display font-bold text-sm text-white">LLM Visual Parser</h3>
+                      <span className="text-[10px] font-mono text-slate-400">Temp 0 · Schema Validation</span>
+                    </div>
                   </div>
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    Temperature 0 · Strict JSON
+                    MATCH CONFIRMED
                   </span>
                 </div>
-                <div className="space-y-2.5">
+
+                <div className="space-y-2">
                   {[
-                    { label: 'Revenue (Current)',    val: '$391,035M', delay: 40 },
-                    { label: 'Net Income (Current)', val: '$93,736M',  delay: 120 },
-                    { label: 'Total Assets',         val: '$364,980M', delay: 200 },
-                    { label: 'Total Liabilities',    val: '$308,030M', delay: 280 },
-                  ].map((row) => (
+                    { label: 'Revenue (Consolidated)', val: '$391,035M', delay: 40 },
+                    { label: 'Net Income', val: '$93,736M', delay: 120 },
+                    { label: 'Total Assets', val: '$364,980M', delay: 200 },
+                    { label: 'Total Liabilities', val: '$308,030M', delay: 280 },
+                  ].map((item) => (
                     <div
-                      key={row.label}
+                      key={item.label}
                       style={{
-                        animationDelay:
-                          prefersReducedMotion || !dualVisible ? '0ms' : `${row.delay}ms`,
+                        animationDelay: prefersReducedMotion || !dualVisible ? '0ms' : `${item.delay}ms`,
                       }}
-                      className={`flex items-center justify-between p-2.5 rounded-lg border border-slate-800/80 text-xs ${
-                        dualVisible && !prefersReducedMotion
-                          ? 'animate-cell-reveal'
-                          : 'bg-[#12151C] opacity-100'
+                      className={`flex items-center justify-between p-3 rounded-xl border border-white/[0.04] bg-[#0E121A]/70 text-xs ${
+                        dualVisible && !prefersReducedMotion ? 'animate-cell-reveal' : ''
                       }`}
                     >
-                      <span className="text-slate-400 font-sans">{row.label}</span>
+                      <span className="text-slate-400 font-sans">{item.label}</span>
                       <div className="flex items-center space-x-2">
-                        <span className="font-mono font-medium text-emerald-300">{row.val}</span>
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                        <span className="font-mono font-medium text-emerald-300">{item.val}</span>
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                       </div>
                     </div>
                   ))}
@@ -378,81 +339,108 @@ export const IntroScreen: React.FC = () => {
               </div>
             </div>
 
-            {/* Consensus badge */}
-            <div
-              className="mt-6 inline-flex items-center space-x-2 px-4 py-2 rounded-full border border-[rgba(232,179,57,0.3)] bg-[rgba(232,179,57,0.07)] text-[var(--signal,#E8B339)] text-xs font-mono"
-              style={{
-                opacity: dualVisible || prefersReducedMotion ? 1 : 0,
-                transform: dualVisible || prefersReducedMotion ? 'translateY(0)' : 'translateY(10px)',
-                transition: 'opacity 0.5s ease 0.4s, transform 0.5s ease 0.4s',
-              }}
-            >
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Consensus reached · confidence 0.91 · auto-approved</span>
+            {/* Bottom Consensus Synthesis Bar */}
+            <div className="mt-5 p-3 rounded-xl bg-[#141822]/60 border border-white/[0.06] flex items-center justify-between text-xs font-mono">
+              <div className="flex items-center space-x-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#10B981]" />
+                <span className="text-slate-300">Corroboration Score: <strong className="text-white">100% Concordance</strong></span>
+              </div>
+              <span className="text-[var(--signal,#E8B339)]">Tolerances ±0.0% · No Inferred Values</span>
             </div>
           </div>
         </section>
 
-        {/* ── SECTION 3: FOUR CHECKS ──────────────────────────────────────── */}
+        {/* ── SECTION 3: FOUR CHECKS ────────────────────────────────────────── */}
         <section
           id="scene-validation"
           ref={(el) => { sectionRefs.current[2] = el; }}
-          className={`relative w-full ${SH} flex flex-col items-center justify-center px-6`}
+          className={`relative w-full ${SECTION_HEIGHT} flex flex-col items-center justify-center px-6 md:px-12`}
           style={{ scrollSnapAlign: 'start' }}
         >
-          <div className="max-w-5xl w-full mx-auto flex flex-col items-center">
-            <div className="text-xs font-mono uppercase tracking-widest text-[var(--signal,#E8B339)] mb-2 opacity-80">
-              Mathematical Invariants · Multi-Statement Verification
+          <div className="max-w-5xl w-full mx-auto">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-4 border-b border-white/[0.08]">
+              <div>
+                <span className="text-[11px] font-mono tracking-widest text-[var(--signal,#E8B339)] uppercase block mb-1">
+                  SEC // 03 — MATHEMATICAL INVARIANTS
+                </span>
+                <h2 className="font-display font-bold text-3xl md:text-5xl text-white tracking-[-0.02em]">
+                  Four checks. <span className="text-[var(--signal,#E8B339)]">Every single run.</span>
+                </h2>
+              </div>
+              <p className="text-xs md:text-sm font-sans text-slate-400 max-w-md mt-2 md:mt-0 leading-relaxed">
+                Accounting theorems must balance algebraically. A single penny discrepancy invalidates automated approval.
+              </p>
             </div>
-            <h2 className="font-display font-bold text-4xl md:text-5xl text-white mb-4 text-center tracking-tight">
-              Four checks, every time.
-            </h2>
-            <p className="text-sm md:text-base text-slate-400/90 max-w-2xl text-center mb-10 font-sans">
-              Accounting theorems must hold before numbers pass. Any breakdown
-              triggers an automatic quarantine.
-            </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl">
+            {/* 4 Invariant Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {[
                 {
+                  code: 'INV-01',
                   title: 'Accounting Equation',
-                  desc: 'Total Assets = Total Liabilities + Stockholders\u2019 Equity (\u00b10.5% tolerance).',
-                  icon: Scale,       delay: 0,
+                  formula: 'Assets = Liabilities + Equity (±0.5%)',
+                  desc: 'Enforces the foundational identity across balance sheet lines before ledger write-back.',
+                  icon: Scale,
+                  delay: 0,
                 },
                 {
-                  title: 'Segment Validation',
-                  desc: 'Sum of operating segment revenues corroborates total consolidated revenue.',
-                  icon: Layers,      delay: 110,
+                  code: 'INV-02',
+                  title: 'Segment Synthesis',
+                  formula: 'Σ(Segments) == Consolidated Revenue',
+                  desc: 'Disaggregates operating geographic & product segments to ensure internal consistency.',
+                  icon: Layers,
+                  delay: 90,
                 },
                 {
-                  title: 'Year-on-Year Analysis',
-                  desc: 'Detects unexpected variance shifts greater than \u00b150% against prior-year filing.',
-                  icon: TrendingUp,  delay: 220,
+                  code: 'INV-03',
+                  title: 'Year-on-Year Continuity',
+                  formula: 'Prior_Year(Reported) == Historical(Current)',
+                  desc: 'Audits restatements and variance anomalies exceeding 50% year-over-year bounds.',
+                  icon: TrendingUp,
+                  delay: 180,
                 },
                 {
-                  title: 'Cross-Statement Check',
-                  desc: 'Reconciles Income Statement Net Income against starting operating cash flow.',
-                  icon: FileSpreadsheet, delay: 330,
+                  code: 'INV-04',
+                  title: 'Cross-Statement Reconciliation',
+                  formula: 'Net Income -> Operating Cash Flow Base',
+                  desc: 'Reconciles Income Statement net earnings against cash flow operating starting balances.',
+                  icon: FileSpreadsheet,
+                  delay: 270,
                 },
-              ].map((item) => {
-                const Icon = item.icon;
+              ].map((inv) => {
+                const Icon = inv.icon;
                 return (
                   <div
-                    key={item.title}
+                    key={inv.code}
                     style={{
-                      opacity:    valVisible || prefersReducedMotion ? 1 : 0,
-                      transform:  valVisible || prefersReducedMotion ? 'translateY(0)' : 'translateY(18px)',
-                      transition: `opacity 0.45s ease ${item.delay}ms, transform 0.45s cubic-bezier(0.16,1,0.3,1) ${item.delay}ms`,
+                      opacity: valVisible || prefersReducedMotion ? 1 : 0,
+                      transform: valVisible || prefersReducedMotion ? 'translateY(0)' : 'translateY(16px)',
+                      transition: `opacity 0.4s ease ${inv.delay}ms, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${inv.delay}ms`,
                     }}
-                    className={`p-5 ${glassCardLedger} flex items-start space-x-3.5`}
+                    className="p-6 rounded-2xl bg-[#141822]/80 border border-white/[0.08] hover:border-white/[0.16] transition-all backdrop-blur-xl group"
                   >
-                    <div className="p-2.5 rounded-lg bg-[rgba(232,179,57,0.10)] text-[var(--signal,#E8B339)] border border-[rgba(232,179,57,0.25)] shrink-0">
-                      <Icon className="w-5 h-5" />
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-2">
+                        <div className="p-2 rounded-lg bg-[rgba(232,179,57,0.1)] text-[var(--signal,#E8B339)]">
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <span className="font-mono text-xs text-slate-400">{inv.code}</span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+                        VERIFIED IDENTITIES
+                      </span>
                     </div>
-                    <div>
-                      <h3 className="font-display font-bold text-base text-slate-100 mb-1">{item.title}</h3>
-                      <p className="text-xs text-slate-400/90 leading-relaxed font-sans">{item.desc}</p>
+
+                    <h3 className="font-display font-bold text-lg text-white mb-1.5 group-hover:text-[var(--signal,#E8B339)] transition-colors">
+                      {inv.title}
+                    </h3>
+                    <div className="text-[11px] font-mono text-[var(--signal,#E8B339)] bg-[#0E121A] px-2.5 py-1 rounded-md mb-2.5 inline-block border border-white/[0.04]">
+                      {inv.formula}
                     </div>
+                    <p className="text-xs text-slate-400 leading-relaxed font-sans">
+                      {inv.desc}
+                    </p>
                   </div>
                 );
               })}
@@ -460,84 +448,142 @@ export const IntroScreen: React.FC = () => {
           </div>
         </section>
 
-        {/* ── SECTION 4: HUMAN-IN-THE-LOOP ───────────────────────────────── */}
+        {/* ── SECTION 4: HUMAN-IN-THE-LOOP ──────────────────────────────────── */}
         <section
           id="scene-hitl"
           ref={(el) => { sectionRefs.current[3] = el; }}
-          className={`relative w-full ${SH} flex flex-col items-center justify-center px-6`}
+          className={`relative w-full ${SECTION_HEIGHT} flex flex-col items-center justify-center px-6 md:px-12`}
           style={{ scrollSnapAlign: 'start' }}
         >
-          <div className="max-w-5xl w-full mx-auto flex flex-col items-center">
-            <div className="text-xs font-mono uppercase tracking-widest text-[var(--signal,#E8B339)] mb-2 opacity-80">
-              LangGraph Native Interrupt · Durable Triage
+          <div className="max-w-5xl w-full mx-auto">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-4 border-b border-white/[0.08]">
+              <div>
+                <span className="text-[11px] font-mono tracking-widest text-[var(--signal,#E8B339)] uppercase block mb-1">
+                  SEC // 04 — DURABLE TRIAGE
+                </span>
+                <h2 className="font-display font-bold text-3xl md:text-5xl text-white tracking-[-0.02em]">
+                  It pauses. <span className="text-[var(--signal,#E8B339)]">You decide.</span>
+                </h2>
+              </div>
+              <p className="text-xs md:text-sm font-sans text-slate-400 max-w-md mt-2 md:mt-0 leading-relaxed">
+                When confidence dips below threshold, LangGraph issues a native durable interrupt. The pipeline suspends in SQLite until human review.
+              </p>
             </div>
-            <h2 className="font-display font-bold text-4xl md:text-5xl text-white mb-4 text-center tracking-tight">
-              It pauses. You decide.
-            </h2>
-            <p className="text-sm md:text-base text-slate-400/90 max-w-2xl text-center mb-10 font-sans">
-              Autonomous execution halts before untrusted figures enter report ledgers.
-              Reviewers approve, correct, or reject with immutable audit trail.
-            </p>
 
+            {/* Split Screen: Autonomous Stream vs Interactive Human Review HUD */}
             <div
-              className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full max-w-4xl"
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
               style={{
-                opacity:   hitlVisible || prefersReducedMotion ? 1 : 0,
-                transform: hitlVisible || prefersReducedMotion ? 'translateY(0)' : 'translateY(22px)',
-                transition: 'opacity 0.5s ease, transform 0.5s cubic-bezier(0.16,1,0.3,1)',
+                opacity: hitlVisible || prefersReducedMotion ? 1 : 0,
+                transform: hitlVisible || prefersReducedMotion ? 'translateY(0)' : 'translateY(20px)',
+                transition: 'opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
               }}
             >
-              {/* Running state */}
-              <div className={`p-5 ${glassCard} flex flex-col justify-between`}>
+              {/* Left: Execution Stream Suspended */}
+              <div className="rounded-2xl bg-[#141822]/80 border border-white/[0.08] p-6 backdrop-blur-xl flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800/60">
-                    <span className="font-mono text-xs text-slate-400">STATE: RUNNING</span>
-                    <span className="px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] font-mono flex items-center space-x-1">
-                      <Play className="w-2.5 h-2.5 fill-current" />
-                      <span>Pipeline Active</span>
+                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/[0.06]">
+                    <div className="flex items-center space-x-2">
+                      <Terminal className="w-4 h-4 text-slate-400" />
+                      <span className="font-mono text-xs text-slate-300">PIPELINE EXECUTION TRACE</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30 text-[10px] font-mono flex items-center space-x-1.5">
+                      <Pause className="w-2.5 h-2.5 fill-current" />
+                      <span>HALTED AT INTERRUPT</span>
                     </span>
                   </div>
-                  <div className="text-xs font-mono text-slate-400 mb-2">
-                    Current Node: <span className="text-sky-300">validate</span>
+
+                  <div className="space-y-2.5 font-mono text-xs">
+                    <div className="p-2.5 rounded-lg bg-[#0E121A] border border-white/[0.04] text-slate-400">
+                      <div className="text-[10px] text-slate-500">NODE 01: INGESTION</div>
+                      <div className="text-emerald-400">✓ SEC 10-K HTML located (Apple Inc. FY2024)</div>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-[#0E121A] border border-white/[0.04] text-slate-400">
+                      <div className="text-[10px] text-slate-500">NODE 02: DUAL EXTRACTION</div>
+                      <div className="text-emerald-400">✓ 4/4 Core statements verified</div>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200">
+                      <div className="text-[10px] text-amber-400 font-bold">NODE 03: TRIAGE ESCALATION</div>
+                      <div>⚠ Non-controlling equity split confidence 0.65 &lt; 0.75</div>
+                    </div>
                   </div>
-                  <p className="text-xs text-slate-400/80 font-sans leading-normal">
-                    Pipeline executes automated ingestion, table localization, dual consensus
-                    matching, and formula checks in millisecond batches.
-                  </p>
                 </div>
-                <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center text-[11px] text-slate-400 font-mono">
-                  <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse mr-2 shrink-0" />
-                  Streaming events through persistent event bus...
+
+                <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center text-[11px] font-mono text-slate-400">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse mr-2" />
+                  Awaiting resume via Command(resume=decision)
                 </div>
               </div>
 
-              {/* Paused / interrupted state */}
-              <div className={`p-5 ${glassCardLedger} flex flex-col`}>
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800/60">
-                  <span className="font-mono text-xs text-amber-400">STATE: PAUSED</span>
-                  <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30 text-[10px] font-mono flex items-center space-x-1">
-                    <Pause className="w-2.5 h-2.5" />
-                    <span>Human Review Interrupt</span>
-                  </span>
-                </div>
-                <div className="p-3 rounded-xl bg-[rgba(18,21,28,0.8)] border border-amber-500/20 mb-3 flex-1">
-                  <div className="flex items-center justify-between text-xs font-mono mb-1.5">
-                    <span className="text-white font-bold">Total Shareholders&apos; Equity</span>
-                    <span className="text-amber-400">LOW_CONF: 0.65</span>
+              {/* Right: Interactive Review HUD */}
+              <div className="rounded-2xl bg-[#141822]/80 border border-white/[0.08] border-t-2 border-t-[var(--signal,#E8B339)] p-6 backdrop-blur-xl flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/[0.06]">
+                    <span className="font-mono text-xs text-[var(--signal,#E8B339)] font-bold">
+                      HUMAN REVIEW WORKBENCH
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-400">ID: REV-8402</span>
                   </div>
-                  <div className="text-[11px] text-slate-400/80 font-sans leading-snug">
-                    Extracted table row contains ambiguous non-controlling interest split.
+
+                  <div className="p-3.5 rounded-xl bg-[#0E121A] border border-amber-500/20 mb-4">
+                    <div className="flex items-center justify-between text-xs font-mono mb-1">
+                      <span className="text-white font-bold">Total Stockholders&apos; Equity</span>
+                      <span className="text-amber-400 font-bold">FLAGGED: LOW_CONF</span>
+                    </div>
+                    <p className="text-xs text-slate-400 font-sans leading-relaxed">
+                      Footnote 14 mentions subsidiary restructuring not reflected in consolidated totals. Reviewer confirmation required.
+                    </p>
+                  </div>
+
+                  {/* Interactive Buttons — "Taps should answer back" */}
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-mono text-slate-500 block uppercase">
+                      Select reviewer action to simulate resume:
+                    </span>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        onClick={() => setHitlAction('approved')}
+                        className={`py-2 px-3 rounded-lg text-xs font-mono font-bold transition-all active:scale-[0.97] cursor-pointer ${
+                          hitlAction === 'approved'
+                            ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.5)]'
+                            : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25'
+                        }`}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => setHitlAction('corrected')}
+                        className={`py-2 px-3 rounded-lg text-xs font-mono font-bold transition-all active:scale-[0.97] cursor-pointer ${
+                          hitlAction === 'corrected'
+                            ? 'bg-[var(--signal,#E8B339)] text-black shadow-[0_0_15px_rgba(232,179,57,0.5)]'
+                            : 'bg-[var(--signal,#E8B339)]/15 text-amber-300 border border-amber-500/30 hover:bg-[var(--signal,#E8B339)]/25'
+                        }`}
+                      >
+                        Correct
+                      </button>
+                      <button
+                        onClick={() => setHitlAction('rejected')}
+                        className={`py-2 px-3 rounded-lg text-xs font-mono font-bold transition-all active:scale-[0.97] cursor-pointer ${
+                          hitlAction === 'rejected'
+                            ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.5)]'
+                            : 'bg-rose-500/15 text-rose-300 border border-rose-500/30 hover:bg-rose-500/25'
+                        }`}
+                      >
+                        Reject
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold border border-emerald-500/30">
-                    Approve
-                  </span>
-                  <span className="px-2.5 py-1 rounded-lg bg-[var(--signal,#E8B339)] text-[#12151C] text-[10px] font-mono font-bold">
-                    Correct & Revalidate
-                  </span>
-                  <span className="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 text-[10px] font-mono font-bold border border-rose-500/30">
-                    Reject
+
+                {/* Feedback note responding to tap */}
+                <div className="mt-4 pt-3 border-t border-white/[0.06] text-xs font-mono flex items-center justify-between">
+                  <span className="text-slate-400">Audit Status:</span>
+                  <span className="text-white font-bold">
+                    {hitlAction === 'pending' && 'WAITING ON HUMAN DECISION'}
+                    {hitlAction === 'approved' && 'COMMITTED → PIPELINE ADVANCED'}
+                    {hitlAction === 'corrected' && 'VALUE RE-ENTERED → REVALIDATING'}
+                    {hitlAction === 'rejected' && 'RECORD QUARANTINED FROM LEDGER'}
                   </span>
                 </div>
               </div>
@@ -545,54 +591,50 @@ export const IntroScreen: React.FC = () => {
           </div>
         </section>
 
-        {/* ── SECTION 5: DURABILITY ────────────────────────────────────────── */}
+        {/* ── SECTION 5: DURABILITY ─────────────────────────────────────────── */}
         <section
           id="scene-durability"
           ref={(el) => { sectionRefs.current[4] = el; }}
-          className={`relative w-full ${SH} flex flex-col items-center justify-center px-6`}
+          className={`relative w-full ${SECTION_HEIGHT} flex flex-col items-center justify-center px-6 md:px-12`}
           style={{ scrollSnapAlign: 'start' }}
         >
           <div
-            className="relative z-10 max-w-4xl mx-auto flex flex-col items-center text-center"
+            className="max-w-4xl w-full mx-auto flex flex-col items-center text-center"
             style={{
-              opacity:   durVisible || prefersReducedMotion ? 1 : 0,
-              transform: durVisible || prefersReducedMotion ? 'translateY(0)' : 'translateY(28px)',
-              transition: 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.16,1,0.3,1)',
+              opacity: durVisible || prefersReducedMotion ? 1 : 0,
+              transform: durVisible || prefersReducedMotion ? 'translateY(0)' : 'translateY(24px)',
+              transition: 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
-            <div className="p-3.5 rounded-2xl bg-[rgba(232,179,57,0.12)] text-[var(--signal,#E8B339)] border border-[rgba(232,179,57,0.30)] mb-5 shadow-[0_0_28px_rgba(232,179,57,0.18)]">
-              <RefreshCw className="w-8 h-8" />
+            {/* Top Indicator Badge */}
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full border border-white/[0.08] bg-[#141822]/80 backdrop-blur-md text-xs font-mono text-slate-300 mb-6">
+              <RefreshCw className="w-3.5 h-3.5 text-[var(--signal,#E8B339)] animate-spin" style={{ animationDuration: '6s' }} />
+              <span>PERSISTENCE GUARANTEE</span>
             </div>
 
-            <div className="text-xs font-mono uppercase tracking-widest text-[var(--signal,#E8B339)] mb-3 opacity-80">
-              Durable SQLite Checkpointer · Zero Duplicate LLM Calls
-            </div>
-
-            <h2 className="font-display font-bold text-4xl md:text-6xl text-white mb-6 tracking-tight leading-[1.1]">
-              Killed mid-run.{' '}
-              <span className="block text-[var(--signal,#E8B339)]">Nothing lost.</span>
+            {/* Giant Bold Headline */}
+            <h2 className="font-display font-bold text-5xl md:text-7xl text-white tracking-[-0.03em] mb-6 leading-[1.08]">
+              Killed mid-run. <br />
+              <span className="text-[var(--signal,#E8B339)]">Nothing lost.</span>
             </h2>
 
-            <div className={`p-7 ${glassCardLedger} max-w-3xl text-left mb-6`}>
-              <p className="text-base md:text-lg text-slate-300/90 font-sans leading-relaxed mb-5">
-                AsyncSqliteSaver persists state at every node. Human review interrupts pause
-                execution, surviving hard{' '}
-                <code className="px-1.5 py-0.5 rounded bg-[#12151C] text-[var(--signal,#E8B339)] font-mono text-sm border border-slate-800">
-                  kill -9
-                </code>{' '}
-                restarts with zero duplicate LLM calls.
+            {/* Architectural Telemetry Box */}
+            <div className="rounded-2xl bg-[#141822]/80 border border-white/[0.08] border-t-2 border-t-[var(--signal,#E8B339)] p-8 max-w-3xl text-left backdrop-blur-xl mb-6 shadow-2xl w-full">
+              <p className="text-base md:text-lg text-slate-300 font-sans leading-relaxed mb-6">
+                Every node transition is atomically committed using <code className="px-1.5 py-0.5 rounded bg-[#0E121A] text-[var(--signal,#E8B339)] font-mono text-sm border border-white/[0.06]">AsyncSqliteSaver</code>. When a process suffers a sudden <code className="px-1.5 py-0.5 rounded bg-[#0E121A] text-rose-400 font-mono text-sm border border-white/[0.06]">SIGKILL / kill -9</code>, state rehydrates instantly without re-issuing a single duplicate LLM call.
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-5 border-t border-slate-800/60 font-mono text-xs">
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-white/[0.06] font-mono text-xs">
                 <div>
-                  <span className="text-slate-500 block text-[10px] mb-1">RECOVERY MECHANISM</span>
+                  <span className="text-slate-500 block text-[10px] mb-1">REHYDRATION</span>
                   <span className="text-white font-bold">ainvoke(None, config)</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block text-[10px] mb-1">CACHE INTEGRITY</span>
-                  <span className="text-white font-bold">sha256(model+prompt)</span>
+                  <span className="text-slate-500 block text-[10px] mb-1">CACHE VERIFICATION</span>
+                  <span className="text-white font-bold">sha256(model + prompt)</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block text-[10px] mb-1">RESUME STATUS</span>
+                  <span className="text-slate-500 block text-[10px] mb-1">RESUMPTION FLAG</span>
                   <span className="text-emerald-400 font-bold">system_recovered ✓</span>
                 </div>
               </div>
@@ -600,91 +642,100 @@ export const IntroScreen: React.FC = () => {
           </div>
         </section>
 
-        {/* ── SECTION 6: FINAL CTA ────────────────────────────────────────── */}
+        {/* ── SECTION 6: FINAL CTA ──────────────────────────────────────────── */}
         <section
           id="scene-cta"
           ref={(el) => { sectionRefs.current[5] = el; }}
-          className={`relative w-full ${SH} flex flex-col items-center justify-center text-center px-6`}
+          className={`relative w-full ${SECTION_HEIGHT} flex flex-col items-center justify-center text-center px-6 md:px-12`}
           style={{ scrollSnapAlign: 'start' }}
         >
           <div className="max-w-3xl mx-auto flex flex-col items-center relative z-10">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-slate-700/60 bg-[#1B1F28]/90 text-slate-300 text-xs font-medium tracking-wide mb-6 backdrop-blur-sm">
+            {/* Deployment Badge */}
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full border border-white/[0.08] bg-[#141822]/80 backdrop-blur-md text-slate-300 text-xs font-mono tracking-wider mb-6">
               <CheckCircle2 className="w-3.5 h-3.5 text-[var(--signal,#E8B339)]" />
-              <span>Full Pipeline Deployment Ready</span>
+              <span>PIPELINE VERIFIED · 8 PINNED FILINGS</span>
             </div>
 
-            <h2 className="font-display font-bold text-4xl md:text-5xl text-white mb-6 tracking-tight">
+            {/* Headline */}
+            <h2 className="font-display font-bold text-4xl md:text-6xl text-white tracking-[-0.03em] mb-6 leading-tight">
               Ready to explore the financial audit ledger?
             </h2>
-            <p className="font-sans text-base text-slate-400/90 max-w-xl mb-10 leading-relaxed">
-              Launch live runs across 8 SEC-pinned corporate filings, inject anomalies, and witness
-              autonomous corroboration in real time.
+
+            <p className="font-sans text-base md:text-lg text-slate-400 max-w-xl mb-10 leading-relaxed">
+              Launch autonomous runs across pinned SEC filings, inject intentional anomalies, and witness durable audit consensus in action.
             </p>
 
+            {/* Primary Magnetic CTA */}
             <MagneticButton
               maxShift={10}
               onClick={() => navigate('/mission')}
-              className="px-10 py-5 rounded-2xl bg-[var(--signal,#E8B339)] text-[#12151C] font-bold text-lg hover:shadow-[0_0_36px_-4px_rgba(232,179,57,0.55)] hover:brightness-105 flex items-center space-x-3 transition-all cursor-pointer font-sans"
+              className="px-10 py-5 rounded-2xl bg-[var(--signal,#E8B339)] text-[#0E121A] font-bold text-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center space-x-3 cursor-pointer shadow-[0_0_35px_rgba(232,179,57,0.45)] font-sans"
             >
               <span>Enter Mission Control</span>
-              <ArrowRight className="w-6 h-6 text-[#12151C]" />
+              <ArrowRight className="w-6 h-6 text-[#0E121A]" />
             </MagneticButton>
 
-            <div className="text-xs text-slate-400/60 mt-3 font-mono">10-15s skippable demo intro</div>
+            <span className="text-xs font-mono text-slate-500 mt-4 tracking-wider">
+              10-15s skippable demo intro
+            </span>
           </div>
         </section>
       </div>
 
-      {/* ════════════════════════════════════════════════════════════════════
-          FIXED UI CHROME — dots nav, skip button
-         ════════════════════════════════════════════════════════════════════ */}
+      {/* ══════════════════════════════════════════════════════════════════════
+          FIXED HUD NAVIGATION & TELEMETRY
+         ══════════════════════════════════════════════════════════════════════ */}
 
-      {/* Skip button */}
+      {/* Skip Button (Top Right) */}
       <div className="fixed top-18 right-8 z-50 pointer-events-auto">
         <button
           onClick={() => navigate('/mission')}
-          className="group px-3 py-1.5 rounded-lg border border-slate-700/80 bg-[#1B1F28]/90 hover:bg-[#242936] text-xs font-mono text-slate-400 hover:text-white flex items-center space-x-2 transition-all shadow-lg backdrop-blur"
-          title="Skip intro to Mission Control"
+          className="group px-3.5 py-1.5 rounded-xl border border-white/[0.08] bg-[#141822]/80 hover:bg-[#1C2230] text-xs font-mono text-slate-400 hover:text-white flex items-center space-x-2 transition-all shadow-lg backdrop-blur-md cursor-pointer active:scale-[0.98]"
         >
           <span>Skip Demo Intro</span>
           <ArrowRight className="w-3.5 h-3.5 text-[var(--signal,#E8B339)] group-hover:translate-x-0.5 transition-transform" />
         </button>
       </div>
 
-      {/* Scene indicator — bottom-left (Aetheris .sn-scene-indicator) */}
-      <div className="fixed bottom-8 left-8 z-50 flex items-center space-x-3 pointer-events-none">
+      {/* Scene Telemetry Indicator (Bottom Left) */}
+      <div className="fixed bottom-8 left-8 z-50 flex items-center space-x-3 pointer-events-none select-none">
         <div className="relative w-2 h-2">
-          <span className="absolute inset-0 rounded-full bg-[var(--signal,#E8B339)] opacity-50 animate-ping" />
+          <span className="absolute inset-0 rounded-full bg-[var(--signal,#E8B339)] opacity-60 animate-ping" />
           <span className="relative w-2 h-2 rounded-full bg-[var(--signal,#E8B339)] block" />
         </div>
-        <span className="font-mono text-[10px] text-slate-500 tracking-widest">
-          <span className="text-[var(--signal,#E8B339)]">0{activeIdx + 1}</span>
-          <span className="mx-1.5 opacity-40">/</span>
-          06
-          <span className="mx-2 opacity-30">·</span>
-          <span className="text-slate-400">{SECTIONS[activeIdx]?.label}</span>
-        </span>
+        <div className="font-mono text-xs text-slate-500 tracking-wider flex items-center space-x-2">
+          <span className="text-[var(--signal,#E8B339)] font-bold">
+            0{activeIdx + 1}
+          </span>
+          <span className="opacity-40">/</span>
+          <span>06</span>
+          <span className="opacity-30">·</span>
+          <span className="text-slate-300 font-medium">
+            {SECTIONS[activeIdx]?.tag}
+          </span>
+        </div>
       </div>
 
-      {/* Dot nav — right edge */}
+      {/* Vertical Rail Dot Navigation (Right Edge) */}
       <div className="fixed right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center space-y-3">
-        {SECTIONS.map((sec, i) => {
-          const isActive = activeIdx === i;
+        {SECTIONS.map((sec, idx) => {
+          const isActive = activeIdx === idx;
           return (
             <button
               key={sec.id}
-              onClick={() => scrollToSection(i)}
-              className="group relative flex items-center justify-end p-1 cursor-pointer focus:outline-none"
+              onClick={() => scrollToSection(idx)}
+              className="group relative flex items-center justify-end p-1.5 cursor-pointer focus:outline-none"
               title={sec.label}
             >
-              <span className="absolute right-6 px-2 py-0.5 rounded bg-slate-900/90 border border-slate-800 text-[10px] font-mono text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap backdrop-blur-sm">
+              {/* Tooltip Label */}
+              <span className="absolute right-7 px-2.5 py-1 rounded-md bg-[#141822]/90 border border-white/[0.08] text-[10px] font-mono text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap backdrop-blur-md shadow-lg">
                 {sec.label}
               </span>
               <span
                 className={`rounded-full transition-all duration-300 ${
                   isActive
-                    ? 'w-2.5 h-2.5 bg-[var(--signal,#E8B339)] scale-125 shadow-[0_0_10px_rgba(232,179,57,0.65)]'
-                    : 'w-2 h-2 bg-slate-700 hover:bg-slate-500 scale-90'
+                    ? 'w-2.5 h-2.5 bg-[var(--signal,#E8B339)] scale-125 shadow-[0_0_12px_rgba(232,179,57,0.7)]'
+                    : 'w-1.5 h-1.5 bg-slate-700 hover:bg-slate-400'
                 }`}
               />
             </button>

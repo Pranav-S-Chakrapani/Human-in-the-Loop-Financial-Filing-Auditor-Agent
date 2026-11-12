@@ -1,10 +1,19 @@
 /**
- * AuditStageCanvas — sticky ambient backdrop for the Intro screen scroll narrative.
+ * AuditStageCanvas — High-elegance ambient canvas backdrop for VantageAudit.
  *
- * Pure Canvas 2D (no Three.js / WebGL). Renders a dark ink background with
- * animated amber pipeline lanes that shift their visual state to match the
- * active scene.  Respects prefers-reduced-motion by rendering a static frame.
+ * Visual architecture:
+ * - Obsidian deep-space base (#090C12 -> #10141F)
+ * - Delicate mathematical grid with hairline crosshairs (+)
+ * - Dynamic luminous bezier filaments (representing cryptographic/audit streams)
+ * - Harmonic particle flows that adapt to active scene dynamics:
+ *     * hero: expansive golden ambient field + central focal resonance
+ *     * extraction: dual symmetric streams converging towards consensus
+ *     * validation: quad geometric validation lattices with harmonic pulse
+ *     * hitl: suspended temporal freeze (slow amber drift) + horizon pulse
+ *     * durability: resilience shockwave + state restoration burst
+ *     * cta: high-coherence luminous amber field
  */
+
 import React, { useEffect, useRef, useCallback } from 'react';
 
 export type SceneId =
@@ -20,60 +29,98 @@ interface Props {
   prefersReducedMotion: boolean;
 }
 
-// ─── Design tokens (must stay in sync with tokens.css) ──────────────────────
-const INK        = '#12151C';
-const SIGNAL_RGB = { r: 232, g: 179, b: 57 };
-
-function rgba(r: number, g: number, b: number, a: number) {
-  return `rgba(${r},${g},${b},${a})`;
-}
-
-// ─── Lane / block data ───────────────────────────────────────────────────────
-const LANE_COUNT = 5;
-const BLOCK_HEIGHT = 18;
-const BLOCK_GAP    = 48;
-
-interface Block {
+interface Particle {
   x: number;
   y: number;
-  w: number;
+  vx: number;
+  vy: number;
+  size: number;
+  alpha: number;
+  baseAlpha: number;
+  pulsePhase: number;
+  streamIndex: number;
+}
+
+interface Stream {
+  x1: number;
+  x2: number;
+  cx1: number;
+  cy1: number;
+  cx2: number;
+  cy2: number;
+  phase: number;
   speed: number;
-  opacity: number;
-  flash: number; // 0-1, decays over time
+  alpha: number;
 }
 
-interface Lane {
-  x: number;
-  blocks: Block[];
-  paused: boolean;
-}
-
-function makeLanes(cw: number, ch: number): Lane[] {
-  const laneW = cw / (LANE_COUNT + 1);
-  return Array.from({ length: LANE_COUNT }, (_, i) => {
-    const lx = laneW * (i + 1);
-    const blocks: Block[] = Array.from({ length: 8 }, (__, j) => ({
-      x: lx,
-      y: ch - j * (BLOCK_HEIGHT + BLOCK_GAP) - Math.random() * BLOCK_GAP,
-      w: 36 + Math.random() * 20,
-      speed: 0.6 + Math.random() * 0.5,
-      opacity: 0.14 + Math.random() * 0.14,
-      flash: 0,
-    }));
-    return { x: lx, blocks, paused: false };
-  });
-}
-
-// ─── Component ───────────────────────────────────────────────────────────────
 export const AuditStageCanvas: React.FC<Props> = ({ scene, prefersReducedMotion }) => {
-  const canvasRef   = useRef<HTMLCanvasElement>(null);
-  const rafRef      = useRef<number>(0);
-  const lanesRef    = useRef<Lane[]>([]);
-  const sceneRef    = useRef<SceneId>(scene);
-  const frameRef    = useRef(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rafRef = useRef<number>(0);
+  const frameRef = useRef<number>(0);
+  const sceneRef = useRef<SceneId>(scene);
+  const particlesRef = useRef<Particle[]>([]);
+  const streamsRef = useRef<Stream[]>([]);
+  const transitionRef = useRef({ currentSpeed: 1, targetSpeed: 1 });
 
-  // keep scene ref in sync without restarting loop
-  useEffect(() => { sceneRef.current = scene; }, [scene]);
+  useEffect(() => {
+    sceneRef.current = scene;
+    switch (scene) {
+      case 'hitl':
+        transitionRef.current.targetSpeed = 0.2;
+        break;
+      case 'durability':
+        transitionRef.current.targetSpeed = 2.4;
+        break;
+      case 'extraction':
+        transitionRef.current.targetSpeed = 1.3;
+        break;
+      default:
+        transitionRef.current.targetSpeed = 0.8;
+    }
+  }, [scene]);
+
+  const initScene = useCallback((width: number, height: number) => {
+    // Generate organic flow streams
+    const streamCount = 9;
+    const streams: Stream[] = [];
+    const step = width / (streamCount + 1);
+
+    for (let i = 0; i < streamCount; i++) {
+      const baseX = step * (i + 1);
+      streams.push({
+        x1: baseX,
+        x2: baseX + (Math.random() - 0.5) * 80,
+        cx1: baseX + (Math.random() - 0.5) * 160,
+        cy1: height * 0.35,
+        cx2: baseX + (Math.random() - 0.5) * 160,
+        cy2: height * 0.7,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.004 + Math.random() * 0.004,
+        alpha: 0.06 + Math.random() * 0.08,
+      });
+    }
+    streamsRef.current = streams;
+
+    // Generate telemetry particles
+    const pCount = 38;
+    const particles: Particle[] = [];
+    for (let i = 0; i < pCount; i++) {
+      const sIdx = i % streamCount;
+      const st = streams[sIdx];
+      particles.push({
+        x: st.x1 + (Math.random() - 0.5) * 60,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.2,
+        vy: -0.4 - Math.random() * 0.6,
+        size: 1.2 + Math.random() * 1.8,
+        alpha: 0.15 + Math.random() * 0.35,
+        baseAlpha: 0.15 + Math.random() * 0.35,
+        pulsePhase: Math.random() * Math.PI * 2,
+        streamIndex: sIdx,
+      });
+    }
+    particlesRef.current = particles;
+  }, []);
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -81,181 +128,166 @@ export const AuditStageCanvas: React.FC<Props> = ({ scene, prefersReducedMotion 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const cw = canvas.width;
-    const ch = canvas.height;
+    const w = canvas.width;
+    const h = canvas.height;
     frameRef.current++;
+    const frame = frameRef.current;
 
-    const sc = sceneRef.current;
-    const paused = sc === 'hitl';
-    const restored = sc === 'durability';
-    const heroOrCta = sc === 'hero' || sc === 'cta';
+    // Smooth speed interpolation
+    const t = transitionRef.current;
+    t.currentSpeed += (t.targetSpeed - t.currentSpeed) * 0.05;
+    const speed = t.currentSpeed;
+    const currentScene = sceneRef.current;
 
-    // ── Background ──────────────────────────────────────────────────────────
-    ctx.fillStyle = INK;
-    ctx.fillRect(0, 0, cw, ch);
+    // 1. Deep Obsidian Gradient Base
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+    bgGrad.addColorStop(0, '#090C12');
+    bgGrad.addColorStop(0.5, '#0E121A');
+    bgGrad.addColorStop(1, '#080B10');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
 
-    // ── Radial glow behind content ──────────────────────────────────────────
-    const glowAlpha = heroOrCta ? 0.055 : 0.03;
-    const grd = ctx.createRadialGradient(cw / 2, ch * 0.42, 0, cw / 2, ch * 0.42, cw * 0.52);
-    grd.addColorStop(0, rgba(SIGNAL_RGB.r, SIGNAL_RGB.g, SIGNAL_RGB.b, glowAlpha));
-    grd.addColorStop(1, rgba(SIGNAL_RGB.r, SIGNAL_RGB.g, SIGNAL_RGB.b, 0));
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, cw, ch);
+    // 2. Scene-specific Ambient Light Blooms
+    const cx = w / 2;
+    const cy = h * 0.45;
 
-    // ── Dot-grid overlay ───────────────────────────────────────────────────
-    const gridSize = 28;
-    ctx.fillStyle = 'rgba(255,255,255,0.025)';
-    for (let gx = 0; gx < cw; gx += gridSize) {
-      for (let gy = 0; gy < ch; gy += gridSize) {
+    let glowIntensity = 0.06;
+    let glowRadius = Math.min(w, h) * 0.65;
+    let glowColor = '232, 179, 57'; // Amber #E8B339
+
+    if (currentScene === 'validation') {
+      glowColor = '63, 143, 122'; // Emerald / Teal
+      glowIntensity = 0.05;
+    } else if (currentScene === 'hitl') {
+      glowIntensity = 0.08 + Math.sin(frame * 0.03) * 0.02; // Pulse
+    } else if (currentScene === 'durability') {
+      glowIntensity = 0.07;
+    }
+
+    const ambientGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowRadius);
+    ambientGlow.addColorStop(0, `rgba(${glowColor}, ${glowIntensity})`);
+    ambientGlow.addColorStop(0.5, `rgba(${glowColor}, ${glowIntensity * 0.35})`);
+    ambientGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = ambientGlow;
+    ctx.fillRect(0, 0, w, h);
+
+    // 3. Subtle Engineering Grid Crosshairs (+)
+    const gridSize = 72;
+    const crossSize = 3;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
+    ctx.lineWidth = 1;
+
+    for (let gx = gridSize / 2; gx < w; gx += gridSize) {
+      for (let gy = gridSize / 2; gy < h; gy += gridSize) {
         ctx.beginPath();
-        ctx.arc(gx, gy, 0.9, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.moveTo(gx - crossSize, gy);
+        ctx.lineTo(gx + crossSize, gy);
+        ctx.moveTo(gx, gy - crossSize);
+        ctx.lineTo(gx, gy + crossSize);
+        ctx.stroke();
       }
     }
 
-    // ── Lane lines (vertical guide rails) ──────────────────────────────────
-    lanesRef.current.forEach((lane) => {
-      ctx.strokeStyle = `rgba(255,255,255,0.03)`;
-      ctx.lineWidth = 1;
-      ctx.setLineDash([4, 12]);
+    // 4. Luminous Audit Filaments (Curved Bezier Paths)
+    streamsRef.current.forEach((st, idx) => {
+      st.phase += st.speed * speed;
+      const sway1 = Math.sin(st.phase) * 35;
+      const sway2 = Math.cos(st.phase * 0.8) * 30;
+
       ctx.beginPath();
-      ctx.moveTo(lane.x, 0);
-      ctx.lineTo(lane.x, ch);
+      ctx.moveTo(st.x1, h);
+      ctx.bezierCurveTo(
+        st.cx1 + sway1,
+        st.cy1,
+        st.cx2 + sway2,
+        st.cy2,
+        st.x2,
+        0
+      );
+
+      let strokeColor = `rgba(232, 179, 57, ${st.alpha * 0.8})`;
+      if (currentScene === 'validation' && idx % 2 === 0) {
+        strokeColor = `rgba(63, 143, 122, ${st.alpha * 0.9})`;
+      } else if (currentScene === 'hitl') {
+        strokeColor = `rgba(232, 179, 57, ${st.alpha * 0.45})`;
+      }
+
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = idx % 3 === 0 ? 1.5 : 0.8;
       ctx.stroke();
-      ctx.setLineDash([]);
     });
 
-    // ── Move & draw blocks ──────────────────────────────────────────────────
-    lanesRef.current.forEach((lane, laneIdx) => {
-      // scene-based speed modulation
-      let speedMul = 1;
-      if (paused) speedMul = 0;
-      else if (restored) speedMul = 2.2; // blocks rush after restart
-      else if (sc === 'extraction') speedMul = laneIdx < 3 ? 1.4 : 0.6; // left faster
-      else if (sc === 'validation') speedMul = 1.0;
-      else if (heroOrCta) speedMul = 0.7;
+    // 5. Telemetry Flow Particles
+    particlesRef.current.forEach((p) => {
+      if (!prefersReducedMotion) {
+        p.y += p.vy * speed;
+        p.pulsePhase += 0.03;
 
-      lane.blocks.forEach((b) => {
-        if (!prefersReducedMotion && !paused) {
-          b.y -= b.speed * speedMul;
-          if (b.y + BLOCK_HEIGHT < 0) {
-            b.y = ch + BLOCK_GAP;
-            // occasionally flash on reentry
-            if (sc === 'extraction' || restored) b.flash = 1;
-          }
+        // Wrap around gracefully
+        if (p.y < -20) {
+          p.y = h + 20;
+          p.x = (streamsRef.current[p.streamIndex]?.x1 || w / 2) + (Math.random() - 0.5) * 80;
         }
-        if (b.flash > 0) b.flash = Math.max(0, b.flash - 0.04);
+      }
 
-        // determine block color
-        let alpha = b.opacity;
-        let fillR = 50, fillG = 60, fillB = 70; // default muted
+      const pulse = Math.sin(p.pulsePhase) * 0.3 + 0.7;
+      const alpha = p.baseAlpha * pulse;
 
-        if (b.flash > 0) {
-          // amber flash
-          fillR = SIGNAL_RGB.r; fillG = SIGNAL_RGB.g; fillB = SIGNAL_RGB.b;
-          alpha = b.opacity + b.flash * 0.5;
-        } else if (sc === 'validation') {
-          // soft teal tint
-          fillR = 63; fillG = 143; fillB = 122;
-          alpha = b.opacity * 0.7;
-        } else if (paused) {
-          // amber tint on paused blocks
-          fillR = SIGNAL_RGB.r; fillG = SIGNAL_RGB.g; fillB = SIGNAL_RGB.b;
-          alpha = b.opacity * 0.4;
-        }
+      // Draw particle halo
+      const pGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 3.5);
+      pGrad.addColorStop(0, `rgba(232, 179, 57, ${alpha * 0.9})`);
+      pGrad.addColorStop(1, 'rgba(232, 179, 57, 0)');
 
-        // block fill
-        ctx.fillStyle = rgba(fillR, fillG, fillB, alpha);
-        const bx = b.x - b.w / 2;
-        ctx.beginPath();
-        (ctx as CanvasRenderingContext2D).roundRect(bx, b.y, b.w, BLOCK_HEIGHT, 3);
-        ctx.fill();
+      ctx.fillStyle = pGrad;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * 3.5, 0, Math.PI * 2);
+      ctx.fill();
 
-        // block border
-        ctx.strokeStyle = rgba(fillR, fillG, fillB, Math.min(1, alpha * 2.5));
-        ctx.lineWidth = 0.75;
-        ctx.beginPath();
-        (ctx as CanvasRenderingContext2D).roundRect(bx, b.y, b.w, BLOCK_HEIGHT, 3);
-        ctx.stroke();
-      });
+      // Sharp core
+      ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.95})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * 0.8, 0, Math.PI * 2);
+      ctx.fill();
     });
 
-    // ── Special overlays per scene ──────────────────────────────────────────
+    // 6. Section Specific Foreground Geometry
+    if (currentScene === 'hero' || currentScene === 'cta') {
+      // Elegant minimal focal rings around center
+      const rot = frame * 0.003;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rot);
 
-    // HERO / CTA: Central amber pulsing chip silhouette
-    if (heroOrCta) {
-      const cx2 = cw / 2, cy2 = ch * 0.5;
-      const t = (frameRef.current * 0.015);
-      const pulse = Math.sin(t) * 0.015;
-      const r = 54 + pulse * 60;
+      ctx.strokeStyle = 'rgba(232, 179, 57, 0.06)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([8, 16]);
+      ctx.beginPath();
+      ctx.arc(0, 0, 180, 0, Math.PI * 2);
+      ctx.stroke();
 
-      ctx.strokeStyle = rgba(SIGNAL_RGB.r, SIGNAL_RGB.g, SIGNAL_RGB.b, 0.08 + pulse * 0.5);
+      ctx.setLineDash([4, 24]);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+      ctx.beginPath();
+      ctx.arc(0, 0, 260, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.restore();
+    } else if (currentScene === 'hitl') {
+      // Elegant horizon pulse line for paused state
+      const pulseA = Math.sin(frame * 0.04) * 0.5 + 0.5;
+      const lineY = h * 0.5;
+
+      const horizonGrad = ctx.createLinearGradient(0, 0, w, 0);
+      horizonGrad.addColorStop(0, 'rgba(232, 179, 57, 0)');
+      horizonGrad.addColorStop(0.5, `rgba(232, 179, 57, ${0.12 + pulseA * 0.12})`);
+      horizonGrad.addColorStop(1, 'rgba(232, 179, 57, 0)');
+
+      ctx.strokeStyle = horizonGrad;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      (ctx as CanvasRenderingContext2D).roundRect(cx2 - r, cy2 - r, r * 2, r * 2, 10);
+      ctx.moveTo(0, lineY);
+      ctx.lineTo(w, lineY);
       ctx.stroke();
-
-      // inner glow
-      const ig = ctx.createRadialGradient(cx2, cy2, 0, cx2, cy2, r);
-      ig.addColorStop(0, rgba(SIGNAL_RGB.r, SIGNAL_RGB.g, SIGNAL_RGB.b, 0.04 + pulse * 0.3));
-      ig.addColorStop(1, rgba(SIGNAL_RGB.r, SIGNAL_RGB.g, SIGNAL_RGB.b, 0));
-      ctx.fillStyle = ig;
-      ctx.beginPath();
-      (ctx as CanvasRenderingContext2D).roundRect(cx2 - r, cy2 - r, r * 2, r * 2, 10);
-      ctx.fill();
-    }
-
-    // HITL: "PAUSED" text overlay at top-center
-    if (paused && !prefersReducedMotion) {
-      const alpha = 0.3 + Math.sin(frameRef.current * 0.08) * 0.2;
-      ctx.fillStyle = rgba(SIGNAL_RGB.r, SIGNAL_RGB.g, SIGNAL_RGB.b, alpha);
-      ctx.font = `bold 11px 'JetBrains Mono', monospace`;
-      ctx.letterSpacing = '0.2em';
-      ctx.textAlign = 'center';
-      ctx.fillText('⏸  AWAITING HUMAN REVIEW', cw / 2, 54);
-      ctx.letterSpacing = '0em';
-    }
-
-    // DURABILITY: "RESTORED" flash banner
-    if (restored && frameRef.current < 180 && !prefersReducedMotion) {
-      const progress = frameRef.current / 180;
-      const alpha2 = Math.max(0, 0.7 - progress * 0.7);
-      ctx.fillStyle = rgba(SIGNAL_RGB.r, SIGNAL_RGB.g, SIGNAL_RGB.b, alpha2 * 0.1);
-      ctx.fillRect(0, 0, cw, ch);
-      ctx.fillStyle = rgba(SIGNAL_RGB.r, SIGNAL_RGB.g, SIGNAL_RGB.b, alpha2);
-      ctx.font = `bold 12px 'JetBrains Mono', monospace`;
-      ctx.textAlign = 'center';
-      ctx.fillText('↺  CHECKPOINT RESTORED · RESUMING', cw / 2, 54);
-    }
-
-    // EXTRACTION: Two-column separator
-    if (sc === 'extraction') {
-      ctx.strokeStyle = rgba(SIGNAL_RGB.r, SIGNAL_RGB.g, SIGNAL_RGB.b, 0.08);
-      ctx.lineWidth = 1;
-      ctx.setLineDash([6, 10]);
-      ctx.beginPath();
-      ctx.moveTo(cw / 2, ch * 0.1);
-      ctx.lineTo(cw / 2, ch * 0.9);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-
-    // VALIDATION: 4-quadrant subtle markers
-    if (sc === 'validation') {
-      const checks = [
-        { x: cw * 0.25, y: ch * 0.3 },
-        { x: cw * 0.75, y: ch * 0.3 },
-        { x: cw * 0.25, y: ch * 0.72 },
-        { x: cw * 0.75, y: ch * 0.72 },
-      ];
-      checks.forEach((pt, ci) => {
-        const phase = (frameRef.current * 0.02 + ci * 1.5);
-        const a = (Math.sin(phase) * 0.5 + 0.5) * 0.06;
-        ctx.fillStyle = rgba(63, 143, 122, a);
-        ctx.beginPath();
-        ctx.arc(pt.x, pt.y, 70, 0, Math.PI * 2);
-        ctx.fill();
-      });
     }
 
     if (!prefersReducedMotion) {
@@ -263,16 +295,15 @@ export const AuditStageCanvas: React.FC<Props> = ({ scene, prefersReducedMotion 
     }
   }, [prefersReducedMotion]);
 
-  // init canvas & start loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const resize = () => {
-      canvas.width  = canvas.offsetWidth;
+      canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
-      lanesRef.current = makeLanes(canvas.width, canvas.height);
-      if (prefersReducedMotion) draw(); // single static frame
+      initScene(canvas.width, canvas.height);
+      if (prefersReducedMotion) draw();
     };
 
     resize();
@@ -287,17 +318,12 @@ export const AuditStageCanvas: React.FC<Props> = ({ scene, prefersReducedMotion 
       cancelAnimationFrame(rafRef.current);
       ro.disconnect();
     };
-  }, [draw, prefersReducedMotion]);
-
-  // Reset frame counter when scene changes (for RESTORED flash)
-  useEffect(() => {
-    if (scene === 'durability') frameRef.current = 0;
-  }, [scene]);
+  }, [initScene, draw, prefersReducedMotion]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full"
+      className="absolute inset-0 w-full h-full pointer-events-none"
       style={{ display: 'block' }}
       aria-hidden="true"
     />
