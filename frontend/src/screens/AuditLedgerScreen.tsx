@@ -7,6 +7,7 @@ export const AuditLedgerScreen: React.FC = () => {
   const [verifyStatus, setVerifyStatus] = useState<any | null>(null);
   const [tamperResult, setTamperResult] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
+  const [copiedHashSeq, setCopiedHashSeq] = useState<number | null>(null);
 
   const loadAudit = () => {
     fetchAudit().then(setEntries);
@@ -158,8 +159,25 @@ export const AuditLedgerScreen: React.FC = () => {
                   <td className="p-3.5 font-sans text-slate-300 text-[11px]">
                     <strong className="text-white font-mono">{entry.reviewer}</strong>: {entry.note || 'None'}
                   </td>
-                  <td className="p-3.5 font-mono text-slate-500 text-[10px] truncate max-w-[150px]" title={entry.row_hash}>
-                    {entry.row_hash?.slice(0, 16)}...
+                  <td className="p-3.5 font-mono text-slate-500 text-[10px]">
+                    <button
+                      onClick={() => {
+                        if (entry.row_hash) {
+                          navigator.clipboard.writeText(entry.row_hash);
+                          setCopiedHashSeq(entry.seq);
+                          setTimeout(() => setCopiedHashSeq(null), 1800);
+                        }
+                      }}
+                      className="px-2 py-1 rounded bg-[#0E121A] hover:bg-white/[0.08] active:scale-95 text-slate-400 hover:text-white transition-all cursor-pointer border border-white/[0.06] flex items-center space-x-1.5"
+                      title="Click to copy full SHA-256 hash"
+                    >
+                      <span className="truncate max-w-[120px]">{entry.row_hash?.slice(0, 16)}...</span>
+                      {copiedHashSeq === entry.seq ? (
+                        <span className="text-emerald-400 font-bold text-[9px]">COPIED</span>
+                      ) : (
+                        <span className="text-[9px] text-slate-600">COPY</span>
+                      )}
+                    </button>
                   </td>
                 </tr>
               ))

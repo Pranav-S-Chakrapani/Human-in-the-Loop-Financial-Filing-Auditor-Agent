@@ -61,9 +61,9 @@ export const MetricsGridScreen: React.FC = () => {
         <table className="w-full text-xs text-left text-slate-300 border-collapse">
           <thead className="bg-[#0B0E14]/90 border-b border-white/[0.08] text-slate-400 uppercase font-mono tracking-wider text-[10px]">
             <tr>
-              <th className="p-3.5 sticky left-0 bg-[#0B0E14] z-10">Company</th>
+              <th className="p-3.5 sticky left-0 bg-[#0B0E14] z-10 whitespace-nowrap">Company</th>
               {METRIC_COLS.map((col) => (
-                <th key={col} className="p-3.5 text-right font-medium">
+                <th key={col} className="p-3.5 text-right font-medium whitespace-nowrap min-w-[140px]">
                   {col.replace(/_/g, ' ')}
                 </th>
               ))}
@@ -72,11 +72,11 @@ export const MetricsGridScreen: React.FC = () => {
           <tbody className="divide-y divide-white/[0.04] font-mono text-xs">
             {gridData.map((row) => (
               <tr key={row.ticker} className="hover:bg-white/[0.02] transition-colors">
-                <td className="p-3.5 font-bold text-white sticky left-0 bg-[#0E121A]/95 z-10 flex items-center space-x-2 border-r border-white/[0.04]">
+                <td className="p-3.5 font-bold text-white sticky left-0 bg-[#0E121A]/95 z-10 flex items-center space-x-2 border-r border-white/[0.04] whitespace-nowrap">
                   <span className="px-2 py-0.5 rounded-md bg-[#1B1F28] text-[var(--signal,#E8B339)] text-[10px] border border-white/[0.06]">
                     {row.ticker}
                   </span>
-                  <span className="font-sans font-medium text-slate-200 truncate max-w-[130px]">
+                  <span className="font-sans font-medium text-slate-200 truncate max-w-[140px]">
                     {row.company}
                   </span>
                 </td>
@@ -99,7 +99,7 @@ export const MetricsGridScreen: React.FC = () => {
                           });
                         }
                       }}
-                      className={`p-3.5 text-right cursor-pointer transition-all ${
+                      className={`p-3.5 text-right cursor-pointer transition-all whitespace-nowrap ${
                         isSelected
                           ? 'bg-[var(--signal,#E8B339)]/15 border-[var(--signal,#E8B339)] border shadow-inner'
                           : 'hover:bg-white/[0.04]'

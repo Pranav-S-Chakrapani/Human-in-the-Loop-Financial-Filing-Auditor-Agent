@@ -58,36 +58,46 @@ export const ReportScreen: React.FC = () => {
 
       {/* Top Accuracy KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl border border-white/[0.08] bg-[#141822]/85 backdrop-blur-xl shadow-lg">
+        <div className="p-5 rounded-2xl border border-white/[0.08] bg-[#141822]/85 backdrop-blur-xl shadow-lg min-h-[135px] flex flex-col justify-between hover:border-white/[0.16] transition-all">
           <div className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Raw Dual Extraction</div>
-          <div className="text-3xl font-mono font-extrabold text-white mt-1.5 tracking-tight">
-            {(accuracy?.raw * 100).toFixed(1)}%
+          <div>
+            <div className="text-3xl font-mono font-extrabold text-white tracking-tight">
+              {(accuracy?.raw * 100).toFixed(1)}%
+            </div>
+            <div className="text-[11px] text-slate-400 mt-1 font-sans">Pre-review consensus baseline</div>
           </div>
-          <div className="text-[11px] text-slate-400 mt-1 font-sans">Pre-review consensus baseline</div>
         </div>
 
-        <div className="p-5 rounded-2xl border border-white/[0.08] bg-[#141822]/85 backdrop-blur-xl shadow-lg border-t-2 border-t-emerald-500">
+        <div className="p-5 rounded-2xl border border-white/[0.08] bg-[#141822]/85 backdrop-blur-xl shadow-lg border-t-2 border-t-emerald-500 min-h-[135px] flex flex-col justify-between hover:border-white/[0.16] transition-all">
           <div className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Auto-Approved Precision</div>
-          <div className="text-3xl font-mono font-extrabold text-emerald-400 mt-1.5 tracking-tight">
-            {(accuracy?.auto_approved * 100).toFixed(1)}%
+          <div>
+            <div className="text-3xl font-mono font-extrabold text-emerald-400 tracking-tight">
+              {(accuracy?.auto_approved * 100).toFixed(1)}%
+            </div>
+            <div className="text-[11px] text-slate-400 mt-1 font-sans">{totals?.auto_approved} autonomous passes</div>
           </div>
-          <div className="text-[11px] text-slate-400 mt-1 font-sans">{totals?.auto_approved} autonomous passes</div>
         </div>
 
-        <div className="p-5 rounded-2xl border border-white/[0.08] bg-[#141822]/85 backdrop-blur-xl shadow-lg border-t-2 border-t-sky-500">
+        <div className="p-5 rounded-2xl border border-white/[0.08] bg-[#141822]/85 backdrop-blur-xl shadow-lg border-t-2 border-t-sky-500 min-h-[135px] flex flex-col justify-between hover:border-white/[0.16] transition-all">
           <div className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Post-Review Accuracy</div>
-          <div className="text-3xl font-mono font-extrabold text-sky-400 mt-1.5 tracking-tight">
-            {(accuracy?.post_review * 100).toFixed(1)}%
+          <div>
+            <div className="text-3xl font-mono font-extrabold text-sky-400 tracking-tight">
+              {(accuracy?.post_review * 100).toFixed(1)}%
+            </div>
+            <div className="text-[11px] text-slate-400 mt-1 font-sans">Final certified statement ledger</div>
           </div>
-          <div className="text-[11px] text-slate-400 mt-1 font-sans">Final certified statement ledger</div>
         </div>
 
-        <div className="p-5 rounded-2xl border border-white/[0.08] bg-[#141822]/85 backdrop-blur-xl shadow-lg border-t-2 border-t-[var(--signal,#E8B339)]">
+        <div className="p-5 rounded-2xl border border-white/[0.08] bg-[#141822]/85 backdrop-blur-xl shadow-lg border-t-2 border-t-[var(--signal,#E8B339)] min-h-[135px] flex flex-col justify-between hover:border-white/[0.16] transition-all">
           <div className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Escalation Precision</div>
-          <div className="text-3xl font-mono font-extrabold text-[var(--signal,#E8B339)] mt-1.5 tracking-tight">
-            {(escalation_precision?.lenient * 100).toFixed(0)}%
+          <div>
+            <div className="text-3xl font-mono font-extrabold text-[var(--signal,#E8B339)] tracking-tight">
+              {(escalation_precision?.lenient * 100).toFixed(0)}%
+            </div>
+            <div className="text-[11px] text-slate-400 mt-1 font-sans truncate">
+              Strict precision: {(escalation_precision?.strict * 100).toFixed(0)}%
+            </div>
           </div>
-          <div className="text-[11px] text-slate-400 mt-1 font-sans">Strict precision: {(escalation_precision?.strict * 100).toFixed(0)}%</div>
         </div>
       </div>
 
@@ -100,20 +110,20 @@ export const ReportScreen: React.FC = () => {
             <span>Confusion Matrix (Auto vs. Escalated)</span>
           </h3>
           <div className="grid grid-cols-2 gap-3.5 font-mono text-center">
-            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
-              <div className="text-xs text-emerald-300 font-sans">Approved Correct (True Neg)</div>
+            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 min-h-[110px] flex flex-col justify-center items-center">
+              <div className="text-xs text-emerald-300 font-sans">Approved Correct (TN)</div>
               <div className="text-3xl font-bold text-emerald-400 mt-1.5">{confusion?.approved_correct}</div>
             </div>
-            <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30">
-              <div className="text-xs text-rose-300 font-sans">Approved Wrong (False Neg)</div>
+            <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 min-h-[110px] flex flex-col justify-center items-center">
+              <div className="text-xs text-rose-300 font-sans">Approved Wrong (FN)</div>
               <div className="text-3xl font-bold text-rose-400 mt-1.5">{confusion?.approved_wrong}</div>
             </div>
-            <div className="p-4 rounded-xl bg-[var(--signal,#E8B339)]/10 border border-[var(--signal,#E8B339)]/30">
-              <div className="text-xs text-amber-300 font-sans">Escalated Correct (False Pos)</div>
+            <div className="p-4 rounded-xl bg-[var(--signal,#E8B339)]/10 border border-[var(--signal,#E8B339)]/30 min-h-[110px] flex flex-col justify-center items-center">
+              <div className="text-xs text-amber-300 font-sans">Escalated Correct (FP)</div>
               <div className="text-3xl font-bold text-[var(--signal,#E8B339)] mt-1.5">{confusion?.escalated_correct}</div>
             </div>
-            <div className="p-4 rounded-xl bg-sky-500/10 border border-sky-500/30">
-              <div className="text-xs text-sky-300 font-sans">Escalated Wrong (True Pos)</div>
+            <div className="p-4 rounded-xl bg-sky-500/10 border border-sky-500/30 min-h-[110px] flex flex-col justify-center items-center">
+              <div className="text-xs text-sky-300 font-sans">Escalated Wrong (TP)</div>
               <div className="text-3xl font-bold text-sky-400 mt-1.5">{confusion?.escalated_wrong}</div>
             </div>
           </div>
@@ -126,27 +136,27 @@ export const ReportScreen: React.FC = () => {
             <span>System Reliability & Survivability</span>
           </h3>
           <div className="space-y-2.5 font-mono text-xs">
-            <div className="flex justify-between items-center p-3 rounded-xl bg-[#0B0E14] border border-white/[0.05]">
+            <div className="flex justify-between items-center p-3 rounded-xl bg-[#0B0E14] border border-white/[0.05] gap-3">
               <span className="text-slate-400 font-sans">Unique Network LLM Calls:</span>
-              <span className="font-bold text-white">{reliability?.unique_llm_calls}</span>
+              <span className="font-bold text-white shrink-0">{reliability?.unique_llm_calls}</span>
             </div>
-            <div className="flex justify-between items-center p-3 rounded-xl bg-[#0B0E14] border border-white/[0.05]">
+            <div className="flex justify-between items-center p-3 rounded-xl bg-[#0B0E14] border border-white/[0.05] gap-3">
               <span className="text-slate-400 font-sans">Duplicate Network Calls on Resume:</span>
-              <span className="font-bold text-emerald-400">{reliability?.duplicate_llm_calls} (0 NET REDUNDANT)</span>
+              <span className="font-bold text-emerald-400 shrink-0 whitespace-nowrap">{reliability?.duplicate_llm_calls} (0 REDUNDANT)</span>
             </div>
-            <div className="flex justify-between items-center p-3 rounded-xl bg-[#0B0E14] border border-white/[0.05]">
+            <div className="flex justify-between items-center p-3 rounded-xl bg-[#0B0E14] border border-white/[0.05] gap-3">
               <span className="text-slate-400 font-sans">Audit Log Rows Committed:</span>
-              <span className="font-bold text-white">{reliability?.audit_rows}</span>
+              <span className="font-bold text-white shrink-0">{reliability?.audit_rows}</span>
             </div>
-            <div className="flex justify-between items-center p-3 rounded-xl bg-[#0B0E14] border border-white/[0.05]">
+            <div className="flex justify-between items-center p-3 rounded-xl bg-[#0B0E14] border border-white/[0.05] gap-3">
               <span className="text-slate-400 font-sans">Cryptographic Hash Chain:</span>
-              <span className="font-bold text-emerald-400">
+              <span className="font-bold text-emerald-400 shrink-0 whitespace-nowrap">
                 {reliability?.chain_ok ? 'PASS (100% Intact Sequence)' : 'FAIL'}
               </span>
             </div>
-            <div className="flex justify-between items-center p-3 rounded-xl bg-[#0B0E14] border border-white/[0.05]">
+            <div className="flex justify-between items-center p-3 rounded-xl bg-[#0B0E14] border border-white/[0.05] gap-3">
               <span className="text-slate-400 font-sans">Kill-Resume Hard Restarts Survived:</span>
-              <span className="font-bold text-emerald-400">
+              <span className="font-bold text-emerald-400 shrink-0 whitespace-nowrap">
                 {reliability?.kill_resume_tests?.passed}/{reliability?.kill_resume_tests?.total} Passed
               </span>
             </div>

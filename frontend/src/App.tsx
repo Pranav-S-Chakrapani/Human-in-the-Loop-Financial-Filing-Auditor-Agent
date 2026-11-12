@@ -12,6 +12,8 @@ import { fetchCounters, fetchDevStatus, USE_MOCKS, subscribeToEvents } from './a
 import { RefreshCw, HelpCircle, Monitor, Settings, Cpu, ShieldCheck, Activity } from 'lucide-react';
 import { ShortcutsModal } from './components/ShortcutsModal';
 import { DevSettingsModal } from './components/DevSettingsModal';
+import { MosaicTransition } from './components/MosaicTransition';
+import { CyberFooter } from './components/CyberFooter';
 
 const NavigationBar: React.FC<{
   isPresenterMode: boolean;
@@ -50,13 +52,13 @@ const NavigationBar: React.FC<{
   ];
 
   return (
-    <header className="border-b border-white/[0.08] bg-[#090C12]/85 backdrop-blur-2xl sticky top-0 z-50 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+    <header className="border-b border-white/[0.08] bg-[#090C12]/85 backdrop-blur-2xl sticky top-0 z-40 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
       {/* Subtle glowing amber hairline indicator */}
       <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[var(--signal,#E8B339)]/60 to-transparent" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
         {/* Brand & Nav Section */}
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-6 min-w-0">
           {/* Cybernetic Brand Mark */}
           <button
             onClick={handleLogoClick}
@@ -64,7 +66,7 @@ const NavigationBar: React.FC<{
               transform: logoClicked ? 'scale(0.94)' : 'scale(1)',
               transition: 'transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1)',
             }}
-            className="group flex items-center space-x-2.5 cursor-pointer focus:outline-none"
+            className="group flex items-center space-x-2.5 cursor-pointer focus:outline-none shrink-0"
             title="VantageAudit Home"
           >
             <div className="w-7 h-7 rounded-lg bg-[rgba(232,179,57,0.12)] border border-[rgba(232,179,57,0.35)] flex items-center justify-center text-[var(--signal,#E8B339)] shadow-[0_0_16px_rgba(232,179,57,0.25)] group-hover:shadow-[0_0_22px_rgba(232,179,57,0.45)] group-hover:border-[var(--signal,#E8B339)] transition-all">
@@ -74,7 +76,7 @@ const NavigationBar: React.FC<{
                 <polyline points="22 8.5 12 15.5 2 8.5" />
               </svg>
             </div>
-            <div className="flex items-baseline space-x-1.5">
+            <div className="flex items-baseline space-x-1.5 whitespace-nowrap">
               <span className="font-display font-bold text-white tracking-[-0.02em] text-sm group-hover:text-[var(--signal,#E8B339)] transition-colors">
                 VantageAudit
               </span>
@@ -84,15 +86,15 @@ const NavigationBar: React.FC<{
             </div>
           </button>
 
-          {/* Floating Pill Navigation */}
-          <nav className="hidden md:flex items-center space-x-1 bg-white/[0.03] p-1 rounded-full border border-white/[0.06]">
+          {/* Floating Pill Navigation with whitespace-nowrap */}
+          <nav className="hidden md:flex items-center space-x-1 bg-white/[0.03] p-1 rounded-full border border-white/[0.06] shrink-0">
             {navLinks.map((link) => {
               const active = location.pathname === link.path;
               return (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 flex items-center space-x-1.5 ${
+                  className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 flex items-center space-x-1.5 ${
                     active
                       ? 'bg-[var(--signal,#E8B339)] text-[#090C12] font-bold shadow-[0_0_15px_rgba(232,179,57,0.4)]'
                       : 'text-slate-400 hover:text-slate-100 hover:bg-white/[0.05]'
@@ -107,9 +109,9 @@ const NavigationBar: React.FC<{
         </div>
 
         {/* Telemetry & Controls Section */}
-        <div className="flex items-center space-x-3 text-xs">
+        <div className="flex items-center space-x-3 text-xs shrink-0">
           {USE_MOCKS && (
-            <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold tracking-wider font-mono text-[10px] shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+            <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold tracking-wider font-mono text-[10px] shadow-[0_0_10px_rgba(245,158,11,0.2)] whitespace-nowrap">
               MOCK MODE
             </span>
           )}
@@ -117,7 +119,7 @@ const NavigationBar: React.FC<{
           {/* Live Pipeline Telemetry HUD */}
           {counters && (
             <div
-              className={`hidden sm:flex items-center space-x-3 font-mono transition-all px-3 py-1 rounded-xl border ${
+              className={`hidden sm:flex items-center space-x-3 font-mono transition-all px-3 py-1 rounded-xl border whitespace-nowrap ${
                 isPresenterMode
                   ? 'bg-[var(--signal,#E8B339)]/10 border-[var(--signal,#E8B339)]/40 text-[var(--signal,#E8B339)] text-xs font-bold shadow-[0_0_18px_rgba(232,179,57,0.2)]'
                   : 'bg-[#141822]/80 border-white/[0.06] text-slate-400 text-[11px]'
@@ -232,61 +234,69 @@ export const App: React.FC = () => {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-[#070b12] text-slate-100 flex flex-col font-sans selection:bg-[var(--signal,#E8B339)] selection:text-black">
-        <NavigationBar
-          isPresenterMode={isPresenterMode}
-          onTogglePresenter={() => setIsPresenterMode(!isPresenterMode)}
-          onOpenShortcuts={() => setIsShortcutsOpen(true)}
-          onOpenDevSettings={() => setIsDevSettingsOpen(true)}
-          demoResetEnabled={demoResetEnabled}
-        />
+      <div className="min-h-screen bg-[#080B11] text-slate-100 flex flex-col font-sans selection:bg-[var(--signal,#E8B339)] selection:text-black relative overflow-x-clip">
+        {/* Ambient background engineering grid & top spotlight */}
+        <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(rgba(255,255,255,0.035)_1px,transparent_1px)] [background-size:28px_28px] opacity-60 z-0" />
+        <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[350px] rounded-full blur-[160px] pointer-events-none bg-[radial-gradient(circle,rgba(232,179,57,0.04)_0%,transparent_70%)] z-0" />
 
-        <main className="flex-1 pb-12">
-          <Routes>
-            <Route path="/" element={<IntroScreen />} />
-            <Route path="/mission" element={<MissionControlScreen />} />
-            <Route path="/reviews" element={<ReviewWorkbenchScreen />} />
-            <Route path="/metrics" element={<MetricsGridScreen />} />
-            <Route path="/audit" element={<AuditLedgerScreen />} />
-            <Route path="/report" element={<ReportScreen />} />
-          </Routes>
-        </main>
-
-        <ShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
-
-        {demoResetEnabled && (
-          <DevSettingsModal
-            isOpen={isDevSettingsOpen}
-            onClose={() => setIsDevSettingsOpen(false)}
-            onResetSuccess={() => {
-              setToastType('info');
-              setToastMessage('Demo Data Cleared: Database reset to pristine schema.');
-              setTimeout(() => setToastMessage(null), 5000);
-            }}
+        <div className="relative z-10 flex flex-col min-h-screen">
+          <NavigationBar
+            isPresenterMode={isPresenterMode}
+            onTogglePresenter={() => setIsPresenterMode(!isPresenterMode)}
+            onOpenShortcuts={() => setIsShortcutsOpen(true)}
+            onOpenDevSettings={() => setIsDevSettingsOpen(true)}
+            demoResetEnabled={demoResetEnabled}
           />
-        )}
 
-        {/* System Recovered / Error Toasts */}
-        {toastMessage && (
-          <div
-            className={`fixed bottom-10 right-6 z-50 p-4 rounded-xl border shadow-2xl flex items-center space-x-3 text-xs font-mono animate-bounce backdrop-blur-xl ${
-              toastType === 'error'
-                ? 'border-rose-500/50 bg-[#141822]/95 text-rose-300 shadow-[0_0_20px_rgba(244,63,94,0.3)]'
-                : 'border-emerald-500/50 bg-[#141822]/95 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.3)]'
-            }`}
-          >
-            <RefreshCw className="w-4 h-4 animate-spin text-[var(--signal,#E8B339)]" />
-            <span>{toastMessage}</span>
-          </div>
-        )}
+          <main className="flex-1 pb-12 relative">
+            <MosaicTransition>
+              <Routes>
+                <Route path="/" element={<IntroScreen />} />
+                <Route path="/mission" element={<MissionControlScreen />} />
+                <Route path="/reviews" element={<ReviewWorkbenchScreen />} />
+                <Route path="/metrics" element={<MetricsGridScreen />} />
+                <Route path="/audit" element={<AuditLedgerScreen />} />
+                <Route path="/report" element={<ReportScreen />} />
+              </Routes>
+            </MosaicTransition>
+          </main>
 
-        {/* Always-visible footer chip */}
-        <footer className="fixed bottom-2.5 left-6 z-40 pointer-events-none">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-white/[0.08] bg-[#0E121A]/85 backdrop-blur-md text-[10px] font-mono text-slate-400 shadow-lg">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10B981]" />
-            <span>Checkpointed · last checkpoint {lastCheckpointTime}</span>
-          </div>
-        </footer>
+          <ShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
+
+          {demoResetEnabled && (
+            <DevSettingsModal
+              isOpen={isDevSettingsOpen}
+              onClose={() => setIsDevSettingsOpen(false)}
+              onResetSuccess={() => {
+                setToastType('info');
+                setToastMessage('Demo Data Cleared: Database reset to pristine schema.');
+                setTimeout(() => setToastMessage(null), 5000);
+              }}
+            />
+          )}
+
+          {/* System Recovered / Error Toasts */}
+          {toastMessage && (
+            <div
+              className={`fixed bottom-10 right-6 z-50 p-4 rounded-xl border shadow-2xl flex items-center space-x-3 text-xs font-mono animate-bounce backdrop-blur-xl ${
+                toastType === 'error'
+                  ? 'border-rose-500/50 bg-[#141822]/95 text-rose-300 shadow-[0_0_20px_rgba(244,63,94,0.3)]'
+                  : 'border-emerald-500/50 bg-[#141822]/95 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+              }`}
+            >
+              <RefreshCw className="w-4 h-4 animate-spin text-[var(--signal,#E8B339)]" />
+              <span>{toastMessage}</span>
+            </div>
+          )}
+
+          {/* Architectural Second Homepage Footer */}
+          <CyberFooter
+            lastCheckpointTime={lastCheckpointTime}
+            onOpenShortcuts={() => setIsShortcutsOpen(true)}
+            onOpenDevSettings={() => setIsDevSettingsOpen(true)}
+            demoResetEnabled={demoResetEnabled}
+          />
+        </div>
       </div>
     </BrowserRouter>
   );

@@ -121,7 +121,7 @@ export const MissionControlScreen: React.FC = () => {
                 <button
                   key={t}
                   onClick={() => toggleTicker(t)}
-                  className={`px-2.5 py-1 text-xs font-mono rounded-lg transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 text-xs font-mono rounded-lg transition-all cursor-pointer active:scale-95 active:translate-y-0.5 ${
                     active
                       ? "bg-[var(--signal,#E8B339)] text-[#090C12] font-bold shadow-[0_0_12px_rgba(232,179,57,0.35)]"
                       : "text-slate-400 hover:text-white hover:bg-white/[0.05]"
@@ -141,7 +141,7 @@ export const MissionControlScreen: React.FC = () => {
                   key={t}
                   onClick={() => toggleTicker(t)}
                   title={c.name}
-                  className={`px-2.5 py-1 text-xs font-mono rounded-lg border flex items-center space-x-1 transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 text-xs font-mono rounded-lg border flex items-center space-x-1 transition-all cursor-pointer active:scale-95 active:translate-y-0.5 ${
                     active
                       ? "bg-teal-500 text-slate-950 font-bold border-teal-400 shadow-[0_0_12px_rgba(20,184,166,0.4)]"
                       : "bg-[#0E121A] text-teal-400 border-teal-500/30 hover:border-teal-500/60"

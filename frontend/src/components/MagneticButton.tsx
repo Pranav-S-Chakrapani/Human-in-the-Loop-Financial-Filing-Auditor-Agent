@@ -18,6 +18,7 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
   const btnRef = useRef<HTMLButtonElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
+  const [isPressed, setIsPressed] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -48,7 +49,16 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
 
   const handleMouseLeave = () => {
     setIsHovered(false);
+    setIsPressed(false);
     setPosition({ x: 0, y: 0 });
+  };
+
+  const handleMouseDown = () => {
+    setIsPressed(true);
+  };
+
+  const handleMouseUp = () => {
+    setIsPressed(false);
   };
 
   return (
@@ -56,14 +66,20 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
       ref={btnRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
       onClick={onClick}
       style={{
-        transform: prefersReducedMotion ? 'none' : `translate3d(${position.x}px, ${position.y}px, 0)`,
-        transition: isHovered
+        transform: prefersReducedMotion
+          ? isPressed ? 'scale(0.97)' : 'none'
+          : `translate3d(${position.x}px, ${position.y + (isPressed ? 1.5 : 0)}px, 0) scale(${isPressed ? 0.97 : 1})`,
+        transition: isPressed
+          ? 'transform 0.06s ease-out'
+          : isHovered
           ? 'transform 0.12s cubic-bezier(0.25, 1, 0.5, 1)'
           : 'transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275)', // spring-like settle
       }}
-      className={className}
+      className={`relative select-none outline-none focus-visible:ring-2 focus-visible:ring-[var(--signal,#E8B339)] ${className}`}
       {...props}
     >
       {children}
