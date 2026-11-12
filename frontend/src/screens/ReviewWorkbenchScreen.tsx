@@ -170,24 +170,29 @@ export const ReviewWorkbenchScreen: React.FC = () => {
                   <div
                     key={r.review_id}
                     onClick={() => setSelectedReviewId(r.review_id)}
-                    className={`p-3.5 rounded-xl border text-xs cursor-pointer transition-all ${
+                    className={`p-4 rounded-xl border text-xs cursor-pointer transition-all ${
                       isSelected
-                        ? 'border-[var(--signal,#E8B339)] bg-[var(--signal,#E8B339)]/10 shadow-[0_0_15px_rgba(232,179,57,0.15)]'
-                        : 'border-white/[0.05] bg-[#0B0E14]/60 hover:border-white/[0.12]'
+                        ? 'border-[var(--signal,#E8B339)] border-l-4 border-l-[var(--signal,#E8B339)] bg-[var(--signal,#E8B339)]/10 shadow-[0_0_20px_rgba(232,179,57,0.2)]'
+                        : 'border-white/[0.05] bg-[#0B0E14]/60 hover:border-white/[0.12] hover:bg-white/[0.02]'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="font-bold font-mono text-white">{r.company}</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="w-6 h-6 rounded-md bg-[#1B1F28] border border-white/[0.08] flex items-center justify-center font-mono font-bold text-white text-[11px]">
+                          {r.company?.slice(0, 2).toUpperCase()}
+                        </span>
+                        <span className="font-bold font-mono text-white text-xs">{r.company}</span>
+                      </div>
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase ${
                         r.status === 'pending'
-                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-[0_0_8px_rgba(245,158,11,0.2)]'
                           : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                       }`}>
                         {r.status}
                       </span>
                     </div>
 
-                    <div className="text-slate-200 font-semibold font-sans capitalize mb-2">
+                    <div className="text-slate-200 font-semibold font-sans capitalize mb-2 pl-8">
                       {r.metric.replace(/_/g, ' ')}
                     </div>
 
@@ -236,7 +241,7 @@ export const ReviewWorkbenchScreen: React.FC = () => {
           </div>
 
           <div
-            className="flex-1 overflow-auto bg-[#0B0E14] p-4 rounded-xl border border-white/[0.06] font-sans text-xs leading-relaxed text-slate-300 shadow-inner"
+            className="flex-1 overflow-auto bg-[#0B0E14] p-4 rounded-xl border border-white/[0.06] font-sans text-xs leading-relaxed text-slate-300 shadow-inner [&_table]:w-full [&_table]:border-collapse [&_th]:p-2.5 [&_th]:bg-[#121622] [&_th]:text-slate-400 [&_th]:font-mono [&_th]:text-[11px] [&_td]:p-2 [&_td]:border-b [&_td]:border-white/[0.04] [&_tr:hover]:bg-white/[0.03]"
             dangerouslySetInnerHTML={{
               __html: detail?.statement_html
                 ? (detail.statement_html.trim().startsWith('<table')

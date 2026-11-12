@@ -166,19 +166,37 @@ export const ReportScreen: React.FC = () => {
 
       {/* Calibration Buckets & Accuracy Distribution */}
       <div className="border border-white/[0.08] bg-[#141822]/85 rounded-2xl p-6 backdrop-blur-xl shadow-xl space-y-4">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200 font-mono">
-          Calibration Reliability Buckets
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 font-mono text-xs">
-          {calibration?.map((b: any) => (
-            <div key={b.bucket} className="p-3.5 rounded-xl bg-[#0B0E14] border border-white/[0.06]">
-              <div className="text-[10px] text-slate-500 uppercase tracking-wider">Bucket: {b.bucket}</div>
-              <div className="text-xl font-bold text-white mt-1">
-                {(b.accuracy * 100).toFixed(0)}%
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200 font-mono">
+            Calibration Reliability Buckets
+          </h3>
+          <span className="text-[10px] font-mono text-slate-500">Predicted Confidence vs Realized Accuracy</span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono text-xs">
+          {calibration?.map((b: any) => {
+            const pct = Math.round(b.accuracy * 100);
+            return (
+              <div key={b.bucket} className="p-4 rounded-xl bg-[#0B0E14] border border-white/[0.06] flex flex-col justify-between space-y-3">
+                <div>
+                  <div className="text-[10px] text-slate-500 uppercase tracking-wider">Bucket: {b.bucket}</div>
+                  <div className="text-2xl font-bold text-white mt-1">
+                    {pct}%
+                  </div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">Sample size n={b.n}</div>
+                </div>
+
+                {/* Visual Progress Bar */}
+                <div className="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      pct >= 85 ? 'bg-emerald-400 shadow-[0_0_8px_#10B981]' : pct >= 60 ? 'bg-[var(--signal,#E8B339)] shadow-[0_0_8px_#E8B339]' : 'bg-rose-400'
+                    }`}
+                    style={{ width: `${Math.max(5, pct)}%` }}
+                  />
+                </div>
               </div>
-              <div className="text-[10px] text-slate-500 mt-0.5">Sample size n={b.n}</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

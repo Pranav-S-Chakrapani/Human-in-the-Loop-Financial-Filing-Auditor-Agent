@@ -1,21 +1,21 @@
 /**
- * MosaicTransition — High-Precision Cybernetic Shutter Grid Transition.
+ * MosaicTransition — Silky-Smooth Cinematic Geometric Veil.
  *
- * Provides a tactile sci-fi mosaic shutter across route transitions:
- * an 8x5 matrix of obsidian tiles with amber hairline borders and coordinate stamps
- * sweep in a diagonal wave, seamlessly switching views before parting to reveal
- * the new console.
+ * Provides a fluid, luxurious page transition:
+ * A matrix of frosted obsidian glass panels with warm ambient gold refractions
+ * glides smoothly across the viewport, giving a deliberate, high-end feel (~750ms)
+ * before softly parting to reveal the newly mounted screen with gentle elevation.
  *
- * Respects prefers-reduced-motion with an instant subtle opacity fade.
+ * Respects prefers-reduced-motion with a clean instant crossfade.
  */
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const ROWS = 5;
-const COLS = 8;
-const TOTAL_TILES = ROWS * COLS;
+const COLS = 6;
+const ROWS = 4;
+const TOTAL_TILES = COLS * ROWS;
 
 export const MosaicTransition: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
@@ -43,18 +43,18 @@ export const MosaicTransition: React.FC<{ children: React.ReactNode }> = ({ chil
         return;
       }
 
-      // Trigger Mosaic Sweep
+      // Start smooth, cinematic veil
       setIsTransitioning(true);
 
-      // Switch children right as shutter reaches maximum opacity (220ms)
+      // Swap page content smoothly at the apex of the veil (360ms)
       const switchTimer = setTimeout(() => {
         setDisplayedChildren(children);
-      }, 220);
+      }, 360);
 
-      // Dismiss shutter after wave sweeps out (520ms)
+      // Complete the veil reveal gracefully (780ms)
       const endTimer = setTimeout(() => {
         setIsTransitioning(false);
-      }, 520);
+      }, 780);
 
       return () => {
         clearTimeout(switchTimer);
@@ -65,79 +65,94 @@ export const MosaicTransition: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [location.pathname, children, prefersReducedMotion]);
 
-  // Precompute grid tiles with diagonal wavefront delay
+  // Compute smooth wave delays with organic curved falloff
   const tiles = Array.from({ length: TOTAL_TILES }, (_, index) => {
-    const row = Math.floor(index / COLS);
     const col = index % COLS;
-    // Diagonal wavefront from top-left to bottom-right
-    const waveDelay = (row * 0.45 + col * 0.55) * 0.022;
+    const row = Math.floor(index / COLS);
+    // Smooth diagonal wave with quadratic easing
+    const dist = (col * 0.55 + row * 0.45) / (COLS * 0.55 + ROWS * 0.45);
+    const delay = Math.pow(dist, 1.2) * 0.18; // smooth 0 to 180ms delay
     return {
       id: index,
-      row,
       col,
-      delay: waveDelay,
-      coord: `${String(row).padStart(2, '0')}:${String(col).padStart(2, '0')}`
+      row,
+      delay,
+      coord: `${col + 1}.${row + 1}`
     };
   });
 
   return (
     <div className="relative w-full min-h-[calc(100vh-3.5rem)] flex flex-col">
-      {/* Mosaic Shutter Matrix Overlay */}
+      {/* Silky Cinematic Shutter Grid */}
       <AnimatePresence>
         {isTransitioning && !prefersReducedMotion && (
-          <div
-            className="fixed inset-0 top-14 z-50 pointer-events-none grid grid-cols-8 grid-rows-5 overflow-hidden"
+          <motion.div
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
+            className="fixed inset-0 top-14 z-50 pointer-events-none grid grid-cols-6 grid-rows-4 overflow-hidden backdrop-blur-md"
             aria-hidden="true"
           >
             {tiles.map((tile) => (
               <motion.div
                 key={tile.id}
-                initial={{ scaleY: 0, opacity: 0 }}
+                initial={{ opacity: 0, scale: 0.94, y: 15 }}
                 animate={{
-                  scaleY: [0, 1.02, 1, 0],
-                  opacity: [0, 0.98, 0.98, 0],
+                  opacity: [0, 0.96, 0.96, 0],
+                  scale: [0.94, 1, 1, 0.97],
+                  y: [15, 0, 0, -10],
                 }}
                 transition={{
-                  duration: 0.48,
+                  duration: 0.72,
                   delay: tile.delay,
-                  times: [0, 0.35, 0.65, 1],
-                  ease: [0.22, 1, 0.36, 1],
+                  times: [0, 0.42, 0.65, 1],
+                  ease: [0.32, 0.72, 0, 1], // Smooth luxury cubic bezier
                 }}
-                className="relative w-full h-full bg-[#080B11] border border-white/[0.05] shadow-[inset_0_0_15px_rgba(0,0,0,0.9)] flex items-center justify-center origin-top overflow-hidden"
+                className="relative w-full h-full bg-[#080B11]/95 border border-white/[0.04] shadow-[inset_0_0_25px_rgba(0,0,0,0.85)] flex items-center justify-center overflow-hidden"
               >
-                {/* Micro Amber Hairline Accents */}
-                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[var(--signal,#E8B339)]/35 to-transparent" />
-                <div className="absolute bottom-1 right-1.5 font-mono text-[7px] text-[var(--signal,#E8B339)]/25 select-none tracking-tighter">
+                {/* Subtle Amber Glow Filament */}
+                <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[var(--signal,#E8B339)]/40 to-transparent" />
+                <div className="absolute bottom-2 right-2.5 font-mono text-[8px] text-[var(--signal,#E8B339)]/20 select-none tracking-widest">
                   {tile.coord}
                 </div>
               </motion.div>
             ))}
 
-            {/* Central routing HUD pill during transition */}
+            {/* Central Elegant Monogram & Route Pill */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.92 }}
-              animate={{ opacity: [0, 1, 1, 0], scale: [0.95, 1, 1, 0.95] }}
-              transition={{ duration: 0.42, times: [0, 0.25, 0.75, 1] }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{
+                opacity: [0, 1, 1, 0],
+                scale: [0.92, 1, 1, 0.96],
+              }}
+              transition={{
+                duration: 0.68,
+                times: [0, 0.35, 0.72, 1],
+                ease: [0.25, 1, 0.5, 1]
+              }}
               className="absolute inset-0 flex items-center justify-center pointer-events-none"
             >
-              <div className="px-5 py-2 rounded-xl bg-[#121620]/95 border border-[var(--signal,#E8B339)]/40 shadow-[0_0_30px_rgba(232,179,57,0.2)] flex items-center space-x-2.5 font-mono text-xs text-white backdrop-blur-xl">
-                <span className="w-2 h-2 rounded-full bg-[var(--signal,#E8B339)] animate-ping" />
-                <span className="text-slate-400">ROUTING:</span>
-                <span className="font-bold text-[var(--signal,#E8B339)] uppercase tracking-wider">{targetPath === '/' ? 'OVERVIEW' : targetPath.replace('/', '')}</span>
-                <span className="text-slate-500 text-[10px]">· CONSENSUS READY</span>
+              <div className="px-6 py-2.5 rounded-2xl bg-[#121622]/95 border border-[var(--signal,#E8B339)]/35 shadow-[0_0_35px_rgba(232,179,57,0.22)] flex items-center space-x-3 font-mono text-xs text-white backdrop-blur-2xl">
+                <div className="w-2 h-2 rounded-full bg-[var(--signal,#E8B339)] animate-pulse shadow-[0_0_10px_#E8B339]" />
+                <span className="text-slate-400 font-sans tracking-wide">VANTAGE AUDIT</span>
+                <span className="text-white/20">|</span>
+                <span className="font-bold text-[var(--signal,#E8B339)] uppercase tracking-wider">
+                  {targetPath === '/' ? 'OVERVIEW' : targetPath.replace('/', '')}
+                </span>
               </div>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Page Content with Smooth Kinetic Elevation */}
+      {/* Page Content with Smooth Kinetic Reveal */}
       <motion.div
         key={location.pathname}
-        initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 6 }}
+        initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: -4 }}
-        transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+        exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: -8 }}
+        transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
         className="w-full flex-1 flex flex-col"
       >
         {displayedChildren}

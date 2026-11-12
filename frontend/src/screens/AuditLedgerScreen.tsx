@@ -43,7 +43,7 @@ export const AuditLedgerScreen: React.FC = () => {
       {/* Header and Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-white/[0.08] pb-4 gap-4">
         <div>
-          <div className="inline-flex items-center space-x-2 px-2.5 py-1 rounded-full bg-[rgba(232,179,57,0.1)] border border-[rgba(232,179,57,0.25)] text-[var(--signal,#E8B339)] text-[10px] font-mono uppercase tracking-wider mb-2">
+          <div className="inline-flex items-center space-x-2 px-2.5 py-1 rounded-full bg-[rgba(232,179,57,0.1)] border border-[rgba(232,179,57,0.25)] text-[var(--signal,#E8B339)] text-[10px] font-mono uppercase tracking-wider mb-2 shadow-[0_0_12px_rgba(232,179,57,0.15)]">
             <span>IMMUTABLE CRYPTOGRAPHIC HASH CHAIN</span>
           </div>
           <h2 className="text-2xl font-display font-bold text-white tracking-[-0.02em] flex items-center space-x-2">
@@ -59,7 +59,7 @@ export const AuditLedgerScreen: React.FC = () => {
           <button
             onClick={handleVerify}
             disabled={loading}
-            className="px-4 py-2 rounded-xl border border-emerald-500/40 bg-emerald-500/15 hover:bg-emerald-500/25 active:scale-95 text-emerald-300 text-xs font-mono font-bold flex items-center space-x-2 transition-all cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+            className="px-4 py-2.5 rounded-xl border border-emerald-500/40 bg-emerald-500/15 hover:bg-emerald-500/25 active:scale-95 text-emerald-300 text-xs font-mono font-bold flex items-center space-x-2 transition-all cursor-pointer shadow-[0_0_20px_rgba(16,185,129,0.25)]"
           >
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
             <span>Verify Chain Integrity</span>
@@ -67,11 +67,30 @@ export const AuditLedgerScreen: React.FC = () => {
 
           <button
             onClick={handleTamper}
-            className="px-4 py-2 rounded-xl border border-rose-500/40 bg-rose-500/15 hover:bg-rose-500/25 active:scale-95 text-rose-300 text-xs font-mono font-bold flex items-center space-x-2 transition-all cursor-pointer shadow-[0_0_15px_rgba(244,63,94,0.2)]"
+            className="px-4 py-2.5 rounded-xl border border-rose-500/40 bg-rose-500/15 hover:bg-rose-500/25 active:scale-95 text-rose-300 text-xs font-mono font-bold flex items-center space-x-2 transition-all cursor-pointer shadow-[0_0_20px_rgba(244,63,94,0.25)]"
           >
             <AlertOctagon className="w-4 h-4 text-rose-400" />
             <span>Simulate Tamper (Abort Test)</span>
           </button>
+        </div>
+      </div>
+
+      {/* Explorer Metrics Bar */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-xs">
+        <div className="p-4 rounded-xl border border-white/[0.08] bg-[#141822]/80 backdrop-blur-xl flex items-center justify-between">
+          <span className="text-slate-400 font-sans">Committed Audit Blocks:</span>
+          <span className="text-base font-bold text-white">{entries.length} Sequenced</span>
+        </div>
+        <div className="p-4 rounded-xl border border-white/[0.08] bg-[#141822]/80 backdrop-blur-xl flex items-center justify-between">
+          <span className="text-slate-400 font-sans">Cryptographic State:</span>
+          <span className="text-base font-bold text-emerald-400 flex items-center space-x-1">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>100% Sealed</span>
+          </span>
+        </div>
+        <div className="p-4 rounded-xl border border-white/[0.08] bg-[#141822]/80 backdrop-blur-xl flex items-center justify-between">
+          <span className="text-slate-400 font-sans">Trigger Guard:</span>
+          <span className="text-base font-bold text-[var(--signal,#E8B339)]">ABORT ON UPDATE/DEL</span>
         </div>
       </div>
 

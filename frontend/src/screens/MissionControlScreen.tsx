@@ -95,25 +95,28 @@ export const MissionControlScreen: React.FC = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Top Banner / Run Trigger Panel */}
-      <div className="p-6 rounded-2xl border border-white/[0.08] bg-[#141822]/85 backdrop-blur-xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <div className="inline-flex items-center space-x-2 px-2.5 py-1 rounded-full bg-[rgba(232,179,57,0.1)] border border-[rgba(232,179,57,0.25)] text-[var(--signal,#E8B339)] text-[10px] font-mono uppercase tracking-wider mb-2">
+      <div className="p-6 rounded-2xl border border-white/[0.08] bg-gradient-to-br from-[#141822]/90 via-[#10141D]/90 to-[#0A0D14]/90 backdrop-blur-2xl shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+        {/* Subtle radial ambient highlight */}
+        <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-[radial-gradient(circle,rgba(232,179,57,0.08)_0%,transparent_70%)] pointer-events-none" />
+
+        <div className="relative z-10">
+          <div className="inline-flex items-center space-x-2 px-2.5 py-1 rounded-full bg-[rgba(232,179,57,0.1)] border border-[rgba(232,179,57,0.25)] text-[var(--signal,#E8B339)] text-[10px] font-mono uppercase tracking-wider mb-2 shadow-[0_0_12px_rgba(232,179,57,0.15)]">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--signal,#E8B339)] animate-pulse" />
             <span>Autonomous Ingestion Engine</span>
           </div>
-          <h2 className="text-2xl font-display font-bold text-white tracking-[-0.02em] flex items-center gap-2">
+          <h2 className="text-2xl font-display font-bold text-white tracking-[-0.02em] flex items-center gap-2.5">
             <Activity className="w-5 h-5 text-[var(--signal,#E8B339)]" />
             <span>Mission Control Canvas</span>
           </h2>
-          <p className="text-xs text-slate-400 mt-1 max-w-xl font-sans">
+          <p className="text-xs text-slate-400 mt-1 max-w-xl font-sans leading-relaxed">
             Launch multi-company financial audit runs, configure fault injection, and trace asynchronous state checkpoint transitions in real time.
           </p>
         </div>
 
         {/* Trigger Controls */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 relative z-10">
           {/* Ticker selector chips */}
-          <div className="flex flex-wrap items-center gap-1.5 bg-[#0B0E14]/90 p-1.5 rounded-xl border border-white/[0.06] shadow-inner">
+          <div className="flex flex-wrap items-center gap-1.5 bg-[#0B0E14]/90 p-1.5 rounded-xl border border-white/[0.08] shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
             {/* Pinned 8 */}
             {pinnedTickers.map((t) => {
               const active = selectedTickers.includes(t);
@@ -121,10 +124,10 @@ export const MissionControlScreen: React.FC = () => {
                 <button
                   key={t}
                   onClick={() => toggleTicker(t)}
-                  className={`px-2.5 py-1 text-xs font-mono rounded-lg transition-all cursor-pointer active:scale-95 active:translate-y-0.5 ${
+                  className={`px-3 py-1.5 text-xs font-mono rounded-lg transition-all cursor-pointer active:scale-95 active:translate-y-0.5 ${
                     active
-                      ? "bg-[var(--signal,#E8B339)] text-[#090C12] font-bold shadow-[0_0_12px_rgba(232,179,57,0.35)]"
-                      : "text-slate-400 hover:text-white hover:bg-white/[0.05]"
+                      ? "bg-[var(--signal,#E8B339)] text-[#090C12] font-bold shadow-[0_0_15px_rgba(232,179,57,0.4)]"
+                      : "text-slate-400 hover:text-white hover:bg-white/[0.06] border border-transparent hover:border-white/[0.08]"
                   }`}
                 >
                   {t}
@@ -204,7 +207,7 @@ export const MissionControlScreen: React.FC = () => {
           <select
             value={faultMode}
             onChange={(e) => setFaultMode(e.target.value)}
-            className="bg-[#0B0E14] text-xs font-mono text-slate-300 border border-white/[0.08] rounded-xl px-3 py-2 focus:outline-none focus:border-[var(--signal,#E8B339)] transition-colors cursor-pointer"
+            className="bg-[#0B0E14] text-xs font-mono text-slate-300 border border-white/[0.08] rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-[var(--signal,#E8B339)] transition-colors cursor-pointer shadow-sm hover:border-white/[0.16]"
           >
             <option value="">No Fault (Natural Run)</option>
             <option value="wrong_column">Fault: wrong_column</option>
@@ -217,7 +220,7 @@ export const MissionControlScreen: React.FC = () => {
           <MagneticButton
             radius={20}
             onClick={handleStartRun}
-            className="px-5 py-2 rounded-xl bg-[var(--signal,#E8B339)] hover:brightness-110 active:scale-[0.98] text-[#090C12] text-xs font-bold font-sans flex items-center space-x-2 shadow-[0_0_20px_rgba(232,179,57,0.35)] transition-all cursor-pointer"
+            className="px-6 py-2.5 rounded-xl bg-[var(--signal,#E8B339)] hover:brightness-110 active:scale-[0.98] text-[#090C12] text-xs font-bold font-sans flex items-center space-x-2 shadow-[0_0_25px_rgba(232,179,57,0.4)] transition-all cursor-pointer"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
             <span>Launch Run ({selectedTickers.length})</span>
@@ -314,8 +317,8 @@ export const MissionControlScreen: React.FC = () => {
                   </div>
 
                   {/* Nodes Horizontal Pipeline Track */}
-                  <div className="overflow-x-auto pb-1.5 pt-1">
-                    <div className="flex items-center space-x-2 min-w-[720px]">
+                  <div className="overflow-x-auto pb-2 pt-1.5">
+                    <div className="flex items-center space-x-2 min-w-[760px]">
                       {PIPELINE_NODES.map((n, idx) => {
                         const currentNodeIndex = PIPELINE_NODES.indexOf(r.current_node);
                         const isNodeDone = isCompleted || (currentNodeIndex > idx && !isPaused) || (isPaused && idx < currentNodeIndex);
@@ -328,22 +331,25 @@ export const MissionControlScreen: React.FC = () => {
                               onClick={() => {
                                 if (isInterrupted) navigate('/reviews');
                               }}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-mono border text-center transition-all ${
+                              className={`px-3 py-1.5 rounded-xl text-xs font-mono border text-center transition-all flex items-center space-x-1.5 ${
                                 isInterrupted
-                                  ? "bg-amber-500/25 border-amber-400 text-amber-200 font-bold animate-pulse cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.3)]"
+                                  ? "bg-amber-500/20 border-amber-400 text-amber-200 font-bold shadow-[0_0_18px_rgba(245,158,11,0.35)] cursor-pointer active:scale-95"
                                   : isNodeActive
-                                  ? "bg-sky-500/20 border-sky-400 text-sky-200 font-bold animate-pulse"
+                                  ? "bg-sky-500/20 border-sky-400 text-sky-200 font-bold shadow-[0_0_15px_rgba(56,189,248,0.3)] animate-pulse"
                                   : isNodeDone
-                                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                                  ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400"
                                   : "bg-[#0B0E14] border-white/[0.04] text-slate-600"
                               }`}
                             >
-                              {n}
+                              {isInterrupted && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />}
+                              {isNodeActive && !isInterrupted && <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />}
+                              {isNodeDone && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
+                              <span>{n}</span>
                             </div>
                             {idx < PIPELINE_NODES.length - 1 && (
                               <div
-                                className={`h-0.5 w-3.5 transition-colors ${
-                                  isNodeDone ? "bg-emerald-500/50" : "bg-white/[0.06]"
+                                className={`h-[1.5px] w-4 transition-colors ${
+                                  isNodeDone ? "bg-emerald-500/60 shadow-[0_0_6px_#10B981]" : "bg-white/[0.06]"
                                 }`}
                               />
                             )}
