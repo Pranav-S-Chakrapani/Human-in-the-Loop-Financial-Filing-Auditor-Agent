@@ -28,9 +28,11 @@ async def ground_truth_verify_node(state: Dict[str, Any]) -> Dict[str, Any]:
             scale = r["scale"] or 1_000_000
             tolerance = 0.5 * scale  # SPEC §10: tolerance 0.5*scale
 
-            gt_item = gt_data.get(m_name, {})
-            gt_curr = gt_item.get("current", {})
-            gt_val = gt_curr.get("value")
+            gt_item = gt_data.get(m_name, {}) if isinstance(gt_data, dict) else {}
+            if gt_item is None:
+                gt_item = {}
+            gt_curr = gt_item.get("current") or {}
+            gt_val = gt_curr.get("value") if isinstance(gt_curr, dict) else None
 
             if gt_val is not None and final_val is not None:
                 delta = abs(final_val - gt_val)

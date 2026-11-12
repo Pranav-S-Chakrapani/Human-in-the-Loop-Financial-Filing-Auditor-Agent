@@ -37,7 +37,8 @@ SYNONYMS = {
         "net cash from operations",
         "net cash provided by (used in) operating activities",
         "operating activities",
-        "net cash flows from operating activities"
+        "net cash flows from operating activities",
+        "operations"
     ],
     "gross_profit": [
         "gross margin", "gross profit"
@@ -49,6 +50,23 @@ SYNONYMS = {
     ]
 }
 
+def detect_column_direction(tbl_soup: BeautifulSoup) -> Tuple[str, int]:
+    """
+    Detects whether table columns are chronological ('ascending': 2023, 2024, 2025)
+    or reverse chronological ('descending': 2025, 2024, 2023), and how many year columns exist.
+    """
+    for tr in tbl_soup.find_all("tr")[:8]:
+        years = []
+        for td in tr.find_all(["td", "th"]):
+            txt = td.get_text(" ", strip=True)
+            y = re.findall(r"\b(202[0-9])\b", txt)
+            if y:
+                years.append(int(y[0]))
+        if len(years) >= 2:
+            direction = "ascending" if years[0] < years[1] else "descending"
+            return direction, len(years)
+    return "descending", 2
+
 def extract_from_table_soup(
     tbl_soup: BeautifulSoup,
     table_id: str,
@@ -58,6 +76,7 @@ def extract_from_table_soup(
     target_synonyms: List[str]
 ) -> Optional[Dict[str, Any]]:
     """Finds matching row and extracts current (col 0) and prior (col 1) numeric cells."""
+    direction, num_years = detect_column_direction(tbl_soup)
     rows = tbl_soup.find_all("tr")
     for syn in target_synonyms:
         for r_idx, tr in enumerate(rows):
@@ -84,9 +103,21 @@ def extract_from_table_soup(
                         extracted_nums.append((num, c_idx, raw_val))
 
                 if extracted_nums:
-                    val_curr = extracted_nums[0][0]
+                    val_curr = None
+                    val_prior = None
                     col_curr = extracted_nums[0][1]
-                    val_prior = extracted_nums[1][0] if len(extracted_nums) > 1 else None
+
+                    if direction == "ascending":
+                        # If there are extra columns like change/$ change/%, restrict to first num_years numbers
+                        period_nums = extracted_nums[:num_years]
+                        if period_nums:
+                            val_curr = period_nums[-1][0]
+                            col_curr = period_nums[-1][1]
+                            val_prior = period_nums[-2][0] if len(period_nums) > 1 else None
+                    else:
+                        val_curr = extracted_nums[0][0]
+                        col_curr = extracted_nums[0][1]
+                        val_prior = extracted_nums[1][0] if len(extracted_nums) > 1 else None
 
                     effective_scale = 1 if metric_name == "diluted_eps" else scale
                     dollars_curr = val_curr * effective_scale if val_curr is not None else None

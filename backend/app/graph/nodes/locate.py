@@ -47,9 +47,9 @@ def locate_statements_in_html(html_path: str, accession: str, cik: str) -> Dict[
 
         # Balance Sheet criteria
         if not located["balance_sheet"]:
-            if ("cash and cash equivalents" in t_low or "cash and cash" in t_low) and \
+            if ("cash and cash equivalents" in t_low or "cash and cash" in t_low or "cash and equivalents" in t_low) and \
                ("total assets" in t_low or "assets" in t_low) and \
-               ("total liabilities and" in t_low or "liabilities and stockholders" in t_low or "liabilities and shareholders" in t_low or "liabilities and equity" in t_low):
+               ("total liabilities and" in t_low or "liabilities and stockholders" in t_low or "liabilities and shareholders" in t_low or "liabilities and equity" in t_low or "total liabilities" in t_low):
                 if len(txt) < 15000:
                     scale = detect_scale_multiplier(txt)
                     located["balance_sheet"] = {
