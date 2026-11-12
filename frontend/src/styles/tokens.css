@@ -1,0 +1,174 @@
+/* ==========================================================================
+   VantageAudit Design System Tokens (Consistent Layering & Scales)
+   ========================================================================== */
+
+:root {
+  /* Brand Core Tokens */
+  --ink: #12151C;         /* Base background — blue-charcoal, not flat black */
+  --paper: #F2EEE4;       /* Warm document-white — use on evidence/statement panel */
+  --signal: #E8B339;      /* Amber-gold — bold accent */
+  --verified: #3F8F7A;    /* Muted teal-green */
+  --flag: #C24444;        /* Muted red */
+  --ink-raised: #1B1F28;   /* One step lighter than --ink for cards/surfaces */
+
+  /* Three-tier Rich Dark Background Layers */
+  --color-bg-base: #12151C;      /* Deepest base layer (page canvas) */
+  --color-bg-surface: #1B1F28;   /* Main card & section surface */
+  --color-bg-elevated: #242936;  /* Nested cards, input boxes, dropdowns */
+  --color-bg-overlay: #2D3342;   /* Modals, tooltips, active highlights */
+
+  /* Borders & Dividers */
+  --color-border-subtle: rgba(255, 255, 255, 0.07);
+  --color-border-default: rgba(56, 189, 248, 0.18);
+  --color-border-strong: rgba(56, 189, 248, 0.35);
+
+  /* Primary Accent: Cyan / Sky */
+  --color-primary-base: #38bdf8;
+  --color-primary-glow: rgba(56, 189, 248, 0.25);
+  --color-primary-subtle: rgba(56, 189, 248, 0.10);
+
+  /* Secondary Accent: Electric Indigo / Violet (for corroboration & security) */
+  --color-secondary-base: #818cf8;
+  --color-secondary-glow: rgba(129, 140, 248, 0.25);
+  --color-secondary-subtle: rgba(129, 140, 248, 0.12);
+
+  /* Semantic Accents */
+  --color-teal-base: #2dd4bf;
+  --color-teal-subtle: rgba(45, 212, 191, 0.12);
+  --color-emerald-base: #34d399;
+  --color-emerald-subtle: rgba(52, 211, 153, 0.12);
+  --color-amber-base: #fbbf24;
+  --color-amber-subtle: rgba(251, 191, 36, 0.12);
+  --color-rose-base: #f87171;
+  --color-rose-subtle: rgba(248, 113, 113, 0.12);
+
+  /* Text Hierarchy */
+  --color-text-high: #f8fafc;
+  --color-text-mid: #cbd5e1;
+  --color-text-low: #64748b;
+  --color-text-dim: #475569;
+
+  /* Consistent Radius Scale */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Consistent Elevation Shadows */
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.5), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+  --shadow-elevated: 0 10px 30px -5px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(56, 189, 248, 0.15);
+  --shadow-glow-cyan: 0 0 25px -4px rgba(56, 189, 248, 0.35);
+  --shadow-glow-indigo: 0 0 25px -4px rgba(129, 140, 248, 0.35);
+}
+
+/* Common Card & Panel Utility Classes */
+.va-card {
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.va-card:hover {
+  border-color: var(--color-border-default);
+}
+
+.va-card-elevated {
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-elevated);
+}
+
+/* Badge Utilities */
+.va-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  border-width: 1px;
+}
+
+.va-badge-cyan {
+  background-color: var(--color-primary-subtle);
+  border-color: var(--color-border-strong);
+  color: var(--color-primary-base);
+}
+
+.va-badge-indigo {
+  background-color: var(--color-secondary-subtle);
+  border-color: rgba(129, 140, 248, 0.35);
+  color: var(--color-secondary-base);
+}
+
+.va-badge-emerald {
+  background-color: var(--color-emerald-subtle);
+  border-color: rgba(52, 211, 153, 0.35);
+  color: var(--color-emerald-base);
+}
+
+.va-badge-amber {
+  background-color: var(--color-amber-subtle);
+  border-color: rgba(251, 191, 36, 0.35);
+  color: var(--color-amber-base);
+}
+
+.va-badge-rose {
+  background-color: var(--color-rose-subtle);
+  border-color: rgba(248, 113, 113, 0.35);
+  color: var(--color-rose-base);
+}
+
+/* Button Utilities */
+.va-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #38bdf8 0%, #2dd4bf 100%);
+  color: #030712;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.025em;
+  box-shadow: var(--shadow-glow-cyan);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.va-btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.va-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-text-mid);
+  font-weight: 600;
+  font-size: 0.75rem;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.va-btn-secondary:hover {
+  border-color: var(--color-border-default);
+  color: var(--color-text-high);
+  background-color: var(--color-bg-overlay);
+}

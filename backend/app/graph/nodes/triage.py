@@ -6,6 +6,7 @@ from backend.app.config import get_config
 from backend.app.graph.idempotency import is_node_completed, record_node_start, record_node_finish
 from backend.app.events import event_bus
 from backend.app.db import get_connection
+from backend.app.adaptive import get_adaptive_confidence_threshold
 
 async def triage_node(state: Dict[str, Any]) -> Dict[str, Any]:
     run_id = state.get("run_id", "")
@@ -50,9 +51,28 @@ async def triage_node(state: Dict[str, Any]) -> Dict[str, Any]:
             if method == "disagree":
                 reasons.append({"code": "EXTRACTOR_DISAGREE", "text": "Rules and LLM extractors returned conflicting numbers"})
 
-            # Check: LOW_CONF
-            if conf < cfg.confidence_threshold:
-                reasons.append({"code": "LOW_CONF", "text": f"Confidence {conf:.2f} below threshold {cfg.confidence_threshold:.2f}"})
+            # Check: LOW_CONF (Adaptive Threshold Support)
+            eff_threshold, is_adjusted = get_adaptive_confidence_threshold(
+                metric=metric_name,
+                base_threshold=cfg.confidence_threshold,
+                threshold_limit=2,
+                adjustment_penalty=0.15,
+                max_threshold=0.95
+            )
+            if is_adjusted:
+                await event_bus.emit(
+                    "threshold_adjusted",
+                    {
+                        "metric": metric_name,
+                        "base_threshold": cfg.confidence_threshold,
+                        "adjusted_threshold": eff_threshold,
+                        "reason": "Exceeded correction threshold (>=2 prior human corrections/rejections)"
+                    },
+                    run_id=run_id
+                )
+
+            if conf < eff_threshold:
+                reasons.append({"code": "LOW_CONF", "text": f"Confidence {conf:.2f} below threshold {eff_threshold:.2f}"})
 
             # Check: validation failures
             for v in metric_vals:

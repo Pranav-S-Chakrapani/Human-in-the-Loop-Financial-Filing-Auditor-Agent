@@ -25,6 +25,50 @@ export async function fetchCounters() {
   return res.json();
 }
 
+export async function fetchCompanies(): Promise<{ pinned: string[]; custom: any[] }> {
+  if (USE_MOCKS) {
+    return {
+      pinned: ["AAPL", "MSFT", "KO", "NKE", "PEP", "JNJ", "AMZN", "GOOGL"],
+      custom: []
+    };
+  }
+  try {
+    const res = await fetch(`${BASE_URL}/companies`);
+    if (!res.ok) {
+      return {
+        pinned: ["AAPL", "MSFT", "KO", "NKE", "PEP", "JNJ", "AMZN", "GOOGL"],
+        custom: []
+      };
+    }
+    return res.json();
+  } catch {
+    return {
+      pinned: ["AAPL", "MSFT", "KO", "NKE", "PEP", "JNJ", "AMZN", "GOOGL"],
+      custom: []
+    };
+  }
+}
+
+export async function addCompany(ticker: string): Promise<{ status: string; ticker: string; company: any }> {
+  if (USE_MOCKS) {
+    return {
+      status: 'success',
+      ticker: ticker.toUpperCase(),
+      company: { ticker: ticker.toUpperCase(), name: `${ticker.toUpperCase()} Inc.`, is_custom: true }
+    };
+  }
+  const res = await fetch(`${BASE_URL}/companies`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ticker: ticker.trim().toUpperCase() })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Failed to look up company on SEC' }));
+    throw new Error(err.detail || 'Failed to look up company on SEC');
+  }
+  return res.json();
+}
+
 export async function fetchRuns() {
   if (USE_MOCKS) return MOCK_RUNS;
   const res = await fetch(`${BASE_URL}/runs`);
@@ -143,6 +187,32 @@ export async function fetchMetricsGrid() {
 export async function fetchConfig() {
   if (USE_MOCKS) return MOCK_REPORT.config_snapshot;
   const res = await fetch(`${BASE_URL}/config`);
+  return res.json();
+}
+
+export async function fetchDevStatus(): Promise<{ demo_reset_enabled: boolean }> {
+  if (USE_MOCKS) return { demo_reset_enabled: false };
+  try {
+    const res = await fetch(`${BASE_URL}/dev/status`);
+    if (!res.ok) return { demo_reset_enabled: false };
+    return res.json();
+  } catch {
+    return { demo_reset_enabled: false };
+  }
+}
+
+export async function resetDemoData(): Promise<{ status: string; message: string }> {
+  if (USE_MOCKS) {
+    return { status: 'success', message: 'MOCK demo data reset' };
+  }
+  const res = await fetch(`${BASE_URL}/dev/reset-demo`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Failed to reset demo data' }));
+    throw new Error(err.detail || 'Failed to reset demo data');
+  }
   return res.json();
 }
 

@@ -19,6 +19,8 @@ from backend.app.api.audit import router as audit_router
 from backend.app.api.reviews import router as reviews_router
 from backend.app.api.runs import router as runs_router
 from backend.app.api.report import router as report_router
+from backend.app.api.dev import router as dev_router
+from backend.app.api.companies import router as companies_router
 
 # Enforce strict msgpack serialization per RULES #11
 os.environ["LANGGRAPH_STRICT_MSGPACK"] = "true"
@@ -67,6 +69,8 @@ app.include_router(audit_router)
 app.include_router(reviews_router)
 app.include_router(runs_router)
 app.include_router(report_router)
+app.include_router(dev_router)
+app.include_router(companies_router)
 
 @app.get("/health", response_model=HealthResponse)
 def health_check() -> Dict[str, Any]:

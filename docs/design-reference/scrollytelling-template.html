@@ -1,0 +1,3460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aetheris — Compute at Machine Speed</title>
+  <meta name="description" content="Next-generation distributed compute architecture: consensus decoupled from execution, 600 ms rounds, sub-second finality, and cross-cluster settlement.">
+  
+  <!-- Google Fonts: Space Grotesk & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       1. DESIGN TOKENS & CSS VARIABLES
+       ========================================================================== */
+    :root {
+      --bg: #000000;
+      --surface: rgba(8, 8, 8, 0.74);
+      --surface-solid: #0a0a0a;
+      --accent: #23f7dd;
+      --accent-rgb: 35, 247, 221;
+      --text: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.62);
+      --text-dim: rgba(255, 255, 255, 0.4);
+      --border: rgba(255, 255, 255, 0.14);
+      --font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background-color: #121212;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #333333;
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
+
+    :where(html) {
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+    }
+
+    :where(html), :where(body) {
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg);
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-display);
+    }
+
+    .sn-page, .sn-page * {
+      box-sizing: border-box;
+    }
+
+    .sn-page :where(a) {
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .sn-page :where(a:hover) {
+      color: var(--accent);
+    }
+
+    .sn-page h1, .sn-page h2, .sn-page h3, .sn-page p {
+      margin: 0;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .sn-sr-only {
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      position: absolute;
+      overflow: hidden;
+    }
+
+    .sn-skip-link {
+      z-index: 100;
+      color: #000;
+      background: var(--accent);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      position: absolute;
+      top: 12px;
+      left: -9999px;
+    }
+    .sn-skip-link:focus {
+      outline-offset: 2px;
+      outline: 2px solid #fff;
+      left: 12px;
+    }
+
+    a:focus-visible, button:focus-visible, input:focus-visible {
+      outline-offset: 3px;
+      border-radius: 8px;
+      outline: 2px solid var(--accent);
+    }
+
+    supernova-stage, validator-grid {
+      display: block;
+    }
+
+    /* ==========================================================================
+       2. KEYFRAME ANIMATIONS
+       ========================================================================== */
+    @keyframes sn-sweep {
+      0% { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+
+    @keyframes sn-fill {
+      0% { transform: scaleX(0); }
+      96% { transform: scaleX(1); }
+      to { transform: scaleX(1); }
+    }
+
+    @keyframes sn-cell {
+      0%, 9% { color: #fff; background: transparent; }
+      10%, 18% { color: #000; background: var(--accent); font-weight: 600; }
+      19%, to { color: #fff; background: transparent; }
+    }
+
+    @keyframes sn-step {
+      0% { opacity: 0.3; }
+      4% { opacity: 1; }
+      20% { opacity: 1; }
+      24% { opacity: 0.3; }
+      to { opacity: 0.3; }
+    }
+
+    @keyframes sn-cursor {
+      0% { left: 0; }
+      to { left: calc(100% - 2px); }
+    }
+
+    @keyframes sn-rise {
+      0% { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    /* ==========================================================================
+       3. HEADER & MEGA-MENUS
+       ========================================================================== */
+    .sn-page {
+      color: var(--text);
+      background: var(--bg);
+      font-family: var(--font-display);
+      overflow-x: clip;
+    }
+
+    .sn-header {
+      z-index: 50;
+      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(18px);
+      background: rgba(0, 0, 0, 0.72);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .sn-header-inner {
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      max-width: 1320px;
+      height: 72px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+    }
+
+    .sn-brand {
+      flex: none;
+      align-items: center;
+      gap: 10px;
+      display: flex;
+      font-weight: 700;
+      font-size: 19px;
+      letter-spacing: -0.03em;
+    }
+
+    .sn-brand-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: rgba(var(--accent-rgb), 0.14);
+      border: 1px solid var(--accent);
+      display: grid;
+      place-items: center;
+      color: var(--accent);
+      box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.25);
+    }
+
+    .sn-nav {
+      flex-wrap: nowrap;
+      flex: 1;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+      display: flex;
+    }
+
+    .sn-position-relative {
+      position: relative;
+    }
+
+    .sn-nav-link {
+      white-space: nowrap;
+      color: rgba(255, 255, 255, 0.85);
+      border-radius: 999px;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 14px;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      cursor: pointer;
+    }
+
+    .sn-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: none;
+    }
+
+    .sn-header-cta {
+      color: #000 !important;
+      white-space: nowrap;
+      background: var(--accent);
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.3);
+    }
+
+    .sn-mega-menu {
+      background: #060606;
+      border-bottom: 1px solid var(--border);
+      position: absolute;
+      top: 72px;
+      left: 0;
+      right: 0;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.85);
+      display: none;
+    }
+
+    .sn-mega-menu[data-sn-open="true"] {
+      display: block;
+    }
+
+    .sn-mega-inner {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 2fr);
+      gap: 36px;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 32px;
+      display: grid;
+    }
+
+    .sn-mega-feature {
+      background: #0b0b0b;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 12px;
+      min-height: 230px;
+      padding: 28px;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sn-mega-bg-pattern {
+      position: absolute;
+      inset: 0;
+      opacity: 0.45;
+      background-image: 
+        radial-gradient(circle at 85% 20%, rgba(var(--accent-rgb), 0.35), transparent 55%),
+        linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 100% 100%, 24px 24px, 24px 24px;
+      pointer-events: none;
+    }
+
+    .sn-mega-eyebrow {
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      position: relative;
+    }
+
+    .sn-mega-title {
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1.2;
+      position: relative;
+    }
+
+    .sn-mega-cta {
+      color: #000 !important;
+      background: #fff;
+      border-radius: 999px;
+      align-self: flex-start;
+      margin-top: 6px;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      position: relative;
+    }
+
+    .sn-mega-links {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-content: start;
+      gap: 8px;
+      display: grid;
+    }
+
+    .sn-mega-link {
+      color: #fff;
+      border-radius: 14px;
+      flex-direction: column;
+      gap: 4px;
+      padding: 14px 16px;
+      display: flex;
+      border: 1px solid transparent;
+    }
+
+    .sn-mega-link-title {
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+    }
+
+    .sn-mega-link-description {
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .sn-badge-new {
+      letter-spacing: 0.08em;
+      color: #000;
+      background: var(--accent);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    /* ==========================================================================
+       4. STICKY 3D STAGE & SCROLLYTELLING SCENES
+       ========================================================================== */
+    .sn-stage-wrap {
+      background-color: var(--bg);
+      background-image: radial-gradient(rgba(var(--accent-rgb), 0.09), transparent 58%);
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      overflow: hidden;
+    }
+
+    .sn-stage {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      inset: 0;
+    }
+
+    .sn-gradient-overlay {
+      pointer-events: none;
+      background: linear-gradient(rgba(0, 0, 0, 0.55), transparent 22% 72%, rgba(0, 0, 0, 0.78));
+      position: absolute;
+      inset: 0;
+    }
+
+    .sn-scene-indicator {
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      pointer-events: none;
+      white-space: nowrap;
+      gap: 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      position: absolute;
+      bottom: 24px;
+      left: 28px;
+      background: rgba(8, 8, 8, 0.72);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 999px;
+      backdrop-filter: blur(12px);
+    }
+
+    .sn-indicator-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .sn-scenes {
+      z-index: 1;
+      margin-top: -100vh;
+      position: relative;
+    }
+
+    /* Scene 01: Hero */
+    .sn-hero {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      text-align: center;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      place-items: center;
+      row-gap: 16px;
+      height: 100vh;
+      padding: 92px 28px 40px;
+      display: grid;
+    }
+
+    .sn-hero-heading {
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      animation: 1s cubic-bezier(0.2, 0.8, 0.2, 1) both sn-rise;
+      display: flex;
+    }
+
+    .sn-hero-eyebrow {
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      display: flex;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+
+    .sn-hero-eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .sn-hero-title {
+      color: #fff;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      display: flex;
+    }
+
+    .sn-hero-intro {
+      letter-spacing: -0.01em;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: clamp(17px, min(2vw, 2.8vh), 26px);
+      font-weight: 500;
+    }
+
+    .sn-hero-name {
+      letter-spacing: -0.05em;
+      font-size: clamp(50px, min(8.5vw, 11.5vh), 132px);
+      font-weight: 700;
+      line-height: 0.92;
+    }
+
+    .sn-chip-slot {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .sn-hero-bottom {
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      animation: 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s both sn-rise;
+      display: flex;
+    }
+
+    .sn-hero-description {
+      letter-spacing: -0.02em;
+      text-wrap: balance;
+      color: rgba(255, 255, 255, 0.88);
+      max-width: 580px;
+      font-size: clamp(17px, min(2.1vw, 3.2vh), 26px);
+      font-weight: 500;
+      line-height: 1.22;
+    }
+
+    .sn-hero-actions {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      display: flex;
+    }
+
+    .sn-button-primary {
+      color: #000 !important;
+      white-space: nowrap;
+      background: var(--accent);
+      border-radius: 999px;
+      padding: 13px 26px;
+      font-size: 15px;
+      font-weight: 600;
+      box-shadow: 0 0 28px rgba(var(--accent-rgb), 0.35);
+    }
+
+    .sn-button-secondary {
+      color: #fff;
+      white-space: nowrap;
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 999px;
+      padding: 12px 26px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    /* Scene Containers & Glass Cards */
+    .sn-scene {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      align-items: center;
+      min-height: 100vh;
+      padding: 96px 28px;
+      display: flex;
+    }
+
+    .sn-card-left {
+      justify-content: flex-start;
+      width: 100%;
+      max-width: 1360px;
+      margin: 0 auto;
+      transition: opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+      display: flex;
+    }
+
+    .sn-card-right {
+      justify-content: flex-end;
+      width: 100%;
+      max-width: 1360px;
+      margin: 0 auto;
+      transition: opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+      display: flex;
+    }
+
+    .sn-card {
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      flex-direction: column;
+      gap: 24px;
+      width: 100%;
+      max-width: 680px;
+      padding: 34px;
+      display: flex;
+    }
+
+    .sn-decoupling-card {
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      background: var(--surface);
+      border: 1px solid rgba(var(--accent-rgb), 0.45);
+      border-radius: 22px;
+      flex-direction: column;
+      gap: 24px;
+      width: 100%;
+      max-width: 720px;
+      padding: 34px;
+      display: flex;
+      box-shadow: 0 0 80px rgba(var(--accent-rgb), 0.1);
+    }
+
+    .sn-eyebrow {
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .sn-heading {
+      letter-spacing: -0.04em;
+      font-size: clamp(36px, 4.8vw, 68px);
+      font-weight: 700;
+      line-height: 0.95;
+    }
+
+    .sn-comparison-heading {
+      letter-spacing: -0.05em;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0 0.22em;
+      font-size: clamp(46px, 6.6vw, 108px);
+      font-weight: 700;
+      line-height: 0.9;
+      display: flex;
+    }
+
+    .sn-old-value {
+      color: var(--text-dim);
+      text-decoration: line-through;
+      text-decoration-thickness: 0.06em;
+    }
+
+    .sn-body-copy, .sn-body-copy-wide {
+      color: var(--text-muted);
+      text-wrap: pretty;
+      max-width: 580px;
+      font-size: 16.5px;
+      line-height: 1.5;
+    }
+
+    /* Telemetry Timelines & Progress Bars */
+    .sn-timeline {
+      flex-direction: column;
+      gap: 8px;
+      display: flex;
+    }
+
+    .sn-timeline-labels {
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      display: flex;
+    }
+
+    .sn-legacy-bar {
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 8px;
+      grid-template-columns: 45fr 8fr 35fr 12fr;
+      height: 44px;
+      display: grid;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sn-legacy-execute {
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.75);
+      background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0 6px, transparent 6px 12px);
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+      align-items: center;
+      padding: 0 10px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      display: flex;
+    }
+
+    .sn-legacy-segment {
+      color: rgba(255, 255, 255, 0.75);
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+      justify-content: center;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      display: flex;
+    }
+
+    .sn-legacy-vote {
+      color: var(--accent);
+      justify-content: center;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      display: flex;
+    }
+
+    .sn-legacy-cursor {
+      background: var(--accent);
+      width: 2px;
+      animation: 6s linear infinite sn-cursor;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    .sn-stats {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      display: grid;
+    }
+
+    .sn-stat {
+      border-top: 1px solid var(--border);
+      flex-direction: column;
+      gap: 4px;
+      padding-top: 12px;
+      display: flex;
+    }
+
+    .sn-stat-value {
+      letter-spacing: -0.03em;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .sn-stat-label {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .sn-stack-small {
+      flex-direction: column;
+      gap: 6px;
+      display: flex;
+    }
+
+    .sn-labeled-track {
+      grid-template-columns: 110px minmax(0, 1fr);
+      align-items: center;
+      gap: 10px;
+      display: grid;
+    }
+
+    .sn-track-label {
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+
+    .sn-consensus-track {
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      grid-template-columns: 20fr 15fr 7fr 58fr;
+      height: 36px;
+      display: grid;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sn-consensus-segment {
+      letter-spacing: 0.08em;
+      border-right: 1px solid rgba(var(--accent-rgb), 0.5);
+      justify-content: center;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      display: flex;
+    }
+
+    .sn-consensus-final {
+      color: #000;
+      background: var(--accent);
+      border-right: 1px solid rgba(var(--accent-rgb), 0.5);
+      justify-content: center;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+    }
+
+    .sn-consensus-buffer {
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      align-items: center;
+      padding: 0 10px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      display: flex;
+    }
+
+    .sn-round-cursor {
+      background: #fff;
+      width: 2px;
+      animation: 0.6s linear infinite sn-cursor;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+    }
+
+    .sn-execution-track {
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 8px;
+      grid-template-columns: 42fr 58fr;
+      height: 36px;
+      display: grid;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sn-round-cells {
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 0;
+      margin-left: -1px;
+      display: grid;
+    }
+
+    .sn-round-cell {
+      color: #fff;
+      border: 1px solid var(--accent);
+      place-items: center;
+      height: 36px;
+      margin-left: -1px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      display: grid;
+    }
+    .sn-round-cell:nth-child(1)  { animation: 6s linear 0.0s infinite sn-cell; }
+    .sn-round-cell:nth-child(2)  { animation: 6s linear 0.6s infinite sn-cell; }
+    .sn-round-cell:nth-child(3)  { animation: 6s linear 1.2s infinite sn-cell; }
+    .sn-round-cell:nth-child(4)  { animation: 6s linear 1.8s infinite sn-cell; }
+    .sn-round-cell:nth-child(5)  { animation: 6s linear 2.4s infinite sn-cell; }
+    .sn-round-cell:nth-child(6)  { animation: 6s linear 3.0s infinite sn-cell; }
+    .sn-round-cell:nth-child(7)  { animation: 6s linear 3.6s infinite sn-cell; }
+    .sn-round-cell:nth-child(8)  { animation: 6s linear 4.2s infinite sn-cell; }
+    .sn-round-cell:nth-child(9)  { animation: 6s linear 4.8s infinite sn-cell; }
+    .sn-round-cell:nth-child(10) { animation: 6s linear 5.4s infinite sn-cell; }
+
+    /* Scene 04: 40x Slow-Motion Round + Validator Grid */
+    .sn-round-layout {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+      align-items: stretch;
+      gap: 18px;
+      width: 100%;
+      max-width: 1360px;
+      margin: 0 auto;
+      transition: opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+      display: grid;
+    }
+
+    .sn-round-card {
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      flex-direction: column;
+      gap: 20px;
+      padding: 32px;
+      display: flex;
+    }
+
+    .sn-round-heading {
+      letter-spacing: -0.04em;
+      font-size: clamp(36px, 4.6vw, 66px);
+      font-weight: 700;
+      line-height: 0.94;
+    }
+
+    .sn-round-copy {
+      color: var(--text-muted);
+      text-wrap: pretty;
+      max-width: 480px;
+      font-size: 15.5px;
+      line-height: 1.48;
+    }
+
+    .sn-progress-track {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 3px;
+      height: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sn-progress-final-range {
+      background: rgba(var(--accent-rgb), 0.25);
+      width: 41.7%;
+      position: absolute;
+      inset: 0;
+    }
+
+    .sn-progress-fill {
+      transform-origin: 0;
+      background: var(--accent);
+      animation: 24s linear infinite sn-sweep;
+      position: absolute;
+      inset: 0;
+    }
+
+    .sn-progress-marker {
+      background: #fff;
+      width: 2px;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 41.7%;
+    }
+
+    .sn-progress-labels {
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      display: flex;
+    }
+
+    .sn-text-accent {
+      color: var(--accent);
+    }
+
+    .sn-text-muted {
+      color: var(--text-muted);
+    }
+
+    .sn-stack {
+      flex-direction: column;
+      display: flex;
+    }
+
+    .sn-step-row {
+      border-top: 1px solid var(--border);
+      grid-template-columns: 56px minmax(0, 1fr) minmax(0, 1.45fr);
+      align-items: baseline;
+      gap: 14px;
+      padding: 10px 0;
+      animation: 24s linear infinite sn-step;
+      display: grid;
+    }
+
+    .sn-step-time {
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .sn-step-title {
+      letter-spacing: -0.02em;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .sn-step-description {
+      color: var(--text-muted);
+      word-break: break-word;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .sn-validators-card {
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      color: #fff;
+      background: var(--surface);
+      border: 1px solid rgba(var(--accent-rgb), 0.45);
+      border-radius: 22px;
+      flex-direction: column;
+      gap: 18px;
+      min-height: 420px;
+      padding: 28px;
+      display: flex;
+      box-shadow: 0 0 80px rgba(var(--accent-rgb), 0.1);
+    }
+
+    .sn-validators-label {
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      justify-content: space-between;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      display: flex;
+    }
+
+    .sn-validators-wrap {
+      flex: 1;
+      min-height: 260px;
+    }
+
+    .sn-validators-grid {
+      width: 100%;
+      height: 100%;
+      min-height: 260px;
+    }
+
+    .sn-validators-heading {
+      letter-spacing: -0.03em;
+      font-size: clamp(20px, 2vw, 28px);
+      font-weight: 600;
+      line-height: 1.15;
+    }
+
+    .sn-small-copy {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* Scene 05: Cross-Shard / Multi-Cluster */
+    .sn-cross-shard-card {
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      flex-direction: column;
+      gap: 24px;
+      width: 100%;
+      max-width: 720px;
+      padding: 34px;
+      display: flex;
+    }
+
+    .sn-cross-shard-heading {
+      letter-spacing: -0.05em;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0 0.2em;
+      font-size: clamp(44px, 5.8vw, 92px);
+      font-weight: 700;
+      line-height: 0.9;
+      display: flex;
+    }
+
+    .sn-stack-medium {
+      flex-direction: column;
+      gap: 14px;
+      display: flex;
+    }
+
+    .sn-legacy-settlement {
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 6px;
+      height: 26px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sn-legacy-settlement-fill {
+      transform-origin: 0;
+      background: rgba(255, 255, 255, 0.3);
+      animation: 18s linear infinite sn-fill;
+      position: absolute;
+      inset: 0;
+    }
+
+    .sn-settlement-track {
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      grid-template-columns: 1fr 1fr 1fr;
+      height: 26px;
+      display: grid;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sn-settlement-step, .sn-settlement-step-last {
+      letter-spacing: 0.08em;
+      z-index: 1;
+      mix-blend-mode: difference;
+      color: #fff;
+      justify-content: center;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      display: flex;
+      position: relative;
+    }
+    .sn-settlement-step {
+      border-right: 1px solid rgba(var(--accent-rgb), 0.5);
+    }
+
+    .sn-settlement-fill {
+      transform-origin: 0;
+      background: var(--accent);
+      animation: 2.4s linear infinite sn-fill;
+      position: absolute;
+      inset: 0;
+    }
+
+    .sn-mono-note {
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    /* Scene 06: Safety Under Load */
+    .sn-safety-layout {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+      align-items: end;
+      gap: 18px;
+      width: 100%;
+      max-width: 1360px;
+      margin: 0 auto;
+      transition: opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+      display: grid;
+    }
+
+    .sn-safety-heading-wrap {
+      flex-direction: column;
+      gap: 16px;
+      padding-bottom: 8px;
+      display: flex;
+    }
+
+    .sn-safety-eyebrow {
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(var(--accent-rgb), 0.45);
+      border-radius: 999px;
+      align-self: flex-start;
+      padding: 8px 14px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .sn-safety-heading {
+      letter-spacing: -0.05em;
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 14px;
+      align-self: flex-start;
+      margin-left: -14px;
+      padding: 12px 16px;
+      font-size: clamp(46px, 6.5vw, 110px);
+      font-weight: 700;
+      line-height: 0.9;
+    }
+
+    .sn-safety-card {
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      flex-direction: column;
+      gap: 6px;
+      padding: 28px;
+      display: flex;
+    }
+
+    .sn-safety-row {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr);
+      align-items: baseline;
+      gap: 16px;
+      padding: 16px;
+      display: grid;
+    }
+
+    .sn-safety-row-accent {
+      background: rgba(var(--accent-rgb), 0.12);
+      border: 1px solid rgba(var(--accent-rgb), 0.25);
+      border-radius: 12px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr);
+      align-items: baseline;
+      gap: 16px;
+      padding: 16px;
+      display: grid;
+    }
+
+    .sn-safety-row-solid {
+      color: #000;
+      background: var(--accent);
+      border-radius: 12px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr);
+      align-items: baseline;
+      gap: 16px;
+      padding: 16px;
+      display: grid;
+    }
+
+    .sn-row-title {
+      letter-spacing: -0.02em;
+      font-size: clamp(17px, 1.5vw, 20px);
+      font-weight: 600;
+    }
+
+    .sn-row-description {
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 14px;
+      line-height: 1.48;
+    }
+
+    .sn-row-description-dark {
+      color: rgba(0, 0, 0, 0.78);
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.48;
+    }
+
+    /* Scene 07: Releases & Architecture Roadmap */
+    .sn-releases-card {
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      flex-direction: column;
+      gap: 24px;
+      width: 100%;
+      max-width: 760px;
+      padding: 34px;
+      display: flex;
+    }
+
+    .sn-section-heading {
+      letter-spacing: -0.04em;
+      font-size: clamp(34px, 4.4vw, 64px);
+      font-weight: 700;
+      line-height: 0.94;
+    }
+
+    .sn-releases-grid {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 8px;
+      display: grid;
+    }
+
+    .sn-release-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      flex-direction: column;
+      gap: 8px;
+      padding: 18px;
+      display: flex;
+    }
+
+    .sn-release-card-current {
+      background: rgba(var(--accent-rgb), 0.12);
+      border: 1px solid rgba(var(--accent-rgb), 0.45);
+      border-radius: 14px;
+      flex-direction: column;
+      gap: 8px;
+      padding: 18px;
+      display: flex;
+    }
+
+    .sn-release-version {
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .sn-release-version-current {
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .sn-release-name {
+      letter-spacing: -0.02em;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .sn-release-stats {
+      border-top: 1px solid var(--border);
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+      padding-top: 8px;
+      display: grid;
+    }
+
+    .sn-release-stat {
+      flex-direction: column;
+      gap: 4px;
+      padding-top: 12px;
+      display: flex;
+    }
+
+    .sn-release-stat-value {
+      letter-spacing: -0.03em;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .sn-release-stat-label {
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    /* Scene 08: Builders */
+    .sn-builders-card {
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      flex-direction: column;
+      gap: 22px;
+      width: 100%;
+      max-width: 650px;
+      padding: 34px;
+      display: flex;
+    }
+
+    .sn-builder-row {
+      border-top: 1px solid var(--border);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+      align-items: baseline;
+      gap: 16px;
+      padding: 14px 0;
+      display: grid;
+    }
+
+    .sn-builder-row-last {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+      align-items: baseline;
+      gap: 16px;
+      padding: 14px 0;
+      display: grid;
+    }
+
+    .sn-builder-title {
+      letter-spacing: -0.02em;
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .sn-builder-actions {
+      flex-wrap: wrap;
+      gap: 10px;
+      display: flex;
+    }
+
+    /* Scene 09: Closing & Footer */
+    .sn-closing {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 76px 28px 0;
+      display: flex;
+    }
+
+    .sn-closing-hero {
+      text-align: center;
+      flex: 1;
+      grid-template-rows: auto minmax(0, 1fr);
+      place-items: center;
+      row-gap: 12px;
+      min-height: calc(100vh - 76px);
+      padding-bottom: 40px;
+      display: grid;
+    }
+
+    .sn-closing-heading {
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      display: flex;
+    }
+
+    .sn-closing-title {
+      letter-spacing: -0.05em;
+      color: #fff;
+      font-size: clamp(48px, min(8.2vw, 11.5vh), 132px);
+      font-weight: 700;
+      line-height: 0.92;
+    }
+
+    .sn-footer-fade {
+      pointer-events: none;
+      background: linear-gradient(transparent, #000 85%);
+      height: 200px;
+      margin: 0 -28px;
+    }
+
+    .sn-footer {
+      text-align: left;
+      background: #000;
+      margin: 0 -28px;
+      position: relative;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .sn-footer-inner {
+      flex-direction: column;
+      gap: 48px;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 64px 32px 36px;
+      display: flex;
+      position: relative;
+    }
+
+    .sn-footer-grid {
+      grid-template-columns: minmax(0, 1.4fr) repeat(4, minmax(0, 1fr));
+      gap: 40px;
+      display: grid;
+    }
+
+    .sn-footer-brand {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+      display: flex;
+    }
+
+    .sn-social-links {
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+      display: flex;
+    }
+
+    .sn-social-link {
+      opacity: 0.75;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      display: grid;
+    }
+
+    .sn-footer-column {
+      flex-direction: column;
+      gap: 28px;
+      display: flex;
+    }
+
+    .sn-footer-heading {
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .sn-footer-links {
+      flex-direction: column;
+      gap: 10px;
+      display: flex;
+    }
+
+    .sn-footer-link {
+      color: var(--text-muted);
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      display: flex;
+    }
+
+    .sn-copyright {
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 22px;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* Utility Hover States */
+    .sn-hover-nav:hover {
+      color: #fff !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+    .sn-hover-primary:hover {
+      color: #000 !important;
+      filter: brightness(1.12) !important;
+      transform: translateY(-1px);
+    }
+    .sn-hover-accent:hover {
+      color: #000 !important;
+      background: var(--accent) !important;
+    }
+    .sn-hover-card:hover {
+      color: #fff !important;
+      background: rgba(255, 255, 255, 0.05) !important;
+      border-color: rgba(var(--accent-rgb), 0.3);
+    }
+    .sn-hover-outline:hover {
+      color: #fff !important;
+      border-color: var(--accent) !important;
+    }
+    .sn-hover-opacity:hover {
+      opacity: 1 !important;
+      border-color: var(--accent);
+    }
+    .sn-hover-link:hover {
+      color: #fff !important;
+    }
+
+    /* ==========================================================================
+       5. INTERACTIVE TEMPLATE STUDIO DRAWER (FLOATING WIDGET)
+       ========================================================================== */
+    .ts-widget {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 90;
+      font-family: var(--font-display);
+    }
+
+    .ts-toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(12, 12, 12, 0.88);
+      backdrop-filter: blur(16px);
+      color: #fff;
+      border: 1px solid rgba(var(--accent-rgb), 0.5);
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 24px rgba(var(--accent-rgb), 0.2);
+      transition: all 0.2s ease;
+    }
+    .ts-toggle-btn:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .ts-panel {
+      position: absolute;
+      bottom: calc(100% + 12px);
+      right: 0;
+      width: 330px;
+      background: rgba(10, 10, 10, 0.92);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transform-origin: bottom right;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .ts-panel[hidden] {
+      display: none !important;
+    }
+
+    .ts-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+
+    .ts-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ts-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+    }
+    .ts-close:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .ts-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ts-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+
+    .ts-presets {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+
+    .ts-preset-btn {
+      text-align: left;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 12px;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+    .ts-preset-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .ts-preset-btn.active {
+      border-color: var(--accent);
+      background: rgba(var(--accent-rgb), 0.12);
+    }
+
+    .ts-preset-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .ts-input {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 12px;
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 13px;
+      width: 100%;
+    }
+    .ts-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .ts-swatches {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .ts-swatch {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .ts-swatch:hover {
+      transform: scale(1.1);
+    }
+    .ts-swatch.active {
+      border-color: #fff;
+      transform: scale(1.12);
+    }
+
+    .ts-export-btn {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: filter 0.15s ease;
+    }
+    .ts-export-btn:hover {
+      filter: brightness(1.1);
+    }
+
+    /* ==========================================================================
+       6. RESPONSIVE BREAKPOINTS
+       ========================================================================== */
+    @media (max-width: 900px) {
+      [data-m="navlinks"] {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 1000px) {
+      [data-m="footgrid"] {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+    }
+
+    @media (max-width: 720px) {
+      html {
+        scroll-snap-type: none;
+      }
+      [data-m="footgrid"] {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 32px !important;
+      }
+      [data-card] .sn-glass {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+        background: rgba(5, 5, 5, 0.88) !important;
+      }
+      [data-card] > div {
+        padding: 22px !important;
+      }
+      [data-card] h2 {
+        font-size: clamp(32px, 9.5vw, 44px) !important;
+      }
+      [data-card] p {
+        font-size: 15px !important;
+      }
+      [data-m="stack"], [data-m="steps"] {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 4px 0 !important;
+      }
+      [data-m="stack3"] {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+      }
+      [data-m="stack3"] span:first-child {
+        font-size: 22px !important;
+      }
+      [data-m="steps"] > span:first-child {
+        order: 2;
+        font-size: 10px !important;
+      }
+      [data-m="bar"] > div:not(.sn-decoration) {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        letter-spacing: 0 !important;
+        padding: 0 4px !important;
+        font-size: 8px !important;
+      }
+      [data-scene] > div > div {
+        max-width: 100% !important;
+      }
+      .sn-scene-indicator {
+        bottom: 16px;
+        left: 16px;
+        font-size: 10px;
+      }
+      .ts-widget {
+        bottom: 16px;
+        right: 16px;
+      }
+      .ts-panel {
+        width: calc(100vw - 32px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      :where(html) {
+        scroll-behavior: auto;
+      }
+      *, :before, :after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sn-page">
+    <a href="#main" class="sn-skip-link">Skip to content</a>
+
+    <!-- ========================================================================
+         STICKY HEADER & MEGA-MENUS
+         ======================================================================== -->
+    <header data-menu-close class="sn-header sn-glass">
+      <div class="sn-header-inner">
+        <a href="#scene-hero" aria-label="Home" class="sn-brand">
+          <span class="sn-brand-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
+              <line x1="12" y1="22" x2="12" y2="15.5"></line>
+              <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
+            </svg>
+          </span>
+          <span data-brand-text>Aetheris</span>
+        </a>
+
+        <nav data-m="navlinks" class="sn-nav">
+          <div data-menu-trigger="Platform" class="sn-position-relative">
+            <a href="#" aria-controls="menu-platform" aria-expanded="false" aria-haspopup="true" class="sn-nav-link sn-hover-nav">Platform</a>
+          </div>
+          <div data-menu-trigger="Developers" class="sn-position-relative">
+            <a href="#" aria-controls="menu-developers" aria-expanded="false" aria-haspopup="true" class="sn-nav-link sn-hover-nav">Developers</a>
+          </div>
+          <div class="sn-position-relative">
+            <a href="#scene-shards" class="sn-nav-link sn-hover-nav">Decoupled Engine</a>
+          </div>
+          <div data-menu-trigger="Ecosystem" class="sn-position-relative">
+            <a href="#" aria-controls="menu-ecosystem" aria-expanded="false" aria-haspopup="true" class="sn-nav-link sn-hover-nav">Ecosystem</a>
+          </div>
+          <div data-menu-trigger="About" class="sn-position-relative">
+            <a href="#" aria-controls="menu-about" aria-expanded="false" aria-haspopup="true" class="sn-nav-link sn-hover-nav">Architecture</a>
+          </div>
+        </nav>
+
+        <div class="sn-header-actions">
+          <a href="#scene-builders" class="sn-header-cta sn-hover-primary" data-cta-primary>Deploy Node</a>
+        </div>
+      </div>
+
+      <!-- Mega Menu: Platform -->
+      <div id="menu-platform" data-menu="Platform" data-sn-open="false" class="sn-mega-menu" hidden>
+        <div class="sn-mega-inner">
+          <div class="sn-mega-feature">
+            <div class="sn-mega-bg-pattern"></div>
+            <div class="sn-mega-eyebrow">Core Infrastructure</div>
+            <div class="sn-mega-title">Sub-second finality at planetary throughput.</div>
+            <a href="#scene-shards" class="sn-mega-cta sn-hover-accent">Explore Pipeline</a>
+          </div>
+          <div class="sn-mega-links">
+            <a href="#scene-slow" class="sn-mega-link sn-hover-card">
+              <span class="sn-mega-link-title">01 · Legacy Bottlenecks</span>
+              <span class="sn-mega-link-description">Why coupled execution bounded consensus rounds</span>
+            </a>
+            <a href="#scene-shards" class="sn-mega-link sn-hover-card">
+              <span class="sn-mega-link-title">02 · Parallel Decoupling</span>
+              <span class="sn-mega-link-description">Propose and vote in 600 ms; execute asynchronously</span>
+            </a>
+            <a href="#scene-round" class="sn-mega-link sn-hover-card">
+              <span class="sn-mega-link-title">03 · 40× Slow-Motion Round</span>
+              <span class="sn-mega-link-description">Inspect every millisecond of the 400-node quorum</span>
+            </a>
+            <a href="#scene-speed" class="sn-mega-link sn-hover-card">
+              <span class="sn-mega-link-title">04 · Cross-Cluster Settlement</span>
+              <span class="sn-mega-link-description">End-to-end multi-lane settlement in ~2.4 seconds</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mega Menu: Developers -->
+      <div id="menu-developers" data-menu="Developers" data-sn-open="false" class="sn-mega-menu" hidden>
+        <div class="sn-mega-inner">
+          <div class="sn-mega-feature">
+            <div class="sn-mega-bg-pattern"></div>
+            <div class="sn-mega-eyebrow">Builder SDKs</div>
+            <div class="sn-mega-title">Build reactive systems against a 600 ms heartbeat.</div>
+            <a href="#scene-builders" class="sn-mega-cta sn-hover-accent">Read Specifications</a>
+          </div>
+          <div class="sn-mega-links">
+            <a href="#scene-builders" class="sn-mega-link sn-hover-card">
+              <span class="sn-mega-link-title">Consensus Proofs <span class="sn-badge-new">v2.0</span></span>
+              <span class="sn-mega-link-description">Deterministic finality in 100–250 ms without confirmation depth</span>
+            </a>
+            <a href="#scene-builders" class="sn-mega-link sn-hover-card">
+              <span class="sn-mega-link-title">Millisecond Timestamps</span>
+              <span class="sn-mega-link-description">High-frequency state transitions and real-time clock primitives</span>
+            </a>
+            <a href="#scene-computer" class="sn-mega-link sn-hover-card">
+              <span class="sn-mega-link-title">Virtual State Mempool</span>
+              <span class="sn-mega-link-description">Automatic backpressure and zero outcome-dependent reordering</span>
+            </a>
+            <a href="#scene-egld" class="sn-mega-link sn-hover-card">
+              <span class="sn-mega-link-title">Release Notes</span>
+              <span class="sn-mega-link-description">Zero breaking changes to keys, balances, or hardware specs</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mega Menu: Ecosystem -->
+      <div id="menu-ecosystem" data-menu="Ecosystem" data-sn-open="false" class="sn-mega-menu" hidden>
+        <div class="sn-mega-inner">
+          <div class="sn-mega-feature">
+            <div class="sn-mega-bg-pattern"></div>
+            <div class="sn-mega-eyebrow">Global Network</div>
+            <div class="sn-mega-title">3,200+ validator nodes across 4 shards.</div>
+            <a href="#scene-round" class="sn-mega-cta sn-hover-accent">View Live Matrix</a>
+          </div>
+          <div class="sn-mega-links">
+            <a href="#scene-round" class="sn-mega-link sn-hover-card">
+              <span class="sn-mega-link-title">Quorum Telemetry</span>
+              <span class="sn-mega-link-description">400 nodes per shard with 267 BLS signature threshold</span>
+            </a>
+            <a href="#scene-speed" class="sn-mega-link sn-hover-card">
+              <span class="sn-mega-link-title">Metachain Notarisation</span>
+              <span class="sn-mega-link-description">Three-step cross-shard coordination protocol</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mega Menu: About -->
+      <div id="menu-about" data-menu="About" data-sn-open="false" class="sn-mega-menu" hidden>
+        <div class="sn-mega-inner">
+          <div class="sn-mega-feature">
+            <div class="sn-mega-bg-pattern"></div>
+            <div class="sn-mega-eyebrow">Evolution</div>
+            <div class="sn-mega-title">Three protocol releases, one architectural leap.</div>
+            <a href="#scene-egld" class="sn-mega-cta sn-hover-accent">See Roadmap</a>
+          </div>
+          <div class="sn-mega-links">
+            <a href="#scene-egld" class="sn-mega-link sn-hover-card">
+              <span class="sn-mega-link-title">Andromeda → Barnard → v2.0</span>
+              <span class="sn-mega-link-description">How we retired confirmation blocks and decoupled execution</span>
+            </a>
+            <a href="#scene-close" class="sn-mega-link sn-hover-card">
+              <span class="sn-mega-link-title">The World Computer</span>
+              <span class="sn-mega-link-description">All parallel execution lanes converging into one silicon die</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ========================================================================
+         MAIN CONTENT: PINNED 3D WEBGL STAGE + 9 SCROLLYTELLING SCENES
+         ======================================================================== -->
+    <main id="main" class="sn-position-relative">
+      
+      <!-- Sticky 100vh WebGL Stage -->
+      <div class="sn-stage-wrap">
+        <supernova-stage
+          scene="hero"
+          chip-frame="0.549,0.369"
+          time-scale=""
+          round-ms="600"
+          accent="#23f7dd"
+          paper="#000000"
+          ink="#FFFFFF"
+          aria-hidden="true"
+          class="sn-stage">
+        </supernova-stage>
+        <div class="sn-gradient-overlay sn-decoration"></div>
+        <div aria-hidden="true" class="sn-scene-indicator sn-decoration">
+          <span class="sn-indicator-dot"></span>
+          <span><span data-bind="sceneIndex">01</span> / 09</span>
+          <span>·</span>
+          <span><span data-bind="sceneName">Aetheris</span></span>
+        </div>
+      </div>
+
+      <!-- Scroll-Snap Scenes -->
+      <div class="sn-scenes">
+
+        <!-- SCENE 01: HERO (Top-Down 3D Chip & PCB Traces) -->
+        <section id="scene-hero" data-scene="hero" class="sn-hero">
+          <div class="sn-hero-heading">
+            <div class="sn-hero-eyebrow">
+              <span class="sn-hero-eyebrow-dot"></span>
+              <span data-preset="eyebrow">Mainnet v2.0 · Epoch 2233</span>
+            </div>
+            <h1 class="sn-hero-title">
+              <span class="sn-hero-intro" data-preset="intro">Introducing</span>
+              <span class="sn-hero-name" data-brand-text>Aetheris</span>
+            </h1>
+          </div>
+
+          <!-- Dynamic DOM Slot where the 3D WebGL Chip aligns -->
+          <div data-chip-slot class="sn-chip-slot"></div>
+
+          <div class="sn-hero-bottom">
+            <p class="sn-hero-description" data-preset="tagline">
+              Compute at machine speed. 600 milliseconds changes what distributed systems can be.
+            </p>
+            <div class="sn-hero-actions">
+              <a href="#scene-slow" class="sn-button-primary sn-hover-primary">How it works</a>
+              <a href="#scene-egld" class="sn-button-secondary sn-hover-outline">Release notes</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- SCENE 02: BEFORE / SLOW (Legacy Coupled Execution) -->
+        <section id="scene-slow" data-scene="slow" class="sn-scene">
+          <div data-card class="sn-card-left">
+            <div class="sn-card sn-glass">
+              <div class="sn-eyebrow">01 - Before · Execute, then agree</div>
+              <h2 class="sn-heading" data-preset="s1Heading">Execution bounded the round.</h2>
+              <p class="sn-body-copy" data-preset="s1Body">
+                Block proposal required the proposer to execute every transaction first; validators re-executed the full payload before casting a vote. Under heavy compute load, execution consumed up to 4.5 seconds of the 6-second round, so time to finality was dominated by computation rather than agreement.
+              </p>
+              <div class="sn-timeline">
+                <div class="sn-timeline-labels">
+                  <span>One round · execute → propose → re-execute → vote</span>
+                  <span>6.0 s</span>
+                </div>
+                <div data-m="bar" class="sn-legacy-bar">
+                  <div class="sn-legacy-execute">EXECUTE · up to 4.5 s</div>
+                  <div class="sn-legacy-segment">P</div>
+                  <div class="sn-legacy-execute">RE-EXECUTE</div>
+                  <div class="sn-legacy-vote">VOTE</div>
+                  <div class="sn-legacy-cursor sn-decoration"></div>
+                </div>
+              </div>
+              <div data-m="stack3" class="sn-stats">
+                <div class="sn-stat">
+                  <span class="sn-stat-value">6 s</span>
+                  <span class="sn-stat-label">legacy round time</span>
+                </div>
+                <div class="sn-stat">
+                  <span class="sn-stat-value">2×</span>
+                  <span class="sn-stat-label">executions per payload</span>
+                </div>
+                <div class="sn-stat">
+                  <span class="sn-stat-value">~18 s</span>
+                  <span class="sn-stat-label">cross-cluster settlement</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SCENE 03: DECOUPLING (6s -> 600ms Parallel Pipeline) -->
+        <section id="scene-shards" data-scene="shards" class="sn-scene">
+          <div data-card class="sn-card-right">
+            <div class="sn-decoupling-card sn-glass">
+              <div class="sn-eyebrow">02 - Decoupled · Propose, vote, then execute</div>
+              <h2 class="sn-comparison-heading">
+                <span class="sn-sr-only">From</span>
+                <span class="sn-old-value">6 s</span>
+                <span class="sn-sr-only">to</span>
+                <span>600 ms</span>
+              </h2>
+              <p class="sn-body-copy-wide" data-preset="s2Body">
+                The proposer selects transactions and broadcasts the block header and body without executing them. Validators verify the proposal against protocol rules and vote at once. Execution proceeds asynchronously on a parallel path, and its state root and receipts are committed in a subsequent block.
+              </p>
+              <div class="sn-stack-small">
+                <div data-m="stack" class="sn-labeled-track">
+                  <span class="sn-track-label">Consensus</span>
+                  <div data-m="bar" class="sn-consensus-track">
+                    <div class="sn-consensus-segment">PROPOSE</div>
+                    <div class="sn-consensus-segment">VOTE</div>
+                    <div class="sn-consensus-final">✓</div>
+                    <div class="sn-consensus-buffer">FINAL · buffer for global network</div>
+                    <div class="sn-round-cursor sn-decoration"></div>
+                  </div>
+                </div>
+                <div data-m="stack" class="sn-labeled-track">
+                  <span class="sn-track-label">Execution</span>
+                  <div data-m="bar" class="sn-execution-track">
+                    <div class="sn-legacy-execute">EXECUTE BLOCK n-1 · async, parallel</div>
+                    <div class="sn-consensus-buffer">RESULTS REFERENCED IN BLOCK n+1</div>
+                  </div>
+                </div>
+              </div>
+              <div class="sn-stack-small">
+                <div class="sn-timeline-labels">
+                  <span>Same 6 seconds</span>
+                  <span>10 × 600 ms</span>
+                </div>
+                <div class="sn-round-cells">
+                  <div class="sn-round-cell">600</div>
+                  <div class="sn-round-cell">600</div>
+                  <div class="sn-round-cell">600</div>
+                  <div class="sn-round-cell">600</div>
+                  <div class="sn-round-cell">600</div>
+                  <div class="sn-round-cell">600</div>
+                  <div class="sn-round-cell">600</div>
+                  <div class="sn-round-cell">600</div>
+                  <div class="sn-round-cell">600</div>
+                  <div class="sn-round-cell">600</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SCENE 04: INSIDE ONE ROUND (40x Slow-Motion + 400-Node 2D Canvas) -->
+        <section id="scene-round" data-scene="round" class="sn-scene">
+          <div data-card class="sn-round-layout">
+            <div class="sn-round-card sn-glass">
+              <div class="sn-eyebrow">03 - One round · <span data-bind="slowLabel">×40 slower</span></div>
+              <h2 class="sn-round-heading">One round,<br>40× slower.</h2>
+              <p class="sn-round-copy">
+                Slowed forty times, one 600 ms round reveals its structure: proposal locks the ordering before any execution result exists, consensus produces the aggregated proof, and execution reconciles state afterwards.
+              </p>
+              <div class="sn-stack-small">
+                <div class="sn-progress-track">
+                  <div class="sn-progress-final-range sn-decoration"></div>
+                  <div data-slow-dur class="sn-progress-fill sn-decoration" style="animation-duration: 24s;"></div>
+                  <div class="sn-progress-marker sn-decoration"></div>
+                </div>
+                <div class="sn-progress-labels">
+                  <span class="sn-text-accent">0 → 250 ms · block final</span>
+                  <span class="sn-text-muted">→ 600 ms · settle buffer</span>
+                </div>
+              </div>
+              <div class="sn-stack">
+                <div data-m="steps" data-slow-delay="0" data-slow-dur class="sn-step-row" style="animation-duration: 24s; animation-delay: 0s;">
+                  <span class="sn-step-time">000 ms</span>
+                  <span class="sn-step-title">Propose</span>
+                  <span class="sn-step-description">proposer selects txs · ordering locked · no execution</span>
+                </div>
+                <div data-m="steps" data-slow-delay="0.07" data-slow-dur class="sn-step-row" style="animation-duration: 24s; animation-delay: 1.68s;">
+                  <span class="sn-step-time">042 ms</span>
+                  <span class="sn-step-title">Verify</span>
+                  <span class="sn-step-description">400 nodes check protocol rules · vote immediately</span>
+                </div>
+                <div data-m="steps" data-slow-delay="0.2" data-slow-dur class="sn-step-row" style="animation-duration: 24s; animation-delay: 4.8s;">
+                  <span class="sn-step-time">120 ms</span>
+                  <span class="sn-step-title">Aggregate</span>
+                  <span class="sn-step-description">&gt; ⅔ votes → one consensus proof (267 / 400)</span>
+                </div>
+                <div data-m="steps" data-slow-delay="0.3958333333333333" data-slow-dur class="sn-step-row" style="animation-duration: 24s; animation-delay: 9.5s;">
+                  <span class="sn-step-time">238 ms</span>
+                  <span class="sn-step-title">Final</span>
+                  <span class="sn-step-description">block final · proof available to any node · ≤ 250 ms</span>
+                </div>
+                <div data-m="steps" data-slow-delay="0.4166666666666667" data-slow-dur class="sn-step-row" style="animation-duration: 24s; animation-delay: 10s;">
+                  <span class="sn-step-time">250 ms</span>
+                  <span class="sn-step-title">Execute</span>
+                  <span class="sn-step-description">async, parallel · results referenced in block n+1</span>
+                </div>
+                <div data-m="steps" data-slow-delay="0.8" data-slow-dur class="sn-step-row" style="animation-duration: 24s; animation-delay: 19.2s;">
+                  <span class="sn-step-time">480 ms</span>
+                  <span class="sn-step-title">Buffer</span>
+                  <span class="sn-step-description">network settles · next proposal at 600 ms</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sn-validators-card sn-glass">
+              <div class="sn-validators-label">
+                <span>Verification Matrix · Shard 0</span>
+                <span><span data-bind="slowLabel">×40 slower</span></span>
+              </div>
+              <div class="sn-validators-wrap">
+                <validator-grid
+                  round-ms="600"
+                  slow="40"
+                  total="400"
+                  quorum="267"
+                  accent="#23f7dd"
+                  ink="#FFFFFF"
+                  role="img"
+                  aria-label="400 nodes verify one round; 267 signatures reach quorum and one aggregated proof finalises the block"
+                  class="sn-validators-grid">
+                </validator-grid>
+              </div>
+              <h3 class="sn-validators-heading">
+                400 nodes verify. 267 signatures reach quorum. One aggregated proof finalises the block.
+              </h3>
+              <p class="sn-small-copy">
+                Equivalent Consensus Proofs allow any node in the topology to finalise the block from the aggregated BLS proof alone, with zero equivocation risk.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SCENE 05: CROSS-SHARD / MULTI-CLUSTER SETTLEMENT -->
+        <section id="scene-speed" data-scene="speed" class="sn-scene">
+          <div data-card class="sn-card-right">
+            <div class="sn-cross-shard-card sn-glass">
+              <div class="sn-eyebrow">04 - Cross-Cluster · Three shards, one metachain</div>
+              <h2 class="sn-cross-shard-heading">
+                <span class="sn-sr-only">From</span>
+                <span class="sn-old-value">~18 s</span>
+                <span class="sn-sr-only">to</span>
+                <span>~2.4 s</span>
+              </h2>
+              <p class="sn-body-copy-wide">
+                A cross-cluster operation is finalised on the source lane, notarised by the coordination metachain, then executed on the destination lane. Compressing this path to three steps at 600 ms rounds settles multi-lane payloads in roughly 2.4 seconds.
+              </p>
+              <div class="sn-stack-medium">
+                <div class="sn-stack-small">
+                  <div class="sn-timeline-labels">
+                    <span>Before · 6 s rounds</span>
+                    <span>~18 s</span>
+                  </div>
+                  <div class="sn-legacy-settlement">
+                    <div class="sn-legacy-settlement-fill sn-decoration"></div>
+                  </div>
+                </div>
+                <div class="sn-stack-small">
+                  <div class="sn-progress-labels">
+                    <span class="sn-text-accent"><span data-brand-text>Aetheris</span> · 600 ms rounds</span>
+                    <span class="sn-text-accent">~2.4 s</span>
+                  </div>
+                  <div data-m="bar" class="sn-settlement-track">
+                    <div class="sn-settlement-step">SOURCE FINAL</div>
+                    <div class="sn-settlement-step">METACHAIN NOTARISES</div>
+                    <div class="sn-settlement-step-last">DESTINATION EXECUTES</div>
+                    <div class="sn-settlement-fill sn-decoration"></div>
+                  </div>
+                </div>
+                <div class="sn-mono-note">
+                  Both bars run on the wall clock. Intra-lane operations finalise within the single 600 ms round in which they are proposed.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SCENE 06: SAFETY UNDER LOAD -->
+        <section id="scene-computer" data-scene="computer" class="sn-scene">
+          <div data-card class="sn-safety-layout">
+            <div class="sn-safety-heading-wrap">
+              <div class="sn-safety-eyebrow">05 - Safety under load</div>
+              <h2 class="sn-safety-heading sn-glass">Bounded<br>execution lag.</h2>
+            </div>
+            <div class="sn-safety-card sn-glass">
+              <div data-m="stack" class="sn-safety-row">
+                <span class="sn-row-title">Mempool with virtual state</span>
+                <span class="sn-row-description">Maintains pending nonces, projected resource consumption, and the set of payloads proposed but not yet executed so proposers only select valid work.</span>
+              </div>
+              <div data-m="stack" class="sn-safety-row">
+                <span class="sn-row-title">Automatic backpressure</span>
+                <span class="sn-row-description">When execution lag exceeds a threshold, block capacity adjusts protocol-wide until execution catches up, keeping backlogs bounded without human intervention.</span>
+              </div>
+              <div data-m="stack" class="sn-safety-row-accent">
+                <span class="sn-row-title">Ordering locked at proposal</span>
+                <span class="sn-row-description">The proposer commits to the exact sequence before any execution result exists, eliminating outcome-dependent reordering as a manipulation surface.</span>
+              </div>
+              <div data-m="stack" class="sn-safety-row-solid">
+                <span class="sn-row-title">Deterministic finality</span>
+                <span class="sn-row-description-dark">One aggregated consensus proof per block. Execution results are committed in subsequent blocks; the agreed ordering is immutable once the proof exists.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SCENE 07: ARCHITECTURAL ROADMAP / RELEASES -->
+        <section id="scene-egld" data-scene="egld" class="sn-scene">
+          <div data-card class="sn-card-right">
+            <div class="sn-releases-card sn-glass">
+              <div class="sn-eyebrow">06 - Three releases, one decoupling</div>
+              <h2 class="sn-section-heading">Andromeda. Barnard. <span data-brand-text>Aetheris</span>.</h2>
+              <div class="sn-releases-grid">
+                <div class="sn-release-card">
+                  <span class="sn-release-version">v1.9.6 · Phase I</span>
+                  <span class="sn-release-name">Andromeda</span>
+                  <span class="sn-row-description">Confirmation blocks removed. Consensus group expanded from 63 to 400 nodes. Equivalent Consensus Proofs introduced. Time to finality halved.</span>
+                </div>
+                <div class="sn-release-card">
+                  <span class="sn-release-version">v1.10 · Phase II</span>
+                  <span class="sn-release-name">Barnard</span>
+                  <span class="sn-row-description">Millisecond timestamps for state machines. Protocol-level governance. Compute gas penalty reduced 10× → 2×.</span>
+                </div>
+                <div class="sn-release-card-current">
+                  <span class="sn-release-version-current">v2.0 · Current</span>
+                  <span class="sn-release-name" data-brand-text>Aetheris</span>
+                  <span class="sn-row-description">Consensus decoupled from execution. 600 ms rounds. Intra-shard finality in 100–250 ms. Cross-shard settlement in ~2.4 s.</span>
+                </div>
+              </div>
+              <div class="sn-release-stats">
+                <div class="sn-release-stat">
+                  <span class="sn-release-stat-value">1B+</span>
+                  <span class="sn-release-stat-label">operations verified in shadow-fork stress testing prior to mainnet activation</span>
+                </div>
+                <div class="sn-release-stat">
+                  <span class="sn-release-stat-value">~24 min</span>
+                  <span class="sn-release-stat-label">activation transition: 240 legacy rounds drain pending queues before the first 600 ms round</span>
+                </div>
+                <div class="sn-release-stat">
+                  <span class="sn-release-stat-value">0</span>
+                  <span class="sn-release-stat-label">breaking changes to addresses, cryptographic keys, state balances, or node hardware specs</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SCENE 08: FOR BUILDERS -->
+        <section id="scene-builders" data-scene="builders" class="sn-scene">
+          <div data-card class="sn-card-left">
+            <div class="sn-builders-card sn-glass">
+              <div class="sn-eyebrow">07 - What changes for builders</div>
+              <h2 class="sn-section-heading">Building against a 600 ms round.</h2>
+              <div class="sn-stack">
+                <div data-m="stack" class="sn-builder-row">
+                  <span class="sn-builder-title">Finality is a consensus proof</span>
+                  <span class="sn-row-description">A transaction is final once the aggregated consensus proof for its block exists, typically within 100–250 ms. Confirmation depth is no longer required.</span>
+                </div>
+                <div data-m="stack" class="sn-builder-row">
+                  <span class="sn-builder-title">Execution results follow inclusion</span>
+                  <span class="sn-row-description">Inclusion and execution are separate events. Receipts and resulting state are read from the subsequent block that commits the execution results.</span>
+                </div>
+                <div data-m="stack" class="sn-builder-row">
+                  <span class="sn-builder-title">Millisecond timestamps</span>
+                  <span class="sn-row-description">Contracts and services read block timestamps in milliseconds. Time-dependent logic is expressed directly in rounds of 600 ms.</span>
+                </div>
+                <div data-m="stack" class="sn-builder-row-last">
+                  <span class="sn-builder-title">Tight feedback loops</span>
+                  <span class="sn-row-description">Real-time order books, autonomous AI agents, high-frequency telemetry, and reactive applications operate directly on sub-second finality.</span>
+                </div>
+              </div>
+              <div class="sn-builder-actions">
+                <a href="#scene-hero" class="sn-button-primary sn-hover-primary">Documentation</a>
+                <a href="#scene-round" class="sn-button-secondary sn-hover-outline">Inspect Quorum</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SCENE 09: CLOSING (Lanes Fold Back into 3D Silicon Chip + Footer) -->
+        <section id="scene-close" data-scene="close" class="sn-closing">
+          <div class="sn-closing-hero">
+            <div class="sn-closing-heading">
+              <div class="sn-eyebrow">08 - All of that is one thing. A computer.</div>
+              <h2 class="sn-closing-title"><span data-brand-text>Aetheris</span> is live</h2>
+            </div>
+            <div data-chip-slot class="sn-chip-slot"></div>
+          </div>
+
+          <div class="sn-footer-fade"></div>
+
+          <footer class="sn-footer">
+            <div class="sn-footer-inner">
+              <div data-m="footgrid" class="sn-footer-grid">
+                <div class="sn-footer-brand">
+                  <a href="#scene-hero" class="sn-brand">
+                    <span class="sn-brand-icon" aria-hidden="true">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
+                        <line x1="12" y1="22" x2="12" y2="15.5"></line>
+                        <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
+                      </svg>
+                    </span>
+                    <span data-brand-text>Aetheris</span>
+                  </a>
+                  <p class="sn-small-copy" style="max-width: 260px;">
+                    Decoupled consensus &amp; asynchronous execution engine operating at 600 ms rounds.
+                  </p>
+                  <div class="sn-social-links">
+                    <a href="#scene-hero" aria-label="X / Twitter" class="sn-social-link sn-hover-opacity">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    </a>
+                    <a href="#scene-hero" aria-label="GitHub" class="sn-social-link sn-hover-opacity">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                    </a>
+                    <a href="#scene-hero" aria-label="Discord" class="sn-social-link sn-hover-opacity">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+                    </a>
+                  </div>
+                </div>
+
+                <div class="sn-footer-column">
+                  <div class="sn-stack-medium">
+                    <div class="sn-footer-heading">Architecture</div>
+                    <div class="sn-footer-links">
+                      <a href="#scene-slow" class="sn-footer-link sn-hover-link">01 · Legacy Bottlenecks</a>
+                      <a href="#scene-shards" class="sn-footer-link sn-hover-link">02 · Decoupled Pipeline</a>
+                      <a href="#scene-round" class="sn-footer-link sn-hover-link">03 · 40× Slow-Mo Round</a>
+                      <a href="#scene-speed" class="sn-footer-link sn-hover-link">04 · Cross-Cluster Sync</a>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="sn-footer-column">
+                  <div class="sn-stack-medium">
+                    <div class="sn-footer-heading">Developers</div>
+                    <div class="sn-footer-links">
+                      <a href="#scene-computer" class="sn-footer-link sn-hover-link">Virtual State Mempool</a>
+                      <a href="#scene-egld" class="sn-footer-link sn-hover-link">Protocol Roadmap</a>
+                      <a href="#scene-builders" class="sn-footer-link sn-hover-link">600 ms SDKs <span class="sn-badge-new">NEW</span></a>
+                      <a href="#scene-close" class="sn-footer-link sn-hover-link">Run a Validator</a>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="sn-footer-column">
+                  <div class="sn-stack-medium">
+                    <div class="sn-footer-heading">Specifications</div>
+                    <div class="sn-footer-links">
+                      <a href="#scene-hero" class="sn-footer-link sn-hover-link">Technical Whitepaper</a>
+                      <a href="#scene-round" class="sn-footer-link sn-hover-link">BLS Consensus Proofs</a>
+                      <a href="#scene-computer" class="sn-footer-link sn-hover-link">Backpressure Mechanics</a>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="sn-footer-column">
+                  <div class="sn-stack-medium">
+                    <div class="sn-footer-heading">Template</div>
+                    <div class="sn-footer-links">
+                      <a href="#scene-hero" class="sn-footer-link sn-hover-link">Three.js r160 Stage</a>
+                      <a href="#scene-round" class="sn-footer-link sn-hover-link">400-Node Canvas</a>
+                      <a href="#scene-hero" id="footer-open-studio" class="sn-footer-link sn-hover-link">Open Template Studio</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sn-copyright">
+                <span>© <span class="year-change">2026</span> <span data-brand-text>Aetheris</span> Protocol. All rights reserved.</span>
+                <span>Interactive 3D Scrollytelling Template</span>
+              </div>
+            </div>
+          </footer>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- ========================================================================
+         FLOATING TEMPLATE STUDIO (CUSTOMIZER DRAWER)
+         ======================================================================== -->
+    <aside class="ts-widget" data-export-strip>
+      <div id="ts-panel" class="ts-panel" hidden>
+        <div class="ts-header">
+          <div class="ts-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            Template Studio
+          </div>
+          <button type="button" id="ts-close-btn" class="ts-close" aria-label="Close customizer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div class="ts-group">
+          <label class="ts-label">1. Industry Preset</label>
+          <div class="ts-presets">
+            <button type="button" class="ts-preset-btn active" data-preset-key="aetheris">
+              <span>Aetheris Engine</span>
+              <span class="ts-preset-tag">Distributed Compute</span>
+            </button>
+            <button type="button" class="ts-preset-btn" data-preset-key="hyperion">
+              <span>Hyperion NIDS</span>
+              <span class="ts-preset-tag">Zero-Latency Security</span>
+            </button>
+            <button type="button" class="ts-preset-btn" data-preset-key="quantum">
+              <span>QuantumCore OS</span>
+              <span class="ts-preset-tag">Silicon &amp; Hardware</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="ts-group">
+          <label class="ts-label" for="ts-brand-input">2. Brand / Project Name</label>
+          <input type="text" id="ts-brand-input" class="ts-input" value="Aetheris" maxlength="28" placeholder="Enter your brand name...">
+        </div>
+
+        <div class="ts-group">
+          <label class="ts-label">3. Live 3D Accent Color</label>
+          <div class="ts-swatches">
+            <button type="button" class="ts-swatch active" style="background: #23f7dd;" data-color="#23f7dd" data-rgb="35, 247, 221" aria-label="Cyber Mint"></button>
+            <button type="button" class="ts-swatch" style="background: #38bdf8;" data-color="#38bdf8" data-rgb="56, 189, 248" aria-label="Electric Sky"></button>
+            <button type="button" class="ts-swatch" style="background: #a855f7;" data-color="#a855f7" data-rgb="168, 85, 247" aria-label="Quantum Violet"></button>
+            <button type="button" class="ts-swatch" style="background: #f59e0b;" data-color="#f59e0b" data-rgb="245, 158, 11" aria-label="Solar Amber"></button>
+            <button type="button" class="ts-swatch" style="background: #10b981;" data-color="#10b981" data-rgb="16, 185, 129" aria-label="Matrix Emerald"></button>
+          </div>
+        </div>
+
+        <button type="button" id="ts-export-btn" class="ts-export-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Export Clean HTML
+        </button>
+      </div>
+
+      <button type="button" id="ts-toggle-btn" class="ts-toggle-btn">
+        <span class="sn-indicator-dot"></span>
+        <span>Customize Template</span>
+      </button>
+    </aside>
+
+  </div>
+
+  <!-- ==========================================================================
+       THREE.JS WEBGL STAGE & 2D VALIDATOR MATRIX CUSTOM ELEMENTS
+       ========================================================================== -->
+  <script type="module">
+    import {
+      BackSide, BoxGeometry, CanvasTexture, CatmullRomCurve3, Color,
+      DirectionalLight, EdgesGeometry, ExtrudeGeometry, Fog, Group,
+      HemisphereLight, LineBasicMaterial, LineSegments, Mesh,
+      MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap,
+      PerspectiveCamera, PlaneGeometry, Scene, ShadowMaterial, Shape,
+      Sprite, SpriteMaterial, TorusGeometry, TubeGeometry, Vector3, WebGLRenderer
+    } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+    const THREE = {
+      BackSide, BoxGeometry, CanvasTexture, CatmullRomCurve3, Color,
+      DirectionalLight, EdgesGeometry, ExtrudeGeometry, Fog, Group,
+      HemisphereLight, LineBasicMaterial, LineSegments, Mesh,
+      MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap,
+      PerspectiveCamera, PlaneGeometry, Scene, ShadowMaterial, Shape,
+      Sprite, SpriteMaterial, TorusGeometry, TubeGeometry, Vector3, WebGLRenderer
+    };
+
+    (() => {
+      const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const loadThree = async () => THREE;
+      const LANES = 6, N = 34, STEP = 1.25;
+      const attr = (el, n) => el.getAttribute(n) ?? el.getAttribute(n.replace(/-/g, ''));
+
+      const SCENES = {
+        hero:     { cam: [0.01, 30, 0.01], look: [0, 0, 0],     gap: 2.4,  lanes: 4, ts: 1,      speeds: null, chip: 1 },
+        slow:     { cam: [9, 4, 14],       look: [0, 0, -4],    gap: 2.4,  lanes: 4, ts: 0.1,    speeds: null },
+        speed:    { cam: [1.5, 17, 5],     look: [0, 0, -7],    gap: 2.4,  lanes: 4, ts: 1,      speeds: null },
+        shards:   { cam: [10, 7.5, 15],    look: [0, 0, -6],    gap: 2.6,  lanes: 4, ts: 1,      speeds: null },
+        builders: { cam: [-6, 3, 12],      look: [0, 0, -8],    gap: 2.4,  lanes: 4, ts: 1,      speeds: null },
+        globe:    { cam: [0, 31, 6],       look: [-9, 30, -30], gap: 2.4,  lanes: 4, ts: 1,      speeds: null, globe: 1 },
+        round:    { cam: [-5.2, 1.7, 9],   look: [-3.6, 0.2, 4],gap: 2.4,  lanes: 4, ts: 1 / 40, speeds: null },
+        computer: { cam: [0, 12, 10],      look: [0, 0, -4],    gap: 1.15, lanes: 4, ts: 0.3,    speeds: null },
+        egld:     { cam: [-8, 4.6, 13],    look: [0, 0, -6],    gap: 2.4,  lanes: 4, ts: 1,      speeds: null },
+        close:    { cam: [0.01, 30, 0.01], look: [0, 0, 0],     gap: 2.4,  lanes: 4, ts: 1,      speeds: null, chip: 1 }
+      };
+
+      class SupernovaStage extends HTMLElement {
+        static get observedAttributes() {
+          return ['round-ms', 'roundms', 'accent', 'paper', 'ink', 'scene', 'chip-frame', 'chipframe', 'time-scale', 'timescale'];
+        }
+        connectedCallback() {
+          if (this._started) return;
+          this._started = true;
+          this.style.display = 'block';
+          this.style.width = '100%';
+          this.style.height = '100%';
+          this.style.minHeight = 'inherit';
+          if (!this.style.position) this.style.position = 'relative';
+          this.canvas = document.createElement('canvas');
+          Object.assign(this.canvas.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', display: 'block' });
+          this.appendChild(this.canvas);
+          this.visible = true;
+          this.mouse = { x: 0, y: 0 };
+          this.io = new IntersectionObserver(([e]) => { this.visible = e.isIntersecting; });
+          this.io.observe(this);
+          this.onMove = e => {
+            this.mouse.x = (e.clientX / innerWidth - 0.5) * 2;
+            this.mouse.y = (e.clientY / innerHeight - 0.5) * 2;
+          };
+          window.addEventListener('pointermove', this.onMove, { passive: true });
+          this.init().catch(err => console.warn('supernova-stage', err));
+        }
+        disconnectedCallback() {
+          cancelAnimationFrame(this.raf);
+          this.io?.disconnect();
+          this.ro?.disconnect();
+          window.removeEventListener('pointermove', this.onMove);
+          this.renderer?.dispose();
+        }
+        attributeChangedCallback() {
+          this.applyAttrs();
+        }
+        get roundMs() {
+          return Math.max(150, +attr(this, 'round-ms') || 600);
+        }
+        get sceneDef() {
+          return SCENES[this.getAttribute('scene')] || SCENES.hero;
+        }
+        applyAttrs() {
+          if (!this.T) return;
+          const T = this.T;
+          const paper = this.getAttribute('paper') || '#000000';
+          this.scene.fog.color = new T.Color(paper);
+          this.accent = new T.Color(this.getAttribute('accent') || '#23F7DD');
+          this.ink = new T.Color(this.getAttribute('ink') || '#FFFFFF');
+          this.grey = this.accent.clone().multiplyScalar(0.35);
+
+          // Dynamically sync 3D materials when user picks a new theme accent color
+          if (this.accentMaterials) {
+            this.accentMaterials.forEach(mat => {
+              if (mat.color) mat.color.copy(this.accent);
+              if (mat.emissive) mat.emissive.copy(this.accent);
+            });
+          }
+        }
+        async init() {
+          const T = this.T = await loadThree();
+          this.accentMaterials = [];
+          const renderer = this.renderer = new T.WebGLRenderer({
+            canvas: this.canvas,
+            antialias: true,
+            alpha: true,
+            powerPreference: 'high-performance'
+          });
+          renderer.setClearColor(0x000000, 0);
+          renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+          renderer.shadowMap.enabled = false;
+          renderer.shadowMap.type = T.PCFSoftShadowMap;
+
+          const scene = this.scene = new T.Scene();
+          scene.fog = new T.Fog(0x000000, 14, 48);
+          this.cam = new T.PerspectiveCamera(32, 1, 0.1, 120);
+          const d = SCENES.hero;
+          this.cam.position.set(...d.cam);
+          this.look = new T.Vector3(...d.look);
+          this.gap = d.gap;
+          this.ts = d.ts;
+          this.chip = 0;
+          this.applyAttrs();
+          this.hardDot = this.dotTexture(T, false);
+          this.softDot = this.dotTexture(T, true);
+          this.buildChip(T, scene);
+
+          scene.add(new T.HemisphereLight(0xffffff, 0x101010, 0.7));
+          const sun = new T.DirectionalLight(0xffffff, 1.6);
+          sun.position.set(6, 12, 8);
+          sun.castShadow = true;
+          sun.shadow.mapSize.set(2048, 2048);
+          Object.assign(sun.shadow.camera, { left: -22, right: 22, top: 22, bottom: -22 });
+          sun.shadow.bias = -0.0005;
+          scene.add(sun);
+
+          const ground = new T.Mesh(new T.PlaneGeometry(300, 300), new T.ShadowMaterial({ opacity: 0 }));
+          ground.rotation.x = -Math.PI / 2;
+          ground.position.y = -0.5;
+          ground.receiveShadow = true;
+          scene.add(ground);
+
+          const railMat = new T.MeshBasicMaterial({ color: this.accent, transparent: true, opacity: 0.35 });
+          const geo = new T.BoxGeometry(0.9, 0.9, 0.9);
+          const frameGeo = new T.BoxGeometry(1.15, 1.15, 1.15);
+          const edgeGeo = new T.EdgesGeometry(geo);
+          const hullMat = new T.MeshBasicMaterial({ color: this.accent, side: T.BackSide });
+          const edgeMat = new T.LineBasicMaterial({ color: this.accent });
+          this.accentMaterials.push(railMat, hullMat, edgeMat);
+
+          this.paper = new T.Color(0x0b0b0b);
+          this.grey = this.accent.clone().multiplyScalar(0.35);
+          this.rails = [];
+          this.blocks = [];
+          this.heads = [];
+          this.phase = [];
+          this.speed = [];
+          this.laneVis = [];
+
+          for (let l = 0; l < LANES; l++) {
+            const rail = new T.Mesh(new T.BoxGeometry(0.06, 0.03, N * STEP + 6), railMat);
+            rail.position.set(0, -0.5, -N * STEP / 2 + 6);
+            rail.receiveShadow = true;
+            scene.add(rail);
+            this.rails.push(rail);
+            const row = [];
+            for (let i = 0; i < N; i++) {
+              const m = new T.Group();
+              const face = new T.Mesh(geo, new T.MeshStandardMaterial({ color: 0x0b0b0b, roughness: 0.4, metalness: 0.6 }));
+              face.castShadow = true;
+              face.receiveShadow = true;
+              const hull = new T.Mesh(geo, hullMat);
+              hull.scale.setScalar(1.05);
+              m.add(face, hull, new T.LineSegments(edgeGeo, edgeMat));
+              m.userData.face = face.material;
+              scene.add(m);
+              row.push(m);
+            }
+            this.blocks.push(row);
+            const f = new T.Mesh(frameGeo, new T.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true }));
+            scene.add(f);
+            this.heads.push(f);
+            this.phase.push(l * 0.25);
+            this.speed.push(1);
+            this.laneVis.push(l < 4 ? 1 : 0);
+          }
+
+          this.ro = new ResizeObserver(() => {
+            cancelAnimationFrame(this.rsz);
+            this.rsz = requestAnimationFrame(() => this.resize());
+          });
+          this.ro.observe(this);
+          this.resize();
+          this.last = performance.now();
+          this.loop = this.loop.bind(this);
+          this.raf = requestAnimationFrame(this.loop);
+        }
+
+        buildChip(T, scene) {
+          const g = this.chipGroup = new T.Group();
+          scene.add(g);
+          const S = 6.2 / 100, o = 50;
+          const pts = [
+            [12,2],[19,2],[27,10.5],[32,12.5],[68,12.5],[73,10.5],[81,2],[88,2],
+            [98,12],[98,88],[88,98],[81,98],[73,89.5],[68,87.5],[32,87.5],[27,89.5],
+            [19,98],[12,98],[2,88],[2,12]
+          ];
+          const shape = new T.Shape();
+          pts.forEach(([x, y], i) => {
+            const px = (x - o) * S, py = (y - o) * S;
+            i ? shape.lineTo(px, py) : shape.moveTo(px, py);
+          });
+          shape.closePath();
+
+          const depth = 0.5;
+          const body = new T.Mesh(
+            new T.ExtrudeGeometry(shape, { depth, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 3 }),
+            new T.MeshStandardMaterial({ color: 0x0f0f0f, roughness: 0.35, metalness: 0.7 })
+          );
+          body.rotation.x = -Math.PI / 2;
+          body.position.y = -0.25;
+          body.castShadow = true;
+          g.add(body);
+
+          const rimPts = shape.getPoints(4).map(p => new T.Vector3(p.x, depth - 0.25 + 0.07, p.y));
+          const rimMat = new T.MeshBasicMaterial({ color: this.accent });
+          this.accentMaterials.push(rimMat);
+          const rim = new T.Mesh(
+            new T.TubeGeometry(new T.CatmullRomCurve3(rimPts, true, 'catmullrom', 0), 400, 0.03, 8, true),
+            rimMat
+          );
+          rim.renderOrder = 2;
+          g.add(rim);
+
+          // Sharp Geometric Emblem at the center of the processor die
+          this.core = new T.Group();
+          this.core.position.y = depth - 0.25 + 0.1;
+          g.add(this.core);
+          const barMat = new T.MeshStandardMaterial({
+            color: this.accent,
+            emissive: this.accent,
+            emissiveIntensity: 1,
+            roughness: 0.3
+          });
+          this.accentMaterials.push(barMat);
+
+          const XS = 2.6 / 192, cx = 96, cy = 74, P = (x, y) => [(x - cx) * XS, (y - cy) * XS];
+          const xs = new T.Shape();
+          xs.moveTo(...P(106.4, 74)); xs.lineTo(...P(192, 28)); xs.lineTo(...P(177.6, 0.2)); xs.lineTo(...P(99.2, 32.1));
+          xs.bezierCurveTo(...P(97.2, 32.9), ...P(94.9, 32.9), ...P(92.9, 32.1));
+          xs.lineTo(...P(14.5, 0.2)); xs.lineTo(...P(0.1, 28)); xs.lineTo(...P(85.7, 74)); xs.lineTo(...P(0.1, 120));
+          xs.lineTo(...P(14.5, 147.8)); xs.lineTo(...P(92.9, 115.9));
+          xs.bezierCurveTo(...P(94.9, 115.1), ...P(97.2, 115.1), ...P(99.2, 115.9));
+          xs.lineTo(...P(177.6, 147.8)); xs.lineTo(...P(192, 120)); xs.lineTo(...P(106.4, 74));
+          xs.closePath();
+
+          const xMark = new T.Mesh(new T.ExtrudeGeometry(xs, { depth: 0.16, bevelEnabled: false }), barMat);
+          xMark.rotation.x = -Math.PI / 2;
+          this.core.add(xMark);
+          this.core.material = barMat;
+
+          // Mini pipeline blocks seen through the processor die
+          this.mini = [];
+          const MG = new T.BoxGeometry(0.36, 0.36, 0.36), ME = new T.EdgesGeometry(MG);
+          for (let l = 0; l < 4; l++) {
+            const row = [];
+            for (let i = 0; i < 12; i++) {
+              const grp = new T.Group();
+              const fMat = new T.MeshBasicMaterial({ color: this.accent, transparent: true, opacity: 0.03 });
+              const eMat = new T.LineBasicMaterial({ color: this.accent, transparent: true, opacity: 0.12 });
+              this.accentMaterials.push(fMat, eMat);
+              const face = new T.Mesh(MG, fMat);
+              const edge = new T.LineSegments(ME, eMat);
+              grp.add(face, edge);
+              grp.userData = { face: fMat, edge: eMat };
+              grp.position.set((l - 1.5) * 0.95, 0.32, 0);
+              g.add(grp);
+              row.push(grp);
+            }
+            this.mini.push(row);
+          }
+          g.traverse(o => { if (o.material) o.material.fog = false; });
+
+          // PCB traces radiating from the chip
+          const tr = new T.Group();
+          g.add(tr);
+          const nodeGeo = new T.TorusGeometry(0.14, 0.025, 8, 24);
+          this.traces = [];
+          let cur = null;
+          let traceMat = null;
+          let seed = 7;
+          const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+          const seg = (a, b) => {
+            const len = a.distanceTo(b);
+            if (len < 0.01) return;
+            cur.pts.push(b.clone());
+            cur.len += len;
+            const m = new T.Mesh(new T.BoxGeometry(len, 0.03, 0.05), traceMat);
+            m.position.copy(a).add(b).multiplyScalar(0.5);
+            m.position.y = -0.44;
+            m.rotation.y = -Math.atan2(b.z - a.z, b.x - a.x);
+            tr.add(m);
+          };
+
+          const trace = (x, z, dx, dz, steps) => {
+            let p = new T.Vector3(x, 0, z);
+            traceMat = new T.MeshBasicMaterial({ color: this.accent, transparent: true, opacity: 0.14 });
+            const pulseMat = new T.SpriteMaterial({
+              map: this.softDot,
+              color: this.accent,
+              transparent: true,
+              opacity: 0.9,
+              depthWrite: false,
+              fog: false
+            });
+            this.accentMaterials.push(traceMat, pulseMat);
+            cur = { mat: traceMat, pts: [p.clone()], len: 0, offset: rnd(), speed: 0.6 + rnd() * 0.8 };
+            const pulse = new T.Sprite(pulseMat);
+            pulse.scale.setScalar(0.4);
+            cur.pulse = pulse;
+            tr.add(pulse);
+            this.traces.push(cur);
+
+            for (let s = 0; s < steps; s++) {
+              const straight = 0.5 + Math.floor(rnd() * 4) * 0.5;
+              let q = p.clone();
+              q.x += dx * straight;
+              q.z += dz * straight;
+              seg(p, q);
+              p = q;
+              if (s < steps - 1) {
+                const d = rnd() < 0.5 ? 0.5 : 1, side = rnd() < 0.5 ? -1 : 1;
+                q = p.clone();
+                if (dx) { q.x += dx * d; q.z += side * d; }
+                else { q.z += dz * d; q.x += side * d; }
+                seg(p, q);
+                p = q;
+              }
+            }
+            const n = new T.Mesh(nodeGeo, traceMat);
+            n.rotation.x = Math.PI / 2;
+            n.position.set(p.x, -0.44, p.z);
+            tr.add(n);
+            cur.node = n;
+          };
+
+          const half = 3.1 + 0.7;
+          for (const side of [-1, 1]) {
+            for (let i = 0; i < 4; i++) {
+              trace(side * half, -1.8 + i * 1.2, side, 0, 2 + Math.floor(rnd() * 2));
+            }
+          }
+          tr.traverse(o => { if (o.material) o.material.fog = false; });
+        }
+
+        dotTexture(T, soft) {
+          const c = document.createElement('canvas');
+          c.width = c.height = 64;
+          const x = c.getContext('2d');
+          const g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+          if (soft) {
+            g.addColorStop(0, 'rgba(255,255,255,1)');
+            g.addColorStop(0.25, 'rgba(255,255,255,.5)');
+            g.addColorStop(1, 'rgba(255,255,255,0)');
+          } else {
+            g.addColorStop(0, 'rgba(255,255,255,1)');
+            g.addColorStop(0.7, 'rgba(255,255,255,1)');
+            g.addColorStop(1, 'rgba(255,255,255,0)');
+          }
+          x.fillStyle = g;
+          x.fillRect(0, 0, 64, 64);
+          return new T.CanvasTexture(c);
+        }
+
+        laneX(l, count) {
+          return (l - (count - 1) / 2) * this.gap;
+        }
+
+        resize() {
+          const w = this.clientWidth || 1, h = this.clientHeight || 1;
+          this.renderer.setSize(w, h, false);
+          this.cam.aspect = w / h;
+          this.cam.fov = w < 720 ? 46 : 32;
+          this.cam.updateProjectionMatrix();
+        }
+
+        loop(now) {
+          this.raf = requestAnimationFrame(this.loop);
+          try {
+            this.tick(now);
+          } catch (err) {
+            if (!this._warned) {
+              this._warned = true;
+              console.warn('supernova-stage', err);
+            }
+          }
+        }
+
+        tick(now) {
+          const dt = Math.min(50, now - this.last);
+          this.last = now;
+          if (!this.visible || document.hidden) return;
+          const still = reduced(), def = this.sceneDef, rm = this.roundMs;
+          const k = 1 - Math.pow(0.001, dt / 1000);
+          this.gap += (def.gap - this.gap) * k * 1.2;
+          this.chip += ((def.chip || 0) - this.chip) * k * 1.1;
+          const chip = this.chip, ch = Math.max(0.001, chip);
+          const cs = ch;
+          this.chipGroup.scale.set(cs, cs, cs);
+          this.chipGroup.visible = cs > 0.01;
+          this.chipGroup.rotation.y = still ? 0 : (1 - chip) * 0.6;
+          const pulse = this.phase[0] % 1;
+          this.core.material.emissiveIntensity = 0.7 + Math.max(0, 1 - pulse) * 0.8;
+          this.core.position.y = 0.35 + Math.sin(Math.PI * Math.max(0, 1 - pulse)) * 0.35;
+
+          if (this.chipGroup.visible && this.traces) {
+            const t = now / 1000;
+            for (const tr of this.traces) {
+              tr.mat.opacity = 0.1 + 0.08 * (0.5 + 0.5 * Math.sin(t * 1.2 + tr.offset * 6.28));
+              const cycle = (this.phase[0] * 0.18 * tr.speed + tr.offset) % 1;
+              const u = Math.min(1, cycle / 0.55);
+              let d = u * tr.len, a = tr.pts[0];
+              for (let i = 1; i < tr.pts.length; i++) {
+                const b = tr.pts[i], L = a.distanceTo(b);
+                if (d <= L) {
+                  tr.pulse.position.lerpVectors(a, b, L ? d / L : 0);
+                  break;
+                }
+                d -= L;
+                a = b;
+                if (i === tr.pts.length - 1) tr.pulse.position.copy(b);
+              }
+              tr.pulse.position.y = -0.4;
+              tr.pulse.material.opacity = cycle < 0.55 ? 0.55 * Math.sin(Math.PI * u) : 0;
+              if (tr.node) {
+                tr.node.scale.setScalar(1 + (cycle > 0.5 && cycle < 0.7 ? 0.6 * Math.sin(Math.PI * (cycle - 0.5) / 0.2) : 0));
+              }
+            }
+          }
+
+          if (this.chipGroup.visible) {
+            const MS = 0.46, span = 1.95, fadeW = 0.5;
+            for (let l = 0; l < 4; l++) {
+              const ph = this.phase[l] % 1, row = this.mini[l];
+              for (let i = 0; i < row.length; i++) {
+                const m = row[i], pos = i + ph, z = span - pos * MS;
+                const live = Math.max(0, 1 - Math.max(0, pos - 1));
+                const fade = Math.max(0, Math.min(1, (span - Math.abs(z)) / fadeW));
+                m.position.z = z;
+                m.visible = z > -span && fade > 0;
+                m.userData.face.opacity = (0.03 + live * 0.14) * fade;
+                m.userData.edge.opacity = (0.1 + live * 0.35) * fade;
+              }
+            }
+          }
+
+          const tsAttr = parseFloat(attr(this, 'time-scale'));
+          const tsTarget = isFinite(tsAttr) && tsAttr > 0 ? tsAttr : def.ts;
+          this.ts += (tsTarget - this.ts) * k * 1.4;
+
+          let tgt = def.cam, lk = def.look;
+          const frame = def.chip && attr(this, 'chip-frame');
+          if (frame) {
+            const [cy, frac] = frame.split(',').map(Number);
+            const half = Math.tan(this.cam.fov * Math.PI / 360), visPerDist = 2 * half;
+            const d = (6.2 + 1.6) / (visPerDist * Math.max(0.12, frac));
+            const L = -(cy - 0.5) * visPerDist * d;
+            tgt = [0.01, d, L + 0.01];
+            lk = [0, 0, L];
+          }
+
+          const drift = still ? 0 : Math.sin(now / 9000) * 0.6;
+          this.cam.position.x += (tgt[0] + drift + this.mouse.x * 0.8 - this.cam.position.x) * k;
+          this.cam.position.y += (tgt[1] - this.mouse.y * 0.4 - this.cam.position.y) * k;
+          this.cam.position.z += (tgt[2] - this.cam.position.z) * k;
+          this.look.x += (lk[0] - this.look.x) * k;
+          this.look.y += (lk[1] - this.look.y) * k;
+          this.look.z += (lk[2] - this.look.z) * k;
+
+          const dir = this.look.clone().sub(this.cam.position).normalize();
+          const tUp = Math.min(1, Math.max(0, (-dir.y - 0.9) / 0.09));
+          this.cam.up.set(0, 1 - tUp, -tUp).normalize();
+          this.cam.lookAt(this.look);
+
+          const count = def.lanes;
+          for (let l = 0; l < LANES; l++) {
+            const spTarget = def.speeds ? def.speeds[l] : 1;
+            this.speed[l] = Math.exp(Math.log(this.speed[l]) + (Math.log(spTarget) - Math.log(this.speed[l])) * k * 1.5);
+            if (!still) this.phase[l] += dt * this.ts / (rm * this.speed[l]);
+            const visT = l < count ? 1 : 0;
+            this.laneVis[l] += (visT - this.laneVis[l]) * k * 1.5;
+            const vis = this.laneVis[l], x = this.laneX(l, count), ph = this.phase[l] % 1;
+            this.rails[l].position.x = x;
+            this.rails[l].scale.x = Math.max(0.001, vis * (1 - chip));
+            this.rails[l].visible = vis > 0.02;
+
+            const row = this.blocks[l];
+            for (let i = 0; i < N; i++) {
+              const m = row[i], pos = i + ph, live = Math.max(0, 1 - Math.max(0, pos - 1));
+              m.position.set(
+                x * (1 - chip),
+                live * 0.55 * Math.sin(Math.PI * ph) * (1 - chip) + 0.35 * chip,
+                (5 - pos * STEP) * (1 - chip)
+              );
+              m.scale.setScalar((0.8 + live * 0.2) * Math.max(0.001, vis * (1 - chip)));
+              m.userData.face.emissive.copy(this.accent).multiplyScalar(live * 0.55);
+              m.userData.face.color.lerpColors(this.paper, this.grey, live);
+              m.visible = pos < N - 1 && vis > 0.02;
+            }
+            const h = this.heads[l];
+            h.position.set(x * (1 - chip), 0.1, (5 - ph * STEP) * (1 - chip));
+            h.rotation.y = still ? 0 : ph * Math.PI / 2;
+            h.scale.setScalar(Math.max(0.001, vis * (1 - chip)));
+            h.visible = vis > 0.02;
+            h.material.color.copy(this.accent);
+            h.material.opacity = 0.25 + 0.65 * (1 - ph);
+          }
+          this.renderer.render(this.scene, this.cam);
+        }
+      }
+
+      if (!customElements.get('supernova-stage')) {
+        customElements.define('supernova-stage', SupernovaStage);
+      }
+
+      class ValidatorGrid extends HTMLElement {
+        connectedCallback() {
+          if (this._started) return;
+          this._started = true;
+          this.style.display = 'block';
+          this.style.width = '100%';
+          this.style.height = '100%';
+          this.style.minHeight = 'inherit';
+          this.style.position = 'relative';
+          this.c = document.createElement('canvas');
+          Object.assign(this.c.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', display: 'block' });
+          this.appendChild(this.c);
+          this.ctx = this.c.getContext('2d');
+          this.ro = new ResizeObserver(() => {
+            cancelAnimationFrame(this.rsz);
+            this.rsz = requestAnimationFrame(() => this.resize());
+          });
+          this.ro.observe(this);
+          this.visible = true;
+          this.io = new IntersectionObserver(([e]) => { this.visible = e.isIntersecting; });
+          this.io.observe(this);
+
+          const total = this.total;
+          this.order = [...Array(total).keys()];
+          let seed = 42;
+          const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+          for (let i = total - 1; i > 0; i--) {
+            const j = Math.floor(rnd() * (i + 1));
+            [this.order[i], this.order[j]] = [this.order[j], this.order[i]];
+          }
+          this.rank = new Array(total);
+          this.order.forEach((v, i) => this.rank[v] = i);
+          this.t0 = performance.now();
+          this.loop = this.loop.bind(this);
+          this.raf = requestAnimationFrame(this.loop);
+        }
+        static get observedAttributes() { return ['slow', 'accent']; }
+        attributeChangedCallback(name) {
+          if (name === 'slow') this.t0 = performance.now();
+        }
+        disconnectedCallback() {
+          cancelAnimationFrame(this.raf);
+          this.ro?.disconnect();
+          this.io?.disconnect();
+        }
+        get total() { return +this.getAttribute('total') || 400; }
+        get quorum() { return +this.getAttribute('quorum') || 267; }
+        get roundMs() { return Math.max(150, +attr(this, 'round-ms') || 600); }
+        resize() {
+          const d = Math.min(devicePixelRatio, 2);
+          this.c.width = this.clientWidth * d;
+          this.c.height = this.clientHeight * d;
+          this.d = d;
+        }
+        loop(now) {
+          this.raf = requestAnimationFrame(this.loop);
+          if (!this.visible || document.hidden || !this.d) return;
+          const ctx = this.ctx, W = this.c.width, H = this.c.height, d = this.d;
+          const accent = this.getAttribute('accent') || '#23F7DD';
+          const ink = this.getAttribute('ink') || '#E4E4E0';
+          const dim = this.getAttribute('dim') || 'rgba(228,228,224,.18)';
+          const total = this.total, quorum = this.quorum, cols = 25, rows = Math.ceil(total / cols);
+          const slow = +attr(this, 'slow') || 1;
+          const rm = this.roundMs * slow, f = reduced() ? 0.8 : ((now - this.t0) % rm) / rm;
+
+          ctx.clearRect(0, 0, W, H);
+          const pad = 8 * d, cw = (W - pad * 2) / cols, ch = (H - pad * 2 - 18 * d) / rows, r = Math.min(cw, ch) * 0.32;
+          const signed = f < 0.2 ? 0 : f < 0.75 ? Math.floor(((f - 0.2) / 0.55) * total) : total;
+
+          for (let i = 0; i < total; i++) {
+            const cx = pad + (i % cols) * cw + cw / 2, cy = pad + Math.floor(i / cols) * ch + ch / 2;
+            const isSigned = this.rank[i] < signed;
+            let fill = dim;
+            if (f < 0.2) {
+              const rip = Math.hypot(cx - W / 2, cy - H / 2) / Math.hypot(W / 2, H / 2);
+              fill = rip < f / 0.2 ? 'rgba(228,228,224,.5)' : dim;
+            } else if (isSigned) {
+              fill = f > 0.75 && f < 0.9 ? accent : (this.rank[i] < quorum ? ink : accent);
+            } else {
+              fill = 'rgba(228,228,224,.3)';
+            }
+            ctx.beginPath();
+            ctx.arc(cx, cy, r * (isSigned && f >= 0.2 ? 1.15 : 1), 0, Math.PI * 2);
+            ctx.fillStyle = fill;
+            ctx.fill();
+          }
+
+          ctx.fillStyle = ink;
+          ctx.font = `${11 * d}px "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace`;
+          ctx.textBaseline = 'bottom';
+          const label = f < 0.2
+            ? 'proposal gossip'
+            : f < 0.75
+              ? `${String(Math.min(signed, total)).padStart(3, '0')} / ${total} signed${signed >= quorum ? '  ·  quorum' : ''}`
+              : f < 0.9
+                ? 'aggregate BLS proof + bitmap'
+                : 'FINAL';
+          ctx.fillText(label, pad, H - 2 * d);
+          ctx.textAlign = 'right';
+          ctx.fillText(`${String(Math.floor(f * this.roundMs)).padStart(3, '0')} ms`, W - pad, H - 2 * d);
+          ctx.textAlign = 'left';
+        }
+      }
+
+      if (!customElements.get('validator-grid')) {
+        customElements.define('validator-grid', ValidatorGrid);
+      }
+    })();
+  </script>
+
+  <!-- ==========================================================================
+       SCROLLYTELLING CONTROLLER, MEGA-MENUS & TEMPLATE STUDIO LOGIC
+       ========================================================================== -->
+  <script>
+    (() => {
+      'use strict';
+
+      const ROUND_MS = 600;
+      const REVEAL_DELAY_MS = 1600;
+      const DUR = ROUND_MS / 1000;
+      const ORDER = ['hero', 'slow', 'shards', 'round', 'speed', 'computer', 'egld', 'builders', 'close'];
+      const NAMES = {
+        hero: 'Overview',
+        slow: 'Before',
+        shards: 'The Decoupling',
+        round: 'Inside the Round',
+        speed: 'Cross-Cluster',
+        computer: 'Under Load',
+        egld: 'The Path',
+        builders: 'For Builders',
+        close: 'Live'
+      };
+
+      const $ = (s, r = document) => r.querySelector(s);
+      const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+      const stage = $('supernova-stage');
+      const grid = $('validator-grid');
+      const sceneIndexEl = $('[data-bind="sceneIndex"]');
+      const sceneNameEl = $('[data-bind="sceneName"]');
+      const slowLabelEls = $$('[data-bind="slowLabel"]');
+      const slowDurEls = $$('[data-slow-dur]');
+      const slowDelayEls = $$('[data-slow-delay]');
+      const cards = $$('[data-card]');
+      const scenes = $$('[data-scene]');
+
+      const state = { scene: 'hero', chipFrame: '', revealed: true, slow: 40 };
+      let revealTimer = 0, slowTimer = 0, pending = false, lastScene = null;
+
+      const setAttr = (el, name, value) => {
+        if (el && el.getAttribute(name) !== value) el.setAttribute(name, value);
+      };
+      const setText = (el, value) => {
+        if (el && el.textContent !== value) el.textContent = value;
+      };
+
+      function render() {
+        const { scene, slow, revealed } = state;
+        setAttr(stage, 'scene', scene);
+        setAttr(stage, 'chip-frame', state.chipFrame);
+        setAttr(stage, 'time-scale', scene === 'round' ? String(1 / slow) : '');
+        setAttr(grid, 'slow', String(slow));
+        setText(sceneIndexEl, String(ORDER.indexOf(scene) + 1).padStart(2, '0'));
+        setText(sceneNameEl, NAMES[scene] || '');
+
+        const slowLabel = slow > 1 ? '×40 slower' : 'real time';
+        slowLabelEls.forEach(el => setText(el, slowLabel));
+
+        const slowDur = (DUR * slow) + 's';
+        slowDurEls.forEach(el => {
+          if (el.style.animationDuration !== slowDur) el.style.animationDuration = slowDur;
+        });
+        slowDelayEls.forEach(el => {
+          const d = (parseFloat(el.dataset.slowDelay) * DUR * slow) + 's';
+          if (el.style.animationDelay !== d) el.style.animationDelay = d;
+        });
+
+        const op = revealed ? '1' : '0';
+        const tf = revealed ? 'none' : 'translateY(28px)';
+        cards.forEach(el => {
+          if (el.style.opacity !== op) el.style.opacity = op;
+          if (el.style.transform !== tf) el.style.transform = tf;
+        });
+
+        if (lastScene !== scene) {
+          lastScene = scene;
+          cycleSlow(scene === 'round');
+        }
+      }
+
+      function cycleSlow(on) {
+        clearTimeout(slowTimer);
+        if (!on) {
+          if (state.slow !== 40) { state.slow = 40; render(); }
+          return;
+        }
+        const slowLeg = () => { state.slow = 40; render(); slowTimer = setTimeout(fastLeg, ROUND_MS * 40); };
+        const fastLeg = () => { state.slow = 1; render(); slowTimer = setTimeout(slowLeg, ROUND_MS * 6); };
+        slowLeg();
+      }
+
+      function pickScene() {
+        const mid = innerHeight * 0.55;
+        let best = null, bd = Infinity;
+        for (const el of scenes) {
+          const r = el.getBoundingClientRect(), c = r.top + r.height / 2, d = Math.abs(c - mid);
+          if (d < bd) { bd = d; best = el.dataset.scene; }
+        }
+        let frame = state.chipFrame || '';
+        const slot = best && $(`[data-scene="${best}"] [data-chip-slot]`);
+        if (slot) {
+          const r = slot.getBoundingClientRect(), pad = 0.92;
+          const size = Math.min(r.height, r.width) * pad;
+          frame = ((r.top + r.height / 2) / innerHeight).toFixed(3) + ',' + (size / innerHeight).toFixed(3);
+        }
+        if (best && best !== state.scene) {
+          clearTimeout(revealTimer);
+          const mobile = matchMedia('(max-width: 720px)').matches;
+          const hold = !mobile || best === 'hero' || best === 'close' ? 0 : REVEAL_DELAY_MS;
+          state.scene = best;
+          state.chipFrame = frame;
+          state.revealed = hold === 0;
+          render();
+          if (hold) revealTimer = setTimeout(() => { state.revealed = true; render(); }, hold);
+        } else if (frame !== state.chipFrame) {
+          state.chipFrame = frame;
+          render();
+        }
+      }
+
+      const onScroll = () => {
+        if (pending) return;
+        pending = true;
+        requestAnimationFrame(() => { pending = false; pickScene(); });
+      };
+      addEventListener('scroll', onScroll, { passive: true });
+      addEventListener('resize', onScroll);
+      render();
+      pickScene();
+
+      // Dynamic Footer Year
+      const yrSpan = $('.year-change');
+      if (yrSpan) yrSpan.textContent = new Date().getFullYear();
+
+      // Header Mega-Menu Controller
+      const header = $('.sn-header');
+      const panels = $$('[data-menu]');
+      const triggers = $$('[data-menu-trigger]');
+      if (header && panels.length) {
+        let open;
+        const setMenu = (label) => {
+          label = label || null;
+          if (open === label) return;
+          open = label;
+          panels.forEach(p => {
+            const active = p.dataset.menu === label;
+            p.dataset.snOpen = String(active);
+            p.hidden = !active;
+          });
+          triggers.forEach(t => {
+            const a = $('[aria-expanded]', t);
+            if (a) a.setAttribute('aria-expanded', String(t.dataset.menuTrigger === label));
+          });
+        };
+        setMenu(null);
+        triggers.forEach(t => {
+          t.addEventListener('mouseenter', () => setMenu(t.dataset.menuTrigger));
+          t.addEventListener('focusin', () => setMenu(t.dataset.menuTrigger));
+          const a = $('a[href="#"]', t);
+          if (a) a.addEventListener('click', e => { e.preventDefault(); setMenu(t.dataset.menuTrigger); });
+        });
+        $$('.sn-mega-link, .sn-mega-cta', header).forEach(link => {
+          link.addEventListener('click', () => setMenu(null));
+        });
+        $$('[data-menu-close]').forEach(el => el.addEventListener('mouseleave', () => setMenu(null)));
+        header.addEventListener('focusout', e => { if (!header.contains(e.relatedTarget)) setMenu(null); });
+        addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(null); });
+      }
+
+      // ========================================================================
+      // TEMPLATE STUDIO CUSTOMIZER LOGIC
+      // ========================================================================
+      const PRESETS = {
+        aetheris: {
+          brand: 'Aetheris',
+          color: '#23f7dd',
+          rgb: '35, 247, 221',
+          eyebrow: 'Mainnet v2.0 · Epoch 2233',
+          intro: 'Introducing',
+          tagline: 'Compute at machine speed. 600 milliseconds changes what distributed systems can be.',
+          cta: 'Deploy Node',
+          s1Heading: 'Execution bounded the round.',
+          s1Body: 'Block proposal required the proposer to execute every transaction first; validators re-executed the full payload before casting a vote. Under heavy compute load, execution consumed up to 4.5 seconds of the 6-second round.'
+        },
+        hyperion: {
+          brand: 'Hyperion',
+          color: '#38bdf8',
+          rgb: '56, 189, 248',
+          eyebrow: 'Zero-Latency NIDS · Core v4.2',
+          intro: 'Deep Packet Telemetry',
+          tagline: 'Real-time intrusion detection at line rate. 600 milliseconds isolates threats before payload execution.',
+          cta: 'Start Sensor',
+          s1Heading: 'Inspection stalled throughput.',
+          s1Body: 'Legacy inline firewalls inspected every packet synchronously before forwarding; cluster nodes re-verified signatures in serial. Under DDoS load, deep inspection consumed 4.5 seconds of latency budget.'
+        },
+        quantum: {
+          brand: 'QuantumCore',
+          color: '#a855f7',
+          rgb: '168, 85, 247',
+          eyebrow: 'Silicon Architecture · 3nm Die',
+          intro: 'Next-Gen Wafer Scale',
+          tagline: 'Speculative instruction commitment decoupled from ALU execution. 600 picoseconds per fabric cycle.',
+          cta: 'View Die Spec',
+          s1Heading: 'Serial retirement gated the clock.',
+          s1Body: 'Traditional instruction pipelines waited for full arithmetic writeback before committing branch state across cores. Under dense tensor workloads, memory stalls locked up 75% of the cycle window.'
+        }
+      };
+
+      const tsPanel = $('#ts-panel');
+      const tsToggleBtn = $('#ts-toggle-btn');
+      const tsCloseBtn = $('#ts-close-btn');
+      const footerOpenStudio = $('#footer-open-studio');
+      const brandInput = $('#ts-brand-input');
+      const presetBtns = $$('.ts-preset-btn');
+      const swatches = $$('.ts-swatch');
+      const exportBtn = $('#ts-export-btn');
+
+      function applyAccent(hex, rgb) {
+        document.documentElement.style.setProperty('--accent', hex);
+        document.documentElement.style.setProperty('--accent-rgb', rgb);
+        if (stage) stage.setAttribute('accent', hex);
+        if (grid) grid.setAttribute('accent', hex);
+        swatches.forEach(s => s.classList.toggle('active', s.dataset.color.toLowerCase() === hex.toLowerCase()));
+      }
+
+      function applyBrandName(name) {
+        const clean = name.trim() || 'Aetheris';
+        $$('[data-brand-text]').forEach(el => { el.textContent = clean; });
+        document.title = `${clean} — Compute at Machine Speed`;
+      }
+
+      function applyPreset(key) {
+        const p = PRESETS[key];
+        if (!p) return;
+        presetBtns.forEach(b => b.classList.toggle('active', b.dataset.presetKey === key));
+        if (brandInput) brandInput.value = p.brand;
+        applyBrandName(p.brand);
+        applyAccent(p.color, p.rgb);
+
+        const eyebrowEl = $('[data-preset="eyebrow"]');
+        const introEl = $('[data-preset="intro"]');
+        const taglineEl = $('[data-preset="tagline"]');
+        const ctaEl = $('[data-cta-primary]');
+        const s1HeadEl = $('[data-preset="s1Heading"]');
+        const s1BodyEl = $('[data-preset="s1Body"]');
+
+        if (eyebrowEl) eyebrowEl.textContent = p.eyebrow;
+        if (introEl) introEl.textContent = p.intro;
+        if (taglineEl) taglineEl.textContent = p.tagline;
+        if (ctaEl) ctaEl.textContent = p.cta;
+        if (s1HeadEl) s1HeadEl.textContent = p.s1Heading;
+        if (s1BodyEl) s1BodyEl.textContent = p.s1Body;
+      }
+
+      if (tsToggleBtn && tsPanel) {
+        tsToggleBtn.addEventListener('click', () => {
+          tsPanel.hidden = !tsPanel.hidden;
+        });
+      }
+      if (tsCloseBtn && tsPanel) {
+        tsCloseBtn.addEventListener('click', () => {
+          tsPanel.hidden = true;
+        });
+      }
+      if (footerOpenStudio && tsPanel) {
+        footerOpenStudio.addEventListener('click', (e) => {
+          e.preventDefault();
+          tsPanel.hidden = false;
+        });
+      }
+
+      presetBtns.forEach(btn => {
+        btn.addEventListener('click', () => applyPreset(btn.dataset.presetKey));
+      });
+
+      if (brandInput) {
+        brandInput.addEventListener('input', (e) => applyBrandName(e.target.value));
+      }
+
+      swatches.forEach(sw => {
+        sw.addEventListener('click', () => {
+          applyAccent(sw.dataset.color, sw.dataset.rgb);
+        });
+      });
+
+      // One-Click Clean HTML Export
+      if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+          const clone = document.documentElement.cloneNode(true);
+          // Remove injected runtime canvases inside custom elements so they initialize cleanly on load
+          clone.querySelectorAll('supernova-stage canvas, validator-grid canvas').forEach(c => c.remove());
+          // Remove the customizer widget from the exported production file
+          clone.querySelectorAll('[data-export-strip]').forEach(el => el.remove());
+
+          const htmlContent = '<!DOCTYPE html>\n' + clone.outerHTML;
+          const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          const brandSlug = (brandInput?.value || 'template').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+          a.href = url;
+          a.download = `${brandSlug}-landing-page.html`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

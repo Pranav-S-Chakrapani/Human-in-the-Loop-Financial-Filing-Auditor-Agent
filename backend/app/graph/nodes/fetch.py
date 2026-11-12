@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional
 from backend.app.graph.idempotency import is_node_completed, record_node_start, record_node_finish
 from backend.app.events import event_bus
 from backend.app.edgar import fetch_edgar
+from backend.app.api.companies import get_custom_company
 
 COMPANIES_FILE = Path("companies.json")
 
@@ -17,6 +18,14 @@ def load_pinned_company(ticker: str) -> Optional[Dict[str, Any]]:
                 return c
     return None
 
+def resolve_company(ticker: str) -> Optional[Dict[str, Any]]:
+    # 1. Pinned 8 companies take precedence (existing tested path untouched)
+    comp = load_pinned_company(ticker)
+    if comp:
+        return comp
+    # 2. Session custom added companies
+    return get_custom_company(ticker)
+
 async def fetch_node(state: Dict[str, Any]) -> Dict[str, Any]:
     run_id = state.get("run_id", "")
     ticker = state.get("ticker", "AAPL")
@@ -29,9 +38,9 @@ async def fetch_node(state: Dict[str, Any]) -> Dict[str, Any]:
     record_node_start(run_id, "fetch")
     await event_bus.emit("node_started", {"node": "fetch"}, run_id=run_id)
 
-    comp = load_pinned_company(ticker)
+    comp = resolve_company(ticker)
     if not comp:
-        raise ValueError(f"Company {ticker} not found in companies.json")
+        raise ValueError(f"Company {ticker} not found in companies.json or custom list")
 
     cik = comp["cik"]
     cik_no_zero = str(int(cik))

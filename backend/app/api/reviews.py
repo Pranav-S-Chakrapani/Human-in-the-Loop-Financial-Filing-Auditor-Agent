@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException, Request
 from langgraph.types import Command
 from backend.app.db import get_connection
 from backend.app.audit import append_audit_entry
+from backend.app.adaptive import record_metric_decision
 from backend.app.events import event_bus
 from backend.app.models import ReviewDecisionRequest, ReviewDecisionResponse
 
@@ -259,6 +260,10 @@ async def submit_review_decision(
             (datetime.now(timezone.utc).isoformat(), run_id)
         )
         conn.commit()
+
+        # Update adaptive thresholds count for corrected or rejected values
+        metric_name = metric_id.replace(f"m_{run_id}_", "")
+        record_metric_decision(metric_name, req.decision)
 
     finally:
         conn.close()

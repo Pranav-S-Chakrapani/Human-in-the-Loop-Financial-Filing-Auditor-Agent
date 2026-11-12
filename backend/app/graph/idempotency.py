@@ -1,3 +1,4 @@
+import os
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -58,3 +59,8 @@ def record_node_finish(run_id: str, node_name: str, status: str = "done", db_pat
         conn.commit()
     finally:
         conn.close()
+
+    chaos_node = os.environ.get("CHAOS_KILL_AFTER_NODE")
+    if chaos_node and chaos_node == node_name:
+        print(f"CHAOS_KILL_AFTER_NODE triggered after {node_name}! Simulating SIGKILL (os._exit(137))...")
+        os._exit(137)

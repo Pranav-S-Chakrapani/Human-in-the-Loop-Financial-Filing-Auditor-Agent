@@ -197,6 +197,12 @@ async def create_runs(
     request: Request,
     background_tasks: BackgroundTasks
 ):
+    if getattr(request.app.state, "maintenance_mode", False):
+        raise HTTPException(
+            status_code=503,
+            detail="System is currently performing maintenance/demo reset. Please retry shortly."
+        )
+
     now_iso = datetime.now(timezone.utc).isoformat()
     created_items: List[RunCreatedItem] = []
 

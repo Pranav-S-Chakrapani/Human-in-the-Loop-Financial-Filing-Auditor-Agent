@@ -8,15 +8,18 @@ import {
   AuditLedgerScreen,
   ReportScreen,
 } from './screens';
-import { fetchCounters, USE_MOCKS, subscribeToEvents } from './api';
-import { Shield, RefreshCw, HelpCircle, Monitor } from 'lucide-react';
+import { fetchCounters, fetchDevStatus, USE_MOCKS, subscribeToEvents } from './api';
+import { Shield, RefreshCw, HelpCircle, Monitor, Settings } from 'lucide-react';
 import { ShortcutsModal } from './components/ShortcutsModal';
+import { DevSettingsModal } from './components/DevSettingsModal';
 
 const NavigationBar: React.FC<{
   isPresenterMode: boolean;
   onTogglePresenter: () => void;
   onOpenShortcuts: () => void;
-}> = ({ isPresenterMode, onTogglePresenter, onOpenShortcuts }) => {
+  onOpenDevSettings: () => void;
+  demoResetEnabled: boolean;
+}> = ({ isPresenterMode, onTogglePresenter, onOpenShortcuts, onOpenDevSettings, demoResetEnabled }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [counters, setCounters] = useState<{ llm_calls: number; audit_rows: number; events: number } | null>(null);
@@ -34,7 +37,7 @@ const NavigationBar: React.FC<{
     e.preventDefault();
     setLogoClicked(true);
     setTimeout(() => setLogoClicked(false), 200);
-    navigate('/mission');
+    navigate('/');
   };
 
   const navLinks = [
@@ -57,7 +60,7 @@ const NavigationBar: React.FC<{
               transform: logoClicked ? 'scale(0.92)' : 'scale(1)',
               transition: 'transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1)'
             }}
-            className="flex items-center space-x-2 font-bold text-sky-400 tracking-wider text-sm uppercase cursor-pointer focus:outline-none"
+            className="flex items-center space-x-2 font-display font-bold text-sky-400 tracking-wider text-sm uppercase cursor-pointer focus:outline-none"
           >
             <Shield className="w-4 h-4 text-sky-400" />
             <span>VantageAudit</span>
@@ -116,6 +119,17 @@ const NavigationBar: React.FC<{
             <Monitor className="w-3.5 h-3.5" />
           </button>
 
+          {/* Dev / Demo Settings button: visible ONLY when demoResetEnabled is true */}
+          {demoResetEnabled && (
+            <button
+              onClick={onOpenDevSettings}
+              title="Developer & Demo Settings"
+              className="p-1.5 rounded-lg border border-sky-500/40 bg-sky-500/10 text-sky-400 hover:text-sky-200 hover:bg-sky-500/20 transition-colors cursor-pointer font-mono"
+            >
+              <Settings className="w-3.5 h-3.5 animate-spin-slow" />
+            </button>
+          )}
+
           {/* Keyboard Shortcuts helper button */}
           <button
             onClick={onOpenShortcuts}
@@ -136,6 +150,14 @@ export const App: React.FC = () => {
   const [lastCheckpointTime, setLastCheckpointTime] = useState<string>('Just now');
   const [isPresenterMode, setIsPresenterMode] = useState<boolean>(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState<boolean>(false);
+  const [isDevSettingsOpen, setIsDevSettingsOpen] = useState<boolean>(false);
+  const [demoResetEnabled, setDemoResetEnabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    fetchDevStatus().then((res) => {
+      setDemoResetEnabled(res.demo_reset_enabled);
+    }).catch(() => setDemoResetEnabled(false));
+  }, []);
 
   useEffect(() => {
     const unsub = subscribeToEvents((event) => {
@@ -165,6 +187,7 @@ export const App: React.FC = () => {
         setIsPresenterMode((prev) => !prev);
       } else if (e.key === 'Escape') {
         setIsShortcutsOpen(false);
+        setIsDevSettingsOpen(false);
       }
     };
     window.addEventListener('keydown', handleGlobalKeys);
@@ -178,6 +201,8 @@ export const App: React.FC = () => {
           isPresenterMode={isPresenterMode}
           onTogglePresenter={() => setIsPresenterMode(!isPresenterMode)}
           onOpenShortcuts={() => setIsShortcutsOpen(true)}
+          onOpenDevSettings={() => setIsDevSettingsOpen(true)}
+          demoResetEnabled={demoResetEnabled}
         />
 
         <main className="flex-1 pb-12">
@@ -192,6 +217,18 @@ export const App: React.FC = () => {
         </main>
 
         <ShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
+        
+        {demoResetEnabled && (
+          <DevSettingsModal
+            isOpen={isDevSettingsOpen}
+            onClose={() => setIsDevSettingsOpen(false)}
+            onResetSuccess={() => {
+              setToastType('info');
+              setToastMessage('Demo Data Cleared: Database reset to pristine schema.');
+              setTimeout(() => setToastMessage(null), 5000);
+            }}
+          />
+        )}
 
         {/* System Recovered / Error Toasts */}
         {toastMessage && (

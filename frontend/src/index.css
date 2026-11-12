@@ -1,3 +1,5 @@
+@import './styles/tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,13 +10,49 @@
 
 body {
   margin: 0;
-  background-color: #090d16;
+  background-color: var(--ink, #12151C);
   color: #f1f5f9;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   font-variant-numeric: tabular-nums;
 }
 
 /* Tabular numerals everywhere per RULES.md #29 */
 * {
   font-variant-numeric: tabular-nums;
+}
+
+/* Staggered cell-reveal animation for Section (b) Dual Extraction */
+@keyframes snCellReveal {
+  0% {
+    opacity: 0.2;
+    transform: translateY(6px);
+    background-color: transparent;
+    color: #94a3b8;
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+    background-color: rgba(232, 179, 57, 0.25);
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(232, 179, 57, 0.4);
+  }
+  40%, 100% {
+    opacity: 1;
+    transform: translateY(0);
+    background-color: var(--ink-raised, #1B1F28);
+    color: #f1f5f9;
+    box-shadow: none;
+  }
+}
+
+.animate-cell-reveal {
+  animation: snCellReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-cell-reveal {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

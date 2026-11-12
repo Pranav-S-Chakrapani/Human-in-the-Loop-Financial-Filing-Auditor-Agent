@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, AlertTriangle, CheckCircle, Clock, Zap, Activity } from 'lucide-react';
-import { fetchRuns, createRun, subscribeToEvents } from '../api';
+import { Play, AlertTriangle, CheckCircle, Clock, Zap, Activity, Plus, Loader2 } from 'lucide-react';
+import { fetchRuns, createRun, subscribeToEvents, fetchCompanies, addCompany } from '../api';
 import { MagneticButton } from '../components/MagneticButton';
 
 const PIPELINE_NODES = [
@@ -10,19 +10,32 @@ const PIPELINE_NODES = [
   "ground_truth_verify", "report"
 ];
 
-const AVAILABLE_TICKERS = ["AAPL", "MSFT", "KO", "NKE", "PEP", "JNJ", "AMZN", "GOOGL"];
+const DEFAULT_PINNED_TICKERS = ["AAPL", "MSFT", "KO", "NKE", "PEP", "JNJ", "AMZN", "GOOGL"];
 
 export const MissionControlScreen: React.FC = () => {
   const navigate = useNavigate();
   const [runs, setRuns] = useState<any[]>([]);
+  const [pinnedTickers, setPinnedTickers] = useState<string[]>(DEFAULT_PINNED_TICKERS);
+  const [customCompanies, setCustomCompanies] = useState<any[]>([]);
   const [selectedTickers, setSelectedTickers] = useState<string[]>(["AAPL", "MSFT"]);
   const [faultMode, setFaultMode] = useState<string>("");
   const [events, setEvents] = useState<any[]>([]);
+
+  // Add Company input state
+  const [isAddingCompany, setIsAddingCompany] = useState<boolean>(false);
+  const [newTickerInput, setNewTickerInput] = useState<string>("");
+  const [isLookingUp, setIsLookingUp] = useState<boolean>(false);
+  const [addCompanyError, setAddCompanyError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchRuns().then((data) => {
       setRuns(data);
     });
+
+    fetchCompanies().then((res) => {
+      if (res.pinned && res.pinned.length > 0) setPinnedTickers(res.pinned);
+      if (res.custom) setCustomCompanies(res.custom);
+    }).catch(() => null);
 
     const unsubscribe = subscribeToEvents((event) => {
       setEvents((prev) => [event, ...prev].slice(0, 50));
@@ -34,6 +47,32 @@ export const MissionControlScreen: React.FC = () => {
 
     return () => unsubscribe();
   }, []);
+
+  const handleAddCompanySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const t = newTickerInput.trim().toUpperCase();
+    if (!t) return;
+    setAddCompanyError(null);
+    setIsLookingUp(true);
+
+    try {
+      const res = await addCompany(t);
+      setCustomCompanies((prev) => {
+        const filtered = prev.filter((c) => c.ticker !== res.ticker);
+        return [...filtered, res.company];
+      });
+      // Auto-select newly added ticker
+      if (!selectedTickers.includes(res.ticker)) {
+        setSelectedTickers((prev) => [...prev, res.ticker]);
+      }
+      setNewTickerInput("");
+      setIsAddingCompany(false);
+    } catch (err: any) {
+      setAddCompanyError(err.message || `Failed to add company ${t}`);
+    } finally {
+      setIsLookingUp(false);
+    }
+  };
 
   const handleStartRun = async () => {
     if (selectedTickers.length === 0) return;
@@ -70,8 +109,9 @@ export const MissionControlScreen: React.FC = () => {
         {/* Trigger Controls */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Ticker selector chips */}
-          <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-lg border border-slate-800">
-            {AVAILABLE_TICKERS.map((t) => {
+          <div className="flex flex-wrap items-center gap-1.5 bg-slate-950 p-1 rounded-lg border border-slate-800">
+            {/* Pinned 8 */}
+            {pinnedTickers.map((t) => {
               const active = selectedTickers.includes(t);
               return (
                 <button
@@ -87,6 +127,73 @@ export const MissionControlScreen: React.FC = () => {
                 </button>
               );
             })}
+
+            {/* Custom Session Added Tickers */}
+            {customCompanies.map((c) => {
+              const t = c.ticker;
+              const active = selectedTickers.includes(t);
+              return (
+                <button
+                  key={t}
+                  onClick={() => toggleTicker(t)}
+                  title={c.name}
+                  className={`px-2 py-1 text-xs font-mono rounded border flex items-center space-x-1 ${
+                    active
+                      ? "bg-teal-500/20 text-teal-300 font-bold border-teal-500/50"
+                      : "bg-slate-900/80 text-teal-400/80 border-teal-500/30 hover:border-teal-500/60"
+                  }`}
+                >
+                  <span>{t}</span>
+                  <span className="text-[9px] px-1 rounded bg-teal-500/20 font-sans">custom</span>
+                </button>
+              );
+            })}
+
+            {/* + Add Company toggle/input */}
+            {!isAddingCompany ? (
+              <button
+                onClick={() => {
+                  setIsAddingCompany(true);
+                  setAddCompanyError(null);
+                }}
+                className="px-2 py-1 text-xs font-mono text-slate-400 hover:text-sky-300 hover:bg-slate-900 rounded flex items-center space-x-1 transition-colors"
+                title="Add company by ticker via SEC EDGAR"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Company</span>
+              </button>
+            ) : (
+              <form onSubmit={handleAddCompanySubmit} className="flex items-center space-x-1">
+                <input
+                  type="text"
+                  value={newTickerInput}
+                  onChange={(e) => setNewTickerInput(e.target.value)}
+                  placeholder="NVDA..."
+                  disabled={isLookingUp}
+                  autoFocus
+                  className="w-20 px-2 py-0.5 text-xs font-mono bg-slate-900 border border-sky-500/50 rounded text-sky-200 placeholder-slate-500 focus:outline-none uppercase"
+                />
+                <button
+                  type="submit"
+                  disabled={isLookingUp || !newTickerInput.trim()}
+                  className="px-2 py-0.5 text-xs font-medium rounded bg-sky-500 hover:bg-sky-400 text-slate-950 disabled:opacity-50 flex items-center"
+                >
+                  {isLookingUp ? <Loader2 className="w-3 h-3 animate-spin" /> : "Add"}
+                </button>
+                <button
+                  type="button"
+                  disabled={isLookingUp}
+                  onClick={() => {
+                    setIsAddingCompany(false);
+                    setAddCompanyError(null);
+                    setNewTickerInput("");
+                  }}
+                  className="px-1.5 py-0.5 text-xs text-slate-400 hover:text-white"
+                >
+                  ✕
+                </button>
+              </form>
+            )}
           </div>
 
           {/* Fault mode dropdown */}
@@ -109,10 +216,26 @@ export const MissionControlScreen: React.FC = () => {
             className="px-4 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold flex items-center space-x-1.5 shadow-md shadow-sky-500/20 cursor-pointer"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
-            <span>Start Run</span>
+            <span>Launch Run ({selectedTickers.length})</span>
           </MagneticButton>
         </div>
       </div>
+
+      {/* Add Company Error Banner */}
+      {addCompanyError && (
+        <div className="p-3 rounded-lg border border-rose-500/40 bg-rose-500/10 text-rose-300 text-xs flex items-center justify-between font-mono">
+          <div className="flex items-center space-x-2">
+            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+            <span>{addCompanyError}</span>
+          </div>
+          <button
+            onClick={() => setAddCompanyError(null)}
+            className="text-slate-400 hover:text-white text-xs px-2 py-0.5"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Main Grid: Pipelines Lane + Event Stream */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

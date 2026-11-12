@@ -3,18 +3,21 @@ import React, { useRef, useState, useEffect } from 'react';
 interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   className?: string;
-  radius?: number; // max interaction radius in px
+  maxShift?: number; // max interaction shift in px toward cursor (default 8px)
+  radius?: number; // legacy alias compatibility
 }
 
 export const MagneticButton: React.FC<MagneticButtonProps> = ({
   children,
   className = '',
-  radius = 35,
+  maxShift = 8,
+  radius,
   onClick,
   ...props
 }) => {
   const btnRef = useRef<HTMLButtonElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -33,17 +36,18 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
 
     const deltaX = e.clientX - centerX;
     const deltaY = e.clientY - centerY;
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-    if (distance < radius) {
-      const pullFactor = 0.35;
-      setPosition({ x: deltaX * pullFactor, y: deltaY * pullFactor });
-    } else {
-      setPosition({ x: 0, y: 0 });
-    }
+    // Normalize within bounding box half-extents
+    const normX = Math.max(-1, Math.min(1, deltaX / (rect.width / 2)));
+    const normY = Math.max(-1, Math.min(1, deltaY / (rect.height / 2)));
+
+    // Shift up to maxShift (8px) toward cursor with spring ease
+    setPosition({ x: normX * maxShift, y: normY * maxShift });
+    setIsHovered(true);
   };
 
   const handleMouseLeave = () => {
+    setIsHovered(false);
     setPosition({ x: 0, y: 0 });
   };
 
@@ -54,8 +58,10 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
       style={{
-        transform: prefersReducedMotion ? 'none' : `translate(${position.x}px, ${position.y}px)`,
-        transition: position.x === 0 && position.y === 0 ? 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' : 'transform 0.05s ease-out',
+        transform: prefersReducedMotion ? 'none' : `translate3d(${position.x}px, ${position.y}px, 0)`,
+        transition: isHovered
+          ? 'transform 0.12s cubic-bezier(0.25, 1, 0.5, 1)'
+          : 'transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275)', // spring-like settle
       }}
       className={className}
       {...props}
