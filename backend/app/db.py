@@ -3,7 +3,8 @@ import aiosqlite
 from pathlib import Path
 from typing import Optional
 
-DB_PATH = Path("app.db")
+BACKEND_DIR = Path(__file__).resolve().parent.parent
+DB_PATH = BACKEND_DIR / "app.db"
 
 SCHEMA_SQL = """
 PRAGMA journal_mode=WAL;

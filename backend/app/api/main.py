@@ -23,7 +23,9 @@ from backend.app.api.report import router as report_router
 # Enforce strict msgpack serialization per RULES #11
 os.environ["LANGGRAPH_STRICT_MSGPACK"] = "true"
 
-CHECKPOINTS_DB_PATH = "checkpoints.db"
+from pathlib import Path
+BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
+CHECKPOINTS_DB_PATH = str(BACKEND_DIR / "checkpoints.db")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
