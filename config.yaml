@@ -1,0 +1,16 @@
+confidence_threshold: 0.75
+yoy_threshold_pct: 50.0
+equation_tolerance_pct: 0.5
+disagree_cap: 0.4
+scoring_weights:
+  agree: 0.5
+  label: 0.3
+  cross: 0.2
+max_review_rounds: 2
+llm:
+  concurrency: 3
+  model: "openai/gpt-oss-120b"
+  fallback_model: "gemini-3.5-flash"
+edgar:
+  max_rps: 5.0
+  user_agent: "FilingAuditor your_real_email@example.com"
