@@ -4,11 +4,23 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException, Request, BackgroundTasks
+from pydantic import BaseModel
 from backend.app.db import get_connection
 from backend.app.events import event_bus
-from backend.app.models import RunCreateRequest, RunCreateResponse, RunCreatedItem
+from backend.app.models import RunCreateRequest, RunCreateResponse, RunCreatedItem, FaultMode
+from backend.app.faults import arm_fault
 
 router = APIRouter(tags=["runs"])
+
+class InjectFaultRequest(BaseModel):
+    ticker: str
+    mode: str
+
+@router.post("/admin/inject-fault")
+def inject_fault_endpoint(req: InjectFaultRequest) -> Dict[str, Any]:
+    """Arms a fault for the ticker's next run per SPEC §12 and CONTRACT.md."""
+    armed = arm_fault(req.ticker, req.mode)
+    return {"armed": True, "ticker": req.ticker, "fault_mode": armed}
 
 @router.get("/runs")
 def list_runs() -> List[Dict[str, Any]]:
@@ -19,6 +31,17 @@ def list_runs() -> List[Dict[str, Any]]:
         rows = cur.fetchall()
         result = []
         for r in rows:
+            run_id = r["run_id"]
+            # Compute real counts from metrics and reviews
+            cur.execute("SELECT count(*) as cnt FROM metrics WHERE run_id = ?", (run_id,))
+            m_cnt = cur.fetchone()["cnt"]
+            cur.execute("SELECT count(*) as cnt FROM metrics WHERE run_id = ? AND decision_status = 'auto_approved'", (run_id,))
+            auto_cnt = cur.fetchone()["cnt"]
+            cur.execute("SELECT count(*) as cnt FROM reviews WHERE run_id = ? AND status = 'pending'", (run_id,))
+            pend_cnt = cur.fetchone()["cnt"]
+            cur.execute("SELECT count(*) as cnt FROM reviews WHERE run_id = ? AND status != 'pending'", (run_id,))
+            decided_cnt = cur.fetchone()["cnt"]
+
             result.append({
                 "run_id": r["run_id"],
                 "company": r["company"],
@@ -26,11 +49,101 @@ def list_runs() -> List[Dict[str, Any]]:
                 "fiscal_year": r["fiscal_year"] or 2026,
                 "status": r["status"],
                 "current_node": r["current_node"],
-                "counts": {"metrics": 0, "auto_approved": 0, "pending": 0, "decided": 0},
+                "counts": {
+                    "metrics": m_cnt,
+                    "auto_approved": auto_cnt,
+                    "pending": pend_cnt,
+                    "decided": decided_cnt
+                },
                 "created_at": r["created_at"],
                 "updated_at": r["updated_at"]
             })
         return result
+    finally:
+        conn.close()
+
+@router.get("/runs/{run_id}")
+def get_run(run_id: str) -> Dict[str, Any]:
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM runs WHERE run_id = ?", (run_id,))
+        run_row = cur.fetchone()
+        if not run_row:
+            raise HTTPException(status_code=404, detail="Run not found")
+
+        cur.execute("SELECT node, status, finished_at FROM node_runs WHERE run_id = ?", (run_id,))
+        node_rows = cur.fetchall()
+        nodes = [{"node": n["node"], "status": n["status"], "finished_at": n["finished_at"]} for n in node_rows]
+
+        cur.execute("SELECT * FROM metrics WHERE run_id = ?", (run_id,))
+        metric_rows = cur.fetchall()
+        metrics = []
+        for m in metric_rows:
+            try:
+                cb = json.loads(m["confidence_breakdown"]) if m["confidence_breakdown"] else None
+                sr = json.loads(m["source_ref"]) if m["source_ref"] else None
+                gt = json.loads(m["ground_truth"]) if m["ground_truth"] else None
+            except Exception:
+                cb, sr, gt = None, None, None
+
+            metrics.append({
+                "metric_id": m["metric_id"],
+                "run_id": m["run_id"],
+                "metric": m["metric"],
+                "period_label": m["period_label"],
+                "period_end": m["period_end"],
+                "is_current": bool(m["is_current"]),
+                "unit_label": m["unit_label"],
+                "scale": m["scale"],
+                "value_a": m["value_a"],
+                "value_b": m["value_b"],
+                "value_dollars": m["value_dollars"],
+                "snippet_text": m["snippet_text"],
+                "snippet_html": m["snippet_html"],
+                "source_ref": sr,
+                "confidence": m["confidence"],
+                "confidence_breakdown": cb,
+                "method": m["method"],
+                "decision_status": m["decision_status"],
+                "final_value": m["final_value"],
+                "fault_injected": bool(m["fault_injected"]),
+                "ground_truth": gt
+            })
+
+        cur.execute("SELECT * FROM validations WHERE run_id = ?", (run_id,))
+        val_rows = cur.fetchall()
+        validations = []
+        for v in val_rows:
+            try:
+                detail = json.loads(v["detail"]) if v["detail"] else None
+            except Exception:
+                detail = None
+            validations.append({
+                "validation_id": v["validation_id"],
+                "check_type": v["check_type"],
+                "metric": v["metric_id"].replace(f"m_{run_id}_", ""),
+                "status": v["status"],
+                "phase": v["phase"],
+                "detail": detail,
+                "explanation": v["explanation"]
+            })
+
+        return {
+            "run_id": run_row["run_id"],
+            "company": run_row["company"],
+            "ticker": run_row["ticker"],
+            "cik": run_row["cik"],
+            "accession": run_row["accession"],
+            "fiscal_year": run_row["fiscal_year"],
+            "status": run_row["status"],
+            "current_node": run_row["current_node"],
+            "fault_mode": run_row["fault_mode"],
+            "nodes": nodes,
+            "metrics": metrics,
+            "validations": validations,
+            "last_checkpoint_at": run_row["updated_at"]
+        }
     finally:
         conn.close()
 
@@ -56,7 +169,7 @@ async def execute_run_graph(run_id: str, is_toy: bool, app_state: Any, initial_s
                 await event_bus.emit("run_paused", {"node": state.next[0]}, run_id=run_id)
             else:
                 cur.execute(
-                    "UPDATE runs SET status = 'completed', updated_at = ? WHERE run_id = ?",
+                    "UPDATE runs SET status = 'completed', current_node = 'done', updated_at = ? WHERE run_id = ?",
                     (now_iso, run_id)
                 )
                 conn.commit()
@@ -122,6 +235,7 @@ async def create_runs(
                 "run_id": run_id,
                 "ticker": ticker,
                 "company": company_name,
+                "fault_mode": req.fault_mode.value if req.fault_mode else None,
                 "current_review_id": f"rv_{run_id}" if is_toy else "",
                 "step_a_count": 0,
                 "step_b_count": 0

@@ -138,9 +138,11 @@ def init_db(db_path: Optional[Path] = None) -> None:
 
 def get_connection(db_path: Optional[Path] = None) -> sqlite3.Connection:
     target = db_path or DB_PATH
-    conn = sqlite3.connect(target)
+    conn = sqlite3.connect(target, timeout=30.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
+    conn.execute("PRAGMA journal_mode = WAL;")
+    conn.execute("PRAGMA busy_timeout = 30000;")
     return conn
 
 async def get_async_connection(db_path: Optional[Path] = None) -> aiosqlite.Connection:
