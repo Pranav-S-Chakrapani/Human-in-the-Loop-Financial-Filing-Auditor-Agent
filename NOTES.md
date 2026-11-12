@@ -22,8 +22,21 @@
 ### 4. Ground Truth Isolation (RULES #1)
 - `backend/app/groundtruth.py` is the only file with knowledge of XBRL Company Facts. No extractor, validator, or triage module imports it.
 
-### 5. Frontend & UI
-- Stack initialized with Vite, React 19, TypeScript, Tailwind CSS, Lucide icons, Framer Motion, and Recharts.
-- Strict dark palette tokens (`#090d16` background, tabular numbers enabled globally via `font-variant-numeric: tabular-nums`).
-- All 6 CONTRACT.md screens routed: Intro (`/`), Mission Control (`/mission`), Review Workbench (`/reviews`), Metrics Grid (`/metrics`), Audit Ledger (`/audit`), Report (`/report`).
-- Mock/real API layer implemented via `VITE_USE_MOCKS` in `api.ts`.
+---
+
+## Gate: Frontend & Contract Verification
+
+### Contract Mismatches & UI Assumptions Observed:
+1. **Mock Mode Switching (`VITE_USE_MOCKS`)**:
+   - `src/api.ts` handles seamless switching between mock fixtures (`src/mocks/index.ts`) and the live FastAPI backend on port 8000.
+   - Visible "MOCK" badge is displayed in the navigation header whenever `VITE_USE_MOCKS=true`.
+2. **Review Workbench Actionable State**:
+   - CONTRACT.md states `actionable=true` only for the head-of-queue review of its run.
+   - Non-actionable items in the queue are explicitly marked "Queued behind head" and the action buttons are disabled with explanation text.
+3. **Parallax and Motion Rules**:
+   - Strict adherence to RULES §G #29–30: scroll-controlled parallax is strictly isolated to the background layers of the Intro screen.
+   - Magnetic button cursor-following is implemented with a ~40px radius on the Intro CTA and a constrained ~20px radius on dense workbench buttons (`Approve`, `Edit`, `Reject`).
+   - `prefers-reduced-motion` is detected and respected: disabling transforms and falling back to native hover states.
+4. **WebSocket & Survivability UI**:
+   - `system_recovered` toast appears dynamically upon reconnection/recovery.
+   - Fixed footer chip displays `"Checkpointed · last checkpoint <time>"` on all screens.
