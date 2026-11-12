@@ -40,3 +40,13 @@
 4. **WebSocket & Survivability UI**:
    - `system_recovered` toast appears dynamically upon reconnection/recovery.
    - Fixed footer chip displays `"Checkpointed · last checkpoint <time>"` on all screens.
+
+---
+
+## Gate: Evaluation & Verification (EVAL)
+
+### 1. `GET /reviews` Head-of-Queue Ordering
+- **Observation:** `backend/app/api/reviews.py` checks actionable status using `ORDER BY rowid ASC LIMIT 1`, but `list_reviews` (`GET /reviews`) previously queried `SELECT r.*, run.company, run.ticker FROM reviews r JOIN runs run ...` without an explicit `ORDER BY r.rowid ASC`. In SQLite, standard `SELECT` without `ORDER BY` does not guarantee row insertion order, which could lead to misidentifying the head of queue if client code trusts the un-ordered response.
+- **Backend Fix Needed:** In `backend/app/api/reviews.py`, `list_reviews` query should append `ORDER BY r.rowid ASC`.
+- **EVAL Test Adaptation:** `eval/kill_resume_test.py` directly queries review details (`/reviews/{id}`) and determines true actionable head by inspecting `GET /reviews/{id}` for `actionable == True`.
+
