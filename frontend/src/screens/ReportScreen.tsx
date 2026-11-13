@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { fetchReport } from '../api';
-import { Download, Award, ShieldCheck, Activity, Printer } from 'lucide-react';
+import { generatePdfReport } from '../utils/generatePdfReport';
+import { Download, Award, ShieldCheck, Activity, Printer, FileText, CheckCircle2 } from 'lucide-react';
 
 export const ReportScreen: React.FC = () => {
   const [report, setReport] = useState<any | null>(null);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [pdfSuccess, setPdfSuccess] = useState(false);
 
   useEffect(() => {
     fetchReport().then(setReport);
@@ -19,7 +22,21 @@ export const ReportScreen: React.FC = () => {
     a.click();
   };
 
-  const handlePrintPDF = () => {
+  const handleExportPDF = () => {
+    if (!report) return;
+    setIsGeneratingPdf(true);
+    try {
+      generatePdfReport(report);
+      setPdfSuccess(true);
+      setTimeout(() => setPdfSuccess(false), 3000);
+    } catch (err) {
+      console.error('PDF Generation Error:', err);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const handlePrint = () => {
     window.print();
   };
 
@@ -80,22 +97,43 @@ export const ReportScreen: React.FC = () => {
           </p>
         </div>
 
-        {/* Action Buttons: PDF Export + JSON Export */}
-        <div className="flex items-center space-x-3">
+        {/* Action Buttons: PDF Export + Print + JSON Export */}
+        <div className="flex items-center space-x-2.5 flex-wrap">
           <button
-            onClick={handlePrintPDF}
-            className="px-4 py-2 rounded-xl border border-[var(--signal,#E8B339)]/30 bg-[rgba(232,179,57,0.12)] hover:bg-[rgba(232,179,57,0.22)] text-[var(--signal,#E8B339)] text-xs font-mono font-bold flex items-center space-x-2 transition-all cursor-pointer shadow-md hover:shadow-[0_0_15px_rgba(232,179,57,0.25)] active:scale-95"
+            onClick={handleExportPDF}
+            disabled={isGeneratingPdf}
+            className="px-4 py-2 rounded-xl border border-[var(--signal,#E8B339)]/40 bg-[rgba(232,179,57,0.14)] hover:bg-[rgba(232,179,57,0.24)] text-[var(--signal,#E8B339)] text-xs font-mono font-bold flex items-center space-x-2 transition-all cursor-pointer shadow-[0_0_15px_rgba(232,179,57,0.25)] active:scale-95"
+            title="Download publication-grade vector PDF report"
           >
-            <Printer className="w-4 h-4 text-[var(--signal,#E8B339)]" />
-            <span>Export Report PDF</span>
+            {pdfSuccess ? (
+              <>
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span className="text-emerald-400">PDF Downloaded!</span>
+              </>
+            ) : (
+              <>
+                <FileText className="w-4 h-4 text-[var(--signal,#E8B339)]" />
+                <span>Export Executive PDF</span>
+              </>
+            )}
+          </button>
+
+          <button
+            onClick={handlePrint}
+            className="px-3.5 py-2 rounded-xl border border-white/[0.08] bg-[#141822] hover:bg-[#1C2230] text-slate-300 text-xs font-mono font-bold flex items-center space-x-2 transition-all cursor-pointer shadow-md hover:border-white/[0.16] active:scale-95"
+            title="Print or view browser print preview"
+          >
+            <Printer className="w-4 h-4 text-slate-400" />
+            <span>Print</span>
           </button>
 
           <button
             onClick={exportJSON}
-            className="px-4 py-2 rounded-xl border border-white/[0.08] bg-[#141822] hover:bg-[#1C2230] text-slate-200 text-xs font-mono font-bold flex items-center space-x-2 transition-all cursor-pointer shadow-md hover:border-white/[0.16] active:scale-95"
+            className="px-3.5 py-2 rounded-xl border border-white/[0.08] bg-[#141822] hover:bg-[#1C2230] text-slate-300 text-xs font-mono font-bold flex items-center space-x-2 transition-all cursor-pointer shadow-md hover:border-white/[0.16] active:scale-95"
+            title="Export raw JSON dataset"
           >
-            <Download className="w-4 h-4 text-slate-300" />
-            <span>Export JSON</span>
+            <Download className="w-4 h-4 text-slate-400" />
+            <span>JSON</span>
           </button>
         </div>
       </div>
