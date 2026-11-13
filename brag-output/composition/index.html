@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>VantageAudit — Launch Video</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Space+Grotesk:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --ground: #080B11;
+        --surface: #141822;
+        --signal: #E8B339;
+        --emerald: #10B981;
+        --rose: #F43F5E;
+        --sky: #38BDF8;
+        --ink: #FFFFFF;
+        --ink-dim: #94A3B8;
+        --font-display: 'Space Grotesk', system-ui, sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--ground);
+        font-family: var(--font-display);
+        color: var(--ink);
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: radial-gradient(circle at 50% 20%, rgba(232, 179, 57, 0.05) 0%, transparent 60%), #080B11;
+      }
+
+      /* Subtle Grid Backdrop */
+      .grid-backdrop {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        background-size: 40px 40px;
+        opacity: 0.6;
+        pointer-events: none;
+      }
+
+      /* Scene Container */
+      .scene {
+        position: absolute;
+        inset: 0;
+        width: 1920px;
+        height: 1080px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 80px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      /* Glass Panels */
+      .glass-card {
+        background: rgba(20, 24, 34, 0.92);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 24px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
+
+      /* Glowing Pill */
+      .glow-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        border-radius: 9999px;
+        font-family: var(--font-mono);
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="20"
+      data-width="1920"
+      data-height="1080"
+    >
+      <div class="grid-backdrop"></div>
+
+      <!-- Audio Tracks -->
+      <audio id="bgm" data-start="0" data-duration="20" data-volume="0.75" src="assets/music/music.mp3"></audio>
+      <audio id="sfx-impact1" data-start="0" data-duration="0.49" data-volume="0.85" src="assets/sfx/impact.ogg"></audio>
+      <audio id="sfx-switch1" data-start="3.2" data-duration="0.37" data-volume="0.7" src="assets/sfx/switch.ogg"></audio>
+      <audio id="sfx-click1" data-start="7.8" data-duration="0.09" data-volume="0.7" src="assets/sfx/click.ogg"></audio>
+      <audio id="sfx-switch2" data-start="12.0" data-duration="0.37" data-volume="0.7" src="assets/sfx/switch.ogg"></audio>
+      <audio id="sfx-impact2" data-start="16.5" data-duration="0.49" data-volume="1.0" src="assets/sfx/impact.ogg"></audio>
+
+      <!-- ================= SCENE 1: THE HOOK (0s - 3.2s) ================= -->
+      <section id="scene-1" class="scene" style="opacity: 1;">
+        <div class="glow-pill bg-amber-500/10 border border-amber-500/30 text-[#E8B339] mb-8" id="s1-tag" data-layout-ignore="true">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#E8B339]"></span>
+          <span>REGULATORY FINANCIAL TRUTH</span>
+        </div>
+        <h1 id="s1-heading" class="text-7xl font-bold tracking-tight text-center leading-[1.1] max-w-5xl">
+          10-K FILINGS ARE MESSY.<br />
+          <span class="text-[#E8B339]">HALLUCINATING THEM COSTS BILLIONS.</span>
+        </h1>
+        <p id="s1-sub" class="text-2xl text-slate-400 mt-6 font-mono tracking-wide">
+          Standard LLMs fail on corporate balance sheets. VantageAudit fixes it.
+        </p>
+      </section>
+
+      <!-- ================= SCENE 2: DUAL CONSENSUS (3.2s - 7.8s) ================= -->
+      <section id="scene-2" class="scene">
+        <div class="glow-pill bg-sky-500/10 border border-sky-500/30 text-sky-400 mb-6" data-layout-ignore="true">
+          <span>PARALLEL CORROBORATION ENGINE</span>
+        </div>
+        <h2 class="text-5xl font-bold tracking-tight text-center mb-10">
+          Two Extractors. <span class="text-[#E8B339]">One Truth.</span>
+        </h2>
+        
+        <div class="flex items-center gap-8 w-full max-w-5xl justify-center">
+          <!-- Rules Extractor Card -->
+          <div id="s2-card-rules" class="glass-card p-8 flex-1 flex flex-col justify-between h-[300px]">
+            <div>
+              <div class="text-sm font-mono text-slate-400 uppercase tracking-widest mb-1" data-layout-ignore="true">Method 01</div>
+              <div class="text-3xl font-bold text-white">Visual HTML Tree Parser</div>
+              <div class="text-sm font-mono text-slate-500 mt-1" data-layout-ignore="true">Deterministic Regex & Cell Normalizer</div>
+            </div>
+            <div>
+              <div class="text-sm font-mono text-slate-400 uppercase mb-1" data-layout-ignore="true">Apple Inc. · Total Net Sales</div>
+              <div class="text-4xl font-mono font-extrabold text-[#E8B339] tracking-tight">$94,930,000,000</div>
+            </div>
+          </div>
+
+          <!-- Corroboration Badge -->
+          <div id="s2-badge" class="w-24 h-24 rounded-full bg-[#E8B339]/20 border-2 border-[#E8B339] flex flex-col items-center justify-center text-center shadow-[0_0_30px_rgba(232,179,57,0.3)]" data-layout-ignore="true">
+            <span class="font-mono text-xs font-extrabold text-[#E8B339]">MATCH</span>
+            <span class="font-mono text-sm text-white">100%</span>
+          </div>
+
+          <!-- Vision LLM Card -->
+          <div id="s2-card-llm" class="glass-card p-8 flex-1 flex flex-col justify-between h-[300px]">
+            <div>
+              <div class="text-sm font-mono text-slate-400 uppercase tracking-widest mb-1" data-layout-ignore="true">Method 02</div>
+              <div class="text-3xl font-bold text-white">Vision LLM Extractor</div>
+              <div class="text-sm font-mono text-slate-500 mt-1" data-layout-ignore="true">Zero-Shot Visual Document Ingestion</div>
+            </div>
+            <div>
+              <div class="text-sm font-mono text-slate-400 uppercase mb-1" data-layout-ignore="true">Apple Inc. · Total Net Sales</div>
+              <div class="text-4xl font-mono font-extrabold text-sky-400 tracking-tight">$94,930,000,000</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="s2-footer" class="mt-8 font-mono text-sm text-slate-400 flex items-center gap-3" data-layout-ignore="true">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>Zero Hallucinations · Independent Corroboration · SEC Edgar CIK Compliant</span>
+        </div>
+      </section>
+
+      <!-- ================= SCENE 3: FOUR-POINT VALIDATION (7.8s - 12.0s) ================= -->
+      <section id="scene-3" class="scene">
+        <div class="glow-pill bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mb-6" data-layout-ignore="true">
+          <span>MATHEMATICAL INVARIANTS</span>
+        </div>
+        <h2 class="text-5xl font-bold tracking-tight text-center mb-10">
+          Four Checks. <span class="text-emerald-400">Every Time.</span>
+        </h2>
+
+        <div class="grid grid-cols-2 gap-6 w-full max-w-5xl">
+          <div id="s3-card-1" class="glass-card p-6 flex items-center justify-between border-l-4 border-l-emerald-500">
+            <div>
+              <div class="text-xs font-mono text-slate-400 uppercase" data-layout-ignore="true">Check 01</div>
+              <div class="text-2xl font-bold text-white mt-0.5">Accounting Equation</div>
+              <div class="text-sm text-slate-400 font-mono mt-1" data-layout-ignore="true">Assets = Liabilities + Equity</div>
+            </div>
+            <div class="text-right" data-layout-ignore="true">
+              <span class="px-3.5 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-sm font-bold border border-emerald-500/40">✓ $0.00 DIFF</span>
+            </div>
+          </div>
+
+          <div id="s3-card-2" class="glass-card p-6 flex items-center justify-between border-l-4 border-l-sky-500">
+            <div>
+              <div class="text-xs font-mono text-slate-400 uppercase" data-layout-ignore="true">Check 02</div>
+              <div class="text-2xl font-bold text-white mt-0.5">Segment Validation</div>
+              <div class="text-sm text-slate-400 font-mono mt-1" data-layout-ignore="true">Segments Sum to Consolidated</div>
+            </div>
+            <div class="text-right" data-layout-ignore="true">
+              <span class="px-3.5 py-1.5 rounded-full bg-sky-500/20 text-sky-300 font-mono text-sm font-bold border border-sky-500/40">✓ 100% RECONCILED</span>
+            </div>
+          </div>
+
+          <div id="s3-card-3" class="glass-card p-6 flex items-center justify-between border-l-4 border-l-[#E8B339]">
+            <div>
+              <div class="text-xs font-mono text-slate-400 uppercase" data-layout-ignore="true">Check 03</div>
+              <div class="text-2xl font-bold text-white mt-0.5">Year-on-Year Dynamics</div>
+              <div class="text-sm text-slate-400 font-mono mt-1" data-layout-ignore="true">Bounds & Magnitude Verification</div>
+            </div>
+            <div class="text-right" data-layout-ignore="true">
+              <span class="px-3.5 py-1.5 rounded-full bg-amber-500/20 text-amber-300 font-mono text-sm font-bold border border-amber-500/40">✓ TOLERANCE OK</span>
+            </div>
+          </div>
+
+          <div id="s3-card-4" class="glass-card p-6 flex items-center justify-between border-l-4 border-l-purple-500">
+            <div>
+              <div class="text-xs font-mono text-slate-400 uppercase" data-layout-ignore="true">Check 04</div>
+              <div class="text-2xl font-bold text-white mt-0.5">Cross-Statement Parity</div>
+              <div class="text-sm text-slate-400 font-mono mt-1" data-layout-ignore="true">Cash Flow Ties to Income Statement</div>
+            </div>
+            <div class="text-right" data-layout-ignore="true">
+              <span class="px-3.5 py-1.5 rounded-full bg-purple-500/20 text-purple-300 font-mono text-sm font-bold border border-purple-500/40">✓ TIED OUT</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SCENE 4: CRASH RESILIENCE (12.0s - 16.5s) ================= -->
+      <section id="scene-4" class="scene" data-hold="true">
+        <div class="glow-pill bg-rose-500/10 border border-rose-500/30 text-rose-400 mb-6" data-layout-ignore="true">
+          <span>DURABLE STATE ENGINE</span>
+        </div>
+        <h2 class="text-5xl font-bold tracking-tight text-center mb-10">
+          Killed Mid-Run. <span class="text-[#E8B339]">Nothing Lost.</span>
+        </h2>
+
+        <div class="glass-card p-8 w-full max-w-4xl space-y-6">
+          <div class="flex items-center justify-between border-b border-white/10 pb-4">
+            <div class="flex items-center gap-3">
+              <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="font-mono text-base text-slate-300">AsyncSqlite Checkpointer · Thread ID: #run-8921</span>
+            </div>
+            <span class="font-mono text-xs text-emerald-400 font-bold bg-emerald-500/10 px-3.5 py-1.5 rounded-full border border-emerald-500/30" data-layout-ignore="true">
+              RECOVERED FROM FAULT
+            </span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-6 font-mono text-center">
+            <div class="p-6 rounded-2xl bg-black/40 border border-white/5">
+              <div class="text-xs text-slate-400" data-layout-ignore="true">Redundant Network Calls</div>
+              <div class="text-4xl font-bold text-emerald-400 mt-2">0</div>
+              <div class="text-xs text-slate-500 mt-1" data-layout-ignore="true">Strict Cache Rehit</div>
+            </div>
+            <div class="p-6 rounded-2xl bg-black/40 border border-white/5">
+              <div class="text-xs text-slate-400" data-layout-ignore="true">Cryptographic Chain</div>
+              <div class="text-4xl font-bold text-white mt-2">100%</div>
+              <div class="text-xs text-slate-500 mt-1" data-layout-ignore="true">SHA-256 Sequential</div>
+            </div>
+            <div class="p-6 rounded-2xl bg-black/40 border border-white/5">
+              <div class="text-xs text-slate-400" data-layout-ignore="true">Human Triage Keystroke</div>
+              <div class="text-4xl font-bold text-[#E8B339] mt-2">[A]</div>
+              <div class="text-xs text-slate-500 mt-1" data-layout-ignore="true">Durable Approval</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SCENE 5: OUTRO / BRAND LOCKUP (16.5s - 20.0s) ================= -->
+      <section id="scene-5" class="scene">
+        <!-- Logo Emblem -->
+        <div id="s5-emblem" class="w-28 h-28 rounded-3xl bg-[rgba(232,179,57,0.15)] border-2 border-[#E8B339] flex items-center justify-center text-[#E8B339] shadow-[0_0_50px_rgba(232,179,57,0.35)] mb-8">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
+            <line x1="12" y1="22" x2="12" y2="15.5" />
+            <polyline points="22 8.5 12 15.5 2 8.5" />
+          </svg>
+        </div>
+
+        <h1 id="s5-title" class="text-7xl font-extrabold tracking-tight text-white mb-4">
+          VantageAudit <span class="text-[#E8B339] text-3xl font-mono font-medium px-4 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30" data-layout-ignore="true">v2.0</span>
+        </h1>
+        <p id="s5-tagline" class="text-3xl text-slate-300 font-mono tracking-wider mb-8 text-center">
+          AUDIT AT MACHINE SPEED. CERTIFY WITH HUMAN TRUTH.
+        </p>
+
+        <div id="s5-badges" class="flex items-center gap-4 text-sm font-mono text-slate-400" data-layout-ignore="true">
+          <span class="px-5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10">100% POST-REVIEW ACCURACY</span>
+          <span class="px-5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10">SEC EDGAR COMPLIANT</span>
+          <span class="px-5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10">LANGGRAPH CHECKPOINTED</span>
+        </div>
+      </section>
+    </div>
+
+    <!-- GSAP Master Animation Timeline -->
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // ================= SCENE 1 (0.0s - 3.2s) =================
+      tl.to("#scene-1", { opacity: 1, duration: 0.01 }, 0);
+      tl.fromTo("#s1-tag", { opacity: 0.8, y: 0 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0);
+      tl.fromTo("#s1-heading", { opacity: 0.9, scale: 0.98, y: 15 }, { opacity: 1, scale: 1, y: 0, duration: 0.7, ease: "power4.out" }, 0.1);
+      tl.fromTo("#s1-sub", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.6);
+      tl.to("#scene-1", { opacity: 0, scale: 1.05, duration: 0.4, ease: "power2.in" }, 2.9);
+
+      // ================= SCENE 2 (3.2s - 7.8s) =================
+      tl.to("#scene-2", { opacity: 1, duration: 0.01 }, 3.2);
+      tl.fromTo("#s2-card-rules", { opacity: 0, x: -80 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, 3.4);
+      tl.fromTo("#s2-card-llm", { opacity: 0, x: 80 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, 3.4);
+      tl.fromTo("#s2-badge", { opacity: 0, scale: 0 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }, 4.0);
+      tl.fromTo("#s2-footer", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 4.5);
+      tl.to("#scene-2", { opacity: 0, scale: 0.96, duration: 0.4, ease: "power2.in" }, 7.5);
+
+      // ================= SCENE 3 (7.8s - 12.0s) =================
+      tl.to("#scene-3", { opacity: 1, duration: 0.01 }, 7.8);
+      tl.fromTo("#s3-card-1", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 8.0);
+      tl.fromTo("#s3-card-2", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 8.3);
+      tl.fromTo("#s3-card-3", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 8.6);
+      tl.fromTo("#s3-card-4", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 8.9);
+      tl.to("#scene-3", { opacity: 0, y: -40, duration: 0.4, ease: "power2.in" }, 11.7);
+
+      // ================= SCENE 4 (12.0s - 16.5s) =================
+      tl.to("#scene-4", { opacity: 1, duration: 0.01 }, 12.0);
+      tl.fromTo("#scene-4 .glass-card", { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power4.out" }, 12.2);
+      tl.to("#scene-4", { opacity: 0, scale: 1.04, duration: 0.4, ease: "power2.in" }, 16.2);
+
+      // ================= SCENE 5 (16.5s - 20.0s) =================
+      tl.to("#scene-5", { opacity: 1, duration: 0.01 }, 16.5);
+      tl.fromTo("#s5-emblem", { opacity: 0, scale: 0.5, rotation: -15 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.7, ease: "back.out(2)" }, 16.7);
+      tl.fromTo("#s5-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 17.0);
+      tl.fromTo("#s5-tagline", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 17.3);
+      tl.fromTo("#s5-badges", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 17.6);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

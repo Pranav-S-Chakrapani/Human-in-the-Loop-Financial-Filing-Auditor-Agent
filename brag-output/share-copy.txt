@@ -1,0 +1,5 @@
+Auditing Fortune 500 10-K filings with dual-consensus AI, 4-way balance sheet invariants, and crash-resilient LangGraph checkpointers.
+
+Killed mid-run, zero state lost, zero redundant LLM calls.
+
+Meet VantageAudit v2.0: https://github.com/Pranav-S-Chakrapani/Human-in-the-Loop-Financial-Filing-Auditor-Agent

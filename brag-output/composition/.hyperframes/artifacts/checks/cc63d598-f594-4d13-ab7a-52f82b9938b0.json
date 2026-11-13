@@ -1,0 +1,838 @@
+{
+  "ok": false,
+  "strict": false,
+  "browserSkipped": false,
+  "lint": {
+    "ok": false,
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "css_parse_error",
+        "severity": "error",
+        "message": "CSS parse error: <css input>:44:9: Unknown word pointer-events-none",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "C:\\Users\\chakr\\Downloads\\MINEARENA\\brag-output\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Check the CSS at the reported line for an unclosed brace, quote, or comment, or a missing semicolon between declarations."
+      }
+    ],
+    "filesScanned": 1
+  },
+  "runtime": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 5,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-impact1\" is 0.49s but its slot (data-duration) is 1.50s — the slot is shortened to the media length when rendered. Set data-duration to ~0.49s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-switch1\" is 0.37s but its slot (data-duration) is 0.50s — the slot is shortened to the media length when rendered. Set data-duration to ~0.37s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-click1\" is 0.09s but its slot (data-duration) is 0.50s — the slot is shortened to the media length when rendered. Set data-duration to ~0.09s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-switch2\" is 0.37s but its slot (data-duration) is 0.50s — the slot is shortened to the media length when rendered. Set data-duration to ~0.37s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-impact2\" is 0.49s but its slot (data-duration) is 2.00s — the slot is shortened to the media length when rendered. Set data-duration to ~0.49s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "20",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      }
+    ]
+  },
+  "layout": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "duration": 20,
+    "samples": [
+      1.111,
+      3.333,
+      5.556,
+      7.778,
+      10,
+      12.222,
+      14.444,
+      16.667,
+      18.889
+    ],
+    "transitionSamples": [],
+    "transitionSamplesDropped": 0,
+    "tolerance": 2,
+    "totalIssueCount": 0,
+    "truncated": false
+  },
+  "motion": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": false,
+    "samples": 0
+  },
+  "contrast": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": true,
+    "samples": [
+      1.111,
+      5.556,
+      10,
+      14.444,
+      18.889
+    ],
+    "checked": 54,
+    "passed": 54
+  },
+  "craft": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 3,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "first_frame_empty",
+        "severity": "warning",
+        "message": "Frame 0 shows only the background, and the first frame is the thumbnail on social players: have the title or key image already on screen at 0 s instead of entering from nothing; see references/review.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 55 text elements stay under it for 0.5 s or more, the smallest \"MATCH\" at 11 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "MATCH",
+        "selector": "#s2-badge > span:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 857.72,
+          "y": 554.59,
+          "width": 37.2,
+          "height": 14.82
+        },
+        "time": 4.125,
+        "times": [
+          0.375,
+          1,
+          3.25,
+          3.25,
+          3.25,
+          3.5,
+          3.5,
+          3.5,
+          3.5,
+          3.5,
+          3.5,
+          3.5,
+          3.5,
+          3.5,
+          3.5,
+          4.125,
+          4.125,
+          4.625,
+          7.875,
+          7.875,
+          7.875,
+          8.125,
+          8.125,
+          8.125,
+          8.125,
+          8.375,
+          8.375,
+          8.375,
+          8.375,
+          8.75,
+          8.75,
+          8.75,
+          8.75,
+          9,
+          9,
+          9,
+          9,
+          12.125,
+          12.125,
+          12.125,
+          12.375,
+          12.375,
+          12.375,
+          12.375,
+          12.375,
+          12.375,
+          12.375,
+          12.375,
+          12.375,
+          12.375,
+          12.375,
+          17.5,
+          17.75,
+          17.75,
+          17.75
+        ],
+        "fontPx": 11.29,
+        "floorPx": 28,
+        "seconds": 3.75,
+        "elements": [
+          {
+            "selector": "#s2-badge > span:nth-of-type(1)",
+            "text": "MATCH",
+            "fontPx": 11.29,
+            "time": 4.125,
+            "seconds": 3.75
+          },
+          {
+            "selector": "span.font-mono.text-\\[10px\\]",
+            "text": "100%",
+            "fontPx": 11.29,
+            "time": 4.125,
+            "seconds": 3.75
+          },
+          {
+            "selector": "div.glow-pill.bg-sky-500\\/10 > span:nth-of-type(1)",
+            "text": "PARALLEL CORROBORATION ENGINE",
+            "fontPx": 13.89,
+            "time": 3.25,
+            "seconds": 4.625
+          },
+          {
+            "selector": "#s1-tag > span:nth-of-type(2)",
+            "text": "REGULATORY FINANCIAL TRUTH",
+            "fontPx": 14,
+            "time": 0.375,
+            "seconds": 2.875
+          },
+          {
+            "selector": "div.glow-pill.bg-emerald-500\\/10 > span:nth-of-type(1)",
+            "text": "MATHEMATICAL INVARIANTS",
+            "fontPx": 14,
+            "time": 7.875,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.glow-pill.bg-rose-500\\/10 > span:nth-of-type(1)",
+            "text": "DURABLE STATE ENGINE",
+            "fontPx": 14,
+            "time": 12.125,
+            "seconds": 4.5
+          },
+          {
+            "selector": "span.font-mono.text-sm",
+            "text": "AsyncSqlite Checkpointer · Thread ID: #run-8921",
+            "fontPx": 15.75,
+            "time": 12.375,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#scene-4 > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "RECOVERED FROM FAULT",
+            "fontPx": 15.75,
+            "time": 12.375,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.grid.grid-cols-3 > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "Redundant Network LLM Calls",
+            "fontPx": 15.75,
+            "time": 12.375,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.grid.grid-cols-3 > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "0",
+            "fontPx": 15.75,
+            "time": 12.375,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.grid.grid-cols-3 > div:nth-of-type(1) > div:nth-of-type(3)",
+            "text": "Strict Cache Rehit",
+            "fontPx": 15.75,
+            "time": 12.375,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.grid.grid-cols-3 > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Cryptographic Chain",
+            "fontPx": 15.75,
+            "time": 12.375,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.grid.grid-cols-3 > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "100%",
+            "fontPx": 15.75,
+            "time": 12.375,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.grid.grid-cols-3 > div:nth-of-type(2) > div:nth-of-type(3)",
+            "text": "SHA-256 Sequential",
+            "fontPx": 15.75,
+            "time": 12.375,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.grid.grid-cols-3 > div:nth-of-type(3) > div:nth-of-type(1)",
+            "text": "Human Triage Keystroke",
+            "fontPx": 15.75,
+            "time": 12.375,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.grid.grid-cols-3 > div:nth-of-type(3) > div:nth-of-type(2)",
+            "text": "[A]",
+            "fontPx": 15.75,
+            "time": 12.375,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.grid.grid-cols-3 > div:nth-of-type(3) > div:nth-of-type(3)",
+            "text": "Durable Approval",
+            "fontPx": 15.75,
+            "time": 12.375,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#s2-card-rules > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "Method 01",
+            "fontPx": 15.87,
+            "time": 3.5,
+            "seconds": 4.375
+          },
+          {
+            "selector": "#s2-card-rules > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "Visual HTML Tree Parser",
+            "fontPx": 15.87,
+            "time": 3.5,
+            "seconds": 4.375
+          },
+          {
+            "selector": "#s2-card-rules > div:nth-of-type(1) > div:nth-of-type(3)",
+            "text": "Deterministic Regex & Cell Normalizer",
+            "fontPx": 15.87,
+            "time": 3.5,
+            "seconds": 4.375
+          },
+          {
+            "selector": "#s2-card-rules > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Apple Inc. · Total Net Sales",
+            "fontPx": 15.87,
+            "time": 3.5,
+            "seconds": 4.375
+          },
+          {
+            "selector": "#s2-card-rules > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "$94,930,000,000",
+            "fontPx": 15.87,
+            "time": 3.5,
+            "seconds": 4.375
+          },
+          {
+            "selector": "#s2-card-llm > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "Method 02",
+            "fontPx": 15.87,
+            "time": 3.5,
+            "seconds": 4.375
+          },
+          {
+            "selector": "#s2-card-llm > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "Vision LLM Extractor",
+            "fontPx": 15.87,
+            "time": 3.5,
+            "seconds": 4.375
+          },
+          {
+            "selector": "#s2-card-llm > div:nth-of-type(1) > div:nth-of-type(3)",
+            "text": "Zero-Shot Visual Document Ingestion",
+            "fontPx": 15.87,
+            "time": 3.5,
+            "seconds": 4.375
+          },
+          {
+            "selector": "#s2-card-llm > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Apple Inc. · Total Net Sales",
+            "fontPx": 15.87,
+            "time": 3.5,
+            "seconds": 4.375
+          },
+          {
+            "selector": "#s2-card-llm > div:nth-of-type(2) > div:nth-of-type(2)",
+            "text": "$94,930,000,000",
+            "fontPx": 15.87,
+            "time": 3.5,
+            "seconds": 4.375
+          },
+          {
+            "selector": "#s2-footer > span:nth-of-type(2)",
+            "text": "Zero Hallucinations · Independent Corroboration · SEC Edgar CIK Compliant",
+            "fontPx": 15.87,
+            "time": 4.625,
+            "seconds": 3.25
+          },
+          {
+            "selector": "#s1-sub",
+            "text": "Standard LLMs fail on corporate balance sheets. VantageAudit fixes it.",
+            "fontPx": 16,
+            "time": 1,
+            "seconds": 2.25
+          },
+          {
+            "selector": "#s3-card-1 > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "Check 01",
+            "fontPx": 16,
+            "time": 8.125,
+            "seconds": 4
+          },
+          {
+            "selector": "#s3-card-1 > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "Accounting Equation",
+            "fontPx": 16,
+            "time": 8.125,
+            "seconds": 4
+          },
+          {
+            "selector": "#s3-card-1 > div:nth-of-type(1) > div:nth-of-type(3)",
+            "text": "Assets = Liabilities + Equity",
+            "fontPx": 16,
+            "time": 8.125,
+            "seconds": 4
+          },
+          {
+            "selector": "#s3-card-1 > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "✓ $0.00 DIFF",
+            "fontPx": 16,
+            "time": 8.125,
+            "seconds": 4
+          },
+          {
+            "selector": "#s3-card-2 > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "Check 02",
+            "fontPx": 16,
+            "time": 8.375,
+            "seconds": 3.75
+          },
+          {
+            "selector": "#s3-card-2 > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "Segment Validation",
+            "fontPx": 16,
+            "time": 8.375,
+            "seconds": 3.75
+          },
+          {
+            "selector": "#s3-card-2 > div:nth-of-type(1) > div:nth-of-type(3)",
+            "text": "Business Segments Sum to Consolidated",
+            "fontPx": 16,
+            "time": 8.375,
+            "seconds": 3.75
+          },
+          {
+            "selector": "#s3-card-2 > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "✓ 100% RECONCILED",
+            "fontPx": 16,
+            "time": 8.375,
+            "seconds": 3.75
+          },
+          {
+            "selector": "#s3-card-3 > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "Check 03",
+            "fontPx": 16,
+            "time": 8.75,
+            "seconds": 3.375
+          },
+          {
+            "selector": "#s3-card-3 > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "Year-on-Year Dynamics",
+            "fontPx": 16,
+            "time": 8.75,
+            "seconds": 3.375
+          },
+          {
+            "selector": "#s3-card-3 > div:nth-of-type(1) > div:nth-of-type(3)",
+            "text": "Macro Bounds & Magnitude Verification",
+            "fontPx": 16,
+            "time": 8.75,
+            "seconds": 3.375
+          },
+          {
+            "selector": "#s3-card-3 > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "✓ TOLERANCE OK",
+            "fontPx": 16,
+            "time": 8.75,
+            "seconds": 3.375
+          },
+          {
+            "selector": "#s3-card-4 > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "Check 04",
+            "fontPx": 16,
+            "time": 9,
+            "seconds": 3.125
+          },
+          {
+            "selector": "#s3-card-4 > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "Cross-Statement Parity",
+            "fontPx": 16,
+            "time": 9,
+            "seconds": 3.125
+          },
+          {
+            "selector": "#s3-card-4 > div:nth-of-type(1) > div:nth-of-type(3)",
+            "text": "Cash Flow Net Income = Income Statement",
+            "fontPx": 16,
+            "time": 9,
+            "seconds": 3.125
+          },
+          {
+            "selector": "#s3-card-4 > div:nth-of-type(2) > span:nth-of-type(1)",
+            "text": "✓ TIED OUT",
+            "fontPx": 16,
+            "time": 9,
+            "seconds": 3.125
+          },
+          {
+            "selector": "#s5-tagline",
+            "text": "AUDIT AT MACHINE SPEED. CERTIFY WITH HUMAN TRUTH.",
+            "fontPx": 16,
+            "time": 17.5,
+            "seconds": 2.5
+          },
+          {
+            "selector": "#s5-badges > span:nth-of-type(1)",
+            "text": "100% POST-REVIEW ACCURACY",
+            "fontPx": 16,
+            "time": 17.75,
+            "seconds": 2.25
+          },
+          {
+            "selector": "#s5-badges > span:nth-of-type(2)",
+            "text": "SEC EDGAR COMPLIANT",
+            "fontPx": 16,
+            "time": 17.75,
+            "seconds": 2.25
+          },
+          {
+            "selector": "#s5-badges > span:nth-of-type(3)",
+            "text": "LANGGRAPH CHECKPOINTED",
+            "fontPx": 16,
+            "time": 17.75,
+            "seconds": 2.25
+          },
+          {
+            "selector": "#scene-2 > h2:nth-of-type(1)",
+            "text": "Two Extractors.",
+            "fontPx": 23.81,
+            "time": 3.25,
+            "seconds": 4.625
+          },
+          {
+            "selector": "#scene-2 > h2:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "One Truth.",
+            "fontPx": 23.81,
+            "time": 3.25,
+            "seconds": 4.625
+          },
+          {
+            "selector": "#scene-3 > h2:nth-of-type(1)",
+            "text": "Four Checks.",
+            "fontPx": 24,
+            "time": 7.875,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#scene-3 > h2:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "Every Time.",
+            "fontPx": 24,
+            "time": 7.875,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#scene-4 > h2:nth-of-type(1)",
+            "text": "Killed Mid-Run.",
+            "fontPx": 24,
+            "time": 12.125,
+            "seconds": 4.5
+          },
+          {
+            "selector": "#scene-4 > h2:nth-of-type(1) > span:nth-of-type(1)",
+            "text": "Nothing Lost.",
+            "fontPx": 24,
+            "time": 12.125,
+            "seconds": 4.5
+          }
+        ]
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 3.38 s (12.75–16.13 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 12.75,
+        "seconds": 3.375,
+        "floorSeconds": 3,
+        "until": 16.125
+      }
+    ],
+    "enabled": true,
+    "step": 0.125,
+    "samples": 160
+  },
+  "audio": {
+    "ok": false,
+    "errorCount": 6,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "audio_source_unreadable",
+        "severity": "error",
+        "message": "assets/music/music.mp3 cannot be read as audio ([FFmpeg] ffprobe not found. Please install FFmpeg.), so the render's audio mix fails and the render stops.",
+        "selector": "#bgm",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "timeRange": [
+          0,
+          20
+        ],
+        "fixHint": "Point src at a file with an audio track, or re-export this one."
+      },
+      {
+        "code": "audio_source_unreadable",
+        "severity": "error",
+        "message": "assets/sfx/impact.ogg cannot be read as audio ([FFmpeg] ffprobe not found. Please install FFmpeg.), so the render's audio mix fails and the render stops.",
+        "selector": "#sfx-impact1",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "timeRange": [
+          0,
+          1.5
+        ],
+        "fixHint": "Point src at a file with an audio track, or re-export this one."
+      },
+      {
+        "code": "audio_source_unreadable",
+        "severity": "error",
+        "message": "assets/sfx/switch.ogg cannot be read as audio ([FFmpeg] ffprobe not found. Please install FFmpeg.), so the render's audio mix fails and the render stops.",
+        "selector": "#sfx-switch1",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 3.2,
+        "timeRange": [
+          3.2,
+          3.7
+        ],
+        "fixHint": "Point src at a file with an audio track, or re-export this one."
+      },
+      {
+        "code": "audio_source_unreadable",
+        "severity": "error",
+        "message": "assets/sfx/click.ogg cannot be read as audio ([FFmpeg] ffprobe not found. Please install FFmpeg.), so the render's audio mix fails and the render stops.",
+        "selector": "#sfx-click1",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 7.8,
+        "timeRange": [
+          7.8,
+          8.3
+        ],
+        "fixHint": "Point src at a file with an audio track, or re-export this one."
+      },
+      {
+        "code": "audio_source_unreadable",
+        "severity": "error",
+        "message": "assets/sfx/switch.ogg cannot be read as audio ([FFmpeg] ffprobe not found. Please install FFmpeg.), so the render's audio mix fails and the render stops.",
+        "selector": "#sfx-switch2",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 12,
+        "timeRange": [
+          12,
+          12.5
+        ],
+        "fixHint": "Point src at a file with an audio track, or re-export this one."
+      },
+      {
+        "code": "audio_source_unreadable",
+        "severity": "error",
+        "message": "assets/sfx/impact.ogg cannot be read as audio ([FFmpeg] ffprobe not found. Please install FFmpeg.), so the render's audio mix fails and the render stops.",
+        "selector": "#sfx-impact2",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 16.5,
+        "timeRange": [
+          16.5,
+          18.5
+        ],
+        "fixHint": "Point src at a file with an audio track, or re-export this one."
+      }
+    ]
+  },
+  "hdr": {
+    "autoPromotion": null,
+    "inspection": "available"
+  },
+  "snapshots": {
+    "enabled": false,
+    "files": [],
+    "times": [],
+    "findingFiles": []
+  }
+}

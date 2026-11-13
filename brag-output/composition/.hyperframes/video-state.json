@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "historyId": "d0b5cfb3-f32e-4fcb-a268-19d1bb313614",
+  "currentRevision": "c6598d17-d22f-424d-84e3-2eea1409302d",
+  "pendingChanges": false,
+  "files": {
+    "AGENTS.md": {
+      "hash": "268ff46777938da818baa92a718571785e9acf2cef2d3ffbacbb93483dcba37a",
+      "content": "C:\\Users\\chakr\\.cache\\hyperframes\\history\\d0b5cfb3-f32e-4fcb-a268-19d1bb313614\\blobs\\26\\268ff46777938da818baa92a718571785e9acf2cef2d3ffbacbb93483dcba37a"
+    },
+    "CLAUDE.md": {
+      "hash": "268ff46777938da818baa92a718571785e9acf2cef2d3ffbacbb93483dcba37a",
+      "content": "C:\\Users\\chakr\\.cache\\hyperframes\\history\\d0b5cfb3-f32e-4fcb-a268-19d1bb313614\\blobs\\26\\268ff46777938da818baa92a718571785e9acf2cef2d3ffbacbb93483dcba37a"
+    },
+    "assets/sfx/click.ogg": {
+      "hash": "59175ac17cd49a68dd736285738441287636112a84a6f7ce0d89921bda5a5360",
+      "content": "C:\\Users\\chakr\\.cache\\hyperframes\\history\\d0b5cfb3-f32e-4fcb-a268-19d1bb313614\\blobs\\59\\59175ac17cd49a68dd736285738441287636112a84a6f7ce0d89921bda5a5360"
+    },
+    "assets/sfx/impact.ogg": {
+      "hash": "112d4f93ddcc370b410630f971c0f5d991856102da9c76bc5c5540d388e75aaa",
+      "content": "C:\\Users\\chakr\\.cache\\hyperframes\\history\\d0b5cfb3-f32e-4fcb-a268-19d1bb313614\\blobs\\11\\112d4f93ddcc370b410630f971c0f5d991856102da9c76bc5c5540d388e75aaa"
+    },
+    "assets/sfx/switch.ogg": {
+      "hash": "75d87dc60b7d29df838530af8c9e28205102234e07b5f1e849aa3d95c3922bd0",
+      "content": "C:\\Users\\chakr\\.cache\\hyperframes\\history\\d0b5cfb3-f32e-4fcb-a268-19d1bb313614\\blobs\\75\\75d87dc60b7d29df838530af8c9e28205102234e07b5f1e849aa3d95c3922bd0"
+    },
+    "hyperframes.json": {
+      "hash": "53dbce1e19aa713cbb12ee0bc4d206143b45ab15e6ffbfcaa8f69572d4d24d50",
+      "content": "C:\\Users\\chakr\\.cache\\hyperframes\\history\\d0b5cfb3-f32e-4fcb-a268-19d1bb313614\\blobs\\53\\53dbce1e19aa713cbb12ee0bc4d206143b45ab15e6ffbfcaa8f69572d4d24d50"
+    },
+    "index.html": {
+      "hash": "83b1634c119b830c7e18b40bced9a26695856263bf77e11e0fa6c5343fdf1f47",
+      "content": "C:\\Users\\chakr\\.cache\\hyperframes\\history\\d0b5cfb3-f32e-4fcb-a268-19d1bb313614\\blobs\\83\\83b1634c119b830c7e18b40bced9a26695856263bf77e11e0fa6c5343fdf1f47"
+    },
+    "meta.json": {
+      "hash": "3561c60fd7c5ba55c2fb4b905b2f0a5ce7895b33fa56bc85a07bfd34b44a11f1",
+      "content": "C:\\Users\\chakr\\.cache\\hyperframes\\history\\d0b5cfb3-f32e-4fcb-a268-19d1bb313614\\blobs\\35\\3561c60fd7c5ba55c2fb4b905b2f0a5ce7895b33fa56bc85a07bfd34b44a11f1"
+    },
+    "package.json": {
+      "hash": "c17ea202bbaf7bfb1bd49e07124cc05c1e2eea5008742bfc8af6b1221106d6f9",
+      "content": "C:\\Users\\chakr\\.cache\\hyperframes\\history\\d0b5cfb3-f32e-4fcb-a268-19d1bb313614\\blobs\\c1\\c17ea202bbaf7bfb1bd49e07124cc05c1e2eea5008742bfc8af6b1221106d6f9"
+    },
+    "assets/music/music.mp3": {
+      "hash": "aa56ab1cdcbef6b05566c6a7c114323078580ccf6a740a9e6c6b6c4b40b4389f",
+      "content": "C:\\Users\\chakr\\.cache\\hyperframes\\history\\d0b5cfb3-f32e-4fcb-a268-19d1bb313614\\blobs\\aa\\aa56ab1cdcbef6b05566c6a7c114323078580ccf6a740a9e6c6b6c4b40b4389f"
+    }
+  },
+  "revisions": {
+    "c6598d17-d22f-424d-84e3-2eea1409302d": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1794528688049,
+      "endedAt": 1794528688053,
+      "files": {
+        "index.html": {
+          "before": "C:\\Users\\chakr\\.cache\\hyperframes\\history\\d0b5cfb3-f32e-4fcb-a268-19d1bb313614\\blobs\\35\\3548c37d57431f1f1b14d3bbd3e9c65c5fcac554d11384a845456969ed9198ee",
+          "after": "C:\\Users\\chakr\\.cache\\hyperframes\\history\\d0b5cfb3-f32e-4fcb-a268-19d1bb313614\\blobs\\83\\83b1634c119b830c7e18b40bced9a26695856263bf77e11e0fa6c5343fdf1f47"
+        }
+      }
+    }
+  },
+  "checks": {
+    "latest": {
+      "revision": "c6598d17-d22f-424d-84e3-2eea1409302d",
+      "id": "978a5a7e-1eae-49b5-af6e-1222a92d4906"
+    },
+    "revisions": {
+      "c6598d17-d22f-424d-84e3-2eea1409302d": [
+        {
+          "id": "978a5a7e-1eae-49b5-af6e-1222a92d4906",
+          "scope": "project",
+          "report": "C:\\Users\\chakr\\Downloads\\MINEARENA\\brag-output\\composition\\.hyperframes\\artifacts\\checks\\978a5a7e-1eae-49b5-af6e-1222a92d4906.json",
+          "metadata": {
+            "ok": true,
+            "browserSkipped": false,
+            "options": {
+              "samples": 9,
+              "atTransitions": false,
+              "maxIssues": 80,
+              "collapseStatic": true,
+              "tolerance": 2,
+              "timeout": 45000,
+              "cache": true,
+              "contrast": true,
+              "craft": true,
+              "strict": false,
+              "snapshots": false,
+              "browserGpuMode": "auto",
+              "includeUnmounted": false
+            }
+          },
+          "createdAt": 1794528696500,
+          "contentHash": "ac7fdf25bc1273a51b898fe281d1a0d1ddca8b0173b360dc37aa19cf1d9eae40",
+          "revision": "c6598d17-d22f-424d-84e3-2eea1409302d",
+          "inputFingerprint": "a116fcdf92ff4bea35452926bb773dc6d3381d5fd7f6d2bea5b12fc60f2b7bb3",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        }
+      ]
+    },
+    "unversioned": [
+      {
+        "id": "cc63d598-f594-4d13-ab7a-52f82b9938b0",
+        "scope": "project",
+        "report": "C:\\Users\\chakr\\Downloads\\MINEARENA\\brag-output\\composition\\.hyperframes\\artifacts\\checks\\cc63d598-f594-4d13-ab7a-52f82b9938b0.json",
+        "metadata": {
+          "ok": false,
+          "browserSkipped": false,
+          "options": {
+            "samples": 9,
+            "atTransitions": false,
+            "maxIssues": 80,
+            "collapseStatic": true,
+            "tolerance": 2,
+            "timeout": 45000,
+            "cache": true,
+            "contrast": true,
+            "craft": true,
+            "strict": false,
+            "snapshots": false,
+            "browserGpuMode": "auto",
+            "includeUnmounted": false
+          }
+        },
+        "createdAt": 1794528578027,
+        "contentHash": "74e48a3a2e6ccb7ac8329823f89651931613245020cbb9c559289e594041309f",
+        "revision": null,
+        "inputFingerprint": "50eaf785a61a3ddb056fa68f16f1e948070ece3172582718a80dcc8288477937",
+        "inputScope": "local-project-files",
+        "attribution": "inputs-changed"
+      }
+    ]
+  },
+  "snapshots": {
+    "latest": null,
+    "revisions": {},
+    "unversioned": []
+  },
+  "renders": {
+    "latest": {
+      "id": "15b7e808-5890-48b6-947c-b525e96c1bec",
+      "completedAt": 1794528762302,
+      "output": "C:\\Users\\chakr\\Downloads\\MINEARENA\\brag-output\\brag.mp4",
+      "status": "completed",
+      "revision": "c6598d17-d22f-424d-84e3-2eea1409302d"
+    },
+    "retainedRevisions": [
+      "c6598d17-d22f-424d-84e3-2eea1409302d"
+    ]
+  },
+  "pendingArtifactCleanup": []
+}
