@@ -180,16 +180,56 @@ export const IntroScreen: React.FC = () => {
         <section
           id="scene-hero"
           ref={(el) => { sectionRefs.current[0] = el; }}
-          className={`relative w-full ${SECTION_HEIGHT} flex flex-col items-center justify-center text-center px-6 md:px-12`}
+          className={`relative w-full ${SECTION_HEIGHT} flex flex-col items-center justify-center text-center px-6 md:px-12 py-8 overflow-hidden`}
           style={{ scrollSnapAlign: 'start' }}
         >
-          <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center">
+          <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center my-auto">
+            {/* Animated VantageAudit Vault Core Emblem */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="relative mb-4 flex items-center justify-center group"
+            >
+              {/* Ambient Halo Aura */}
+              <div className="absolute -inset-3 rounded-full bg-[radial-gradient(circle,rgba(232,179,57,0.2)_0%,transparent_70%)] blur-lg animate-pulse" />
+
+              <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-[#1B2130] via-[#141822] to-[#0A0D14] border border-[var(--signal,#E8B339)]/40 shadow-[0_0_25px_rgba(232,179,57,0.25)] flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-105">
+                {/* Micro-grid pattern background */}
+                <div className="absolute inset-0 bg-[radial-gradient(#E8B339_1px,transparent_1px)] [background-size:6px_6px] opacity-15" />
+
+                {/* VantageAudit Isometric Vault Core SVG */}
+                <svg
+                  width="28"
+                  height="28"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-[var(--signal,#E8B339)] drop-shadow-[0_0_10px_rgba(232,179,57,0.7)] animate-pulse"
+                  style={{ animationDuration: '3s' }}
+                >
+                  <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
+                  <line x1="12" y1="22" x2="12" y2="15.5" />
+                  <polyline points="22 8.5 12 15.5 2 8.5" />
+                </svg>
+
+                {/* Central Pulsing Golden Jewel Node */}
+                <div
+                  className="absolute top-[12px] left-[13px] w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_#FFFFFF] animate-ping opacity-80"
+                  style={{ animationDuration: '2.5s' }}
+                />
+              </div>
+            </motion.div>
+
             {/* Minimalist Top Index Badge */}
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="inline-flex items-center space-x-2.5 px-3.5 py-1.5 rounded-full border border-white/[0.08] bg-[#141822]/80 backdrop-blur-md text-xs font-mono tracking-wider text-slate-300 mb-8 shadow-sm"
+              transition={{ duration: 0.4, delay: 0.1 }}
+              className="inline-flex items-center space-x-2.5 px-3 py-1 rounded-full border border-white/[0.08] bg-[#141822]/80 backdrop-blur-md text-[11px] font-mono tracking-wider text-slate-300 mb-4 shadow-sm"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--signal,#E8B339)] shadow-[0_0_8px_rgba(232,179,57,0.8)]" />
               <span>PS-01</span>
@@ -198,7 +238,7 @@ export const IntroScreen: React.FC = () => {
             </motion.div>
 
             {/* Main Typographic Headline */}
-            <h1 className="font-display font-bold text-5xl md:text-7xl tracking-[-0.03em] text-white mb-6 leading-[1.08]">
+            <h1 className="font-display font-bold text-4xl sm:text-5xl md:text-6xl tracking-[-0.03em] text-white mb-4 leading-[1.1] max-w-3xl">
               <span className="block text-slate-100">A financial AI that knows</span>
               <span className="block text-[var(--signal,#E8B339)] mt-1">
                 when to distrust itself.
@@ -206,32 +246,32 @@ export const IntroScreen: React.FC = () => {
             </h1>
 
             {/* Editorial Body Text */}
-            <p className="font-sans text-lg md:text-xl text-slate-300/80 max-w-2xl mb-10 leading-relaxed font-normal">
+            <p className="font-sans text-sm sm:text-base md:text-lg text-slate-300/80 max-w-2xl mb-7 leading-relaxed font-normal">
               VantageAudit parses SEC 10-K filings as visual documents, corroborates dual independent extractors, enforces strict accounting theorems, and halts execution before uncertainty reaches the ledger.
             </p>
 
             {/* Primary Action Button (Tactile Dip & Magnetic Feel) */}
-            <div className="flex flex-col items-center space-y-3">
+            <div className="flex flex-col items-center space-y-2 mb-2">
               <MagneticButton
                 maxShift={8}
                 onClick={() => navigate('/mission')}
-                className="px-8 py-4 rounded-xl bg-[var(--signal,#E8B339)] text-[#0E121A] font-bold text-base hover:brightness-110 active:scale-[0.98] transition-all flex items-center space-x-3 cursor-pointer shadow-[0_0_30px_rgba(232,179,57,0.35)]"
+                className="px-8 py-3.5 rounded-xl bg-[var(--signal,#E8B339)] text-[#0E121A] font-bold text-sm md:text-base hover:brightness-110 active:scale-[0.98] transition-all flex items-center space-x-3 cursor-pointer shadow-[0_0_30px_rgba(232,179,57,0.35)]"
               >
                 <span>Enter Mission Control</span>
-                <ArrowRight className="w-5 h-5 text-[#0E121A]" />
+                <ArrowRight className="w-4 h-4 text-[#0E121A]" />
               </MagneticButton>
               <span className="text-[11px] font-mono text-slate-500 tracking-wider">
                 10-15s skippable demo intro
               </span>
             </div>
+          </div>
 
-            {/* Downward Scroll Cue */}
-            <div className="absolute bottom-6 flex flex-col items-center text-slate-500">
-              <span className="text-[10px] font-mono tracking-widest uppercase mb-1.5 text-slate-500">
-                scroll to explore
-              </span>
-              <div className="w-px h-6 bg-gradient-to-b from-white/30 to-transparent" />
-            </div>
+          {/* Downward Scroll Cue anchored cleanly to section bottom — zero overlap */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none text-slate-500 z-10">
+            <span className="text-[9px] font-mono tracking-widest uppercase mb-1 text-slate-500">
+              scroll to explore
+            </span>
+            <div className="w-px h-5 bg-gradient-to-b from-white/30 to-transparent" />
           </div>
         </section>
 

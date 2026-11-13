@@ -244,43 +244,83 @@ export const SupernovaStage: React.FC<Props> = ({
     );
     chipGroup.add(rim);
 
-    // Core Emblem
+    // Core Emblem: 3D Isometric Cryptographic Vault (VantageAudit Core)
     const coreGroup = new THREE.Group();
     coreGroup.position.y = depth - 0.25 + 0.1;
     chipGroup.add(coreGroup);
 
-    const coreMat = new THREE.MeshStandardMaterial({
+    // 3D Hexagonal Vault Base
+    const vaultShape = new THREE.Shape();
+    const R = 1.35;
+    for (let i = 0; i < 6; i++) {
+      const a = (i * Math.PI) / 3 - Math.PI / 6;
+      const vx = Math.cos(a) * R;
+      const vy = Math.sin(a) * R;
+      if (i === 0) vaultShape.moveTo(vx, vy);
+      else vaultShape.lineTo(vx, vy);
+    }
+    vaultShape.closePath();
+
+    const vaultGeo = new THREE.ExtrudeGeometry(vaultShape, {
+      depth: 0.18,
+      bevelEnabled: true,
+      bevelSegments: 2,
+      steps: 1,
+      bevelSize: 0.04,
+      bevelThickness: 0.04,
+    });
+    const vaultBody = new THREE.Mesh(
+      vaultGeo,
+      new THREE.MeshStandardMaterial({
+        color: 0x121622,
+        roughness: 0.3,
+        metalness: 0.85,
+      })
+    );
+    vaultBody.rotation.x = -Math.PI / 2;
+    coreGroup.add(vaultBody);
+
+    // Glowing Isometric Vault Facet Edges (Hexagon + 3 internal radiating axes)
+    const lineMat = new THREE.LineBasicMaterial({
+      color: accentColor,
+    });
+    const vaultLinePts: THREE.Vector3[] = [];
+    for (let i = 0; i <= 6; i++) {
+      const a = ((i % 6) * Math.PI) / 3 - Math.PI / 6;
+      vaultLinePts.push(new THREE.Vector3(Math.cos(a) * R, 0.22, Math.sin(a) * R));
+    }
+    const outerHexLine = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(vaultLinePts),
+      lineMat
+    );
+    coreGroup.add(outerHexLine);
+
+    // 3 internal isometric cube division lines radiating from center to every other vertex
+    for (let k = 0; k < 3; k++) {
+      const a = (k * 2 * Math.PI) / 3 - Math.PI / 6;
+      const radPts = [
+        new THREE.Vector3(0, 0.23, 0),
+        new THREE.Vector3(Math.cos(a) * R, 0.23, Math.sin(a) * R),
+      ];
+      const radLine = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(radPts),
+        lineMat
+      );
+      coreGroup.add(radLine);
+    }
+
+    // Central Floating Luminous Audit Gem (Octahedron)
+    const gemGeo = new THREE.OctahedronGeometry(0.36, 0);
+    const gemMat = new THREE.MeshStandardMaterial({
       color: accentColor,
       emissive: accentColor,
-      emissiveIntensity: 1.0,
-      roughness: 0.3,
+      emissiveIntensity: 1.2,
+      roughness: 0.2,
+      metalness: 0.9,
     });
-
-    const XS = 2.6 / 192;
-    const cx = 96;
-    const cy = 74;
-    const P = (x: number, y: number): [number, number] => [(x - cx) * XS, (y - cy) * XS];
-    const xs = new THREE.Shape();
-    xs.moveTo(...P(106.4, 74));
-    xs.lineTo(...P(192, 28));
-    xs.lineTo(...P(177.6, 0.2));
-    xs.lineTo(...P(99.2, 32.1));
-    xs.bezierCurveTo(...P(97.2, 32.9), ...P(94.9, 32.9), ...P(92.9, 32.1));
-    xs.lineTo(...P(14.5, 0.2));
-    xs.lineTo(...P(0.1, 28));
-    xs.lineTo(...P(85.7, 74));
-    xs.lineTo(...P(0.1, 120));
-    xs.lineTo(...P(14.5, 147.8));
-    xs.lineTo(...P(92.9, 115.9));
-    xs.bezierCurveTo(...P(94.9, 115.1), ...P(97.2, 115.1), ...P(99.2, 115.9));
-    xs.lineTo(...P(177.6, 147.8));
-    xs.lineTo(...P(192, 120));
-    xs.lineTo(...P(106.4, 74));
-    xs.closePath();
-
-    const xMark = new THREE.Mesh(new THREE.ExtrudeGeometry(xs, { depth: 0.16, bevelEnabled: false }), coreMat);
-    xMark.rotation.x = -Math.PI / 2;
-    coreGroup.add(xMark);
+    const centralGem = new THREE.Mesh(gemGeo, gemMat);
+    centralGem.position.set(0, 0.38, 0);
+    coreGroup.add(centralGem);
 
     // Mini pipeline blocks seen on the chip die
     const miniRows: THREE.Group[][] = [];
@@ -438,7 +478,9 @@ export const SupernovaStage: React.FC<Props> = ({
       chipGroup.rotation.y = prefersReducedMotion ? 0 : (1 - currentChip) * 0.6;
 
       const pulsePhase = phases[0] % 1;
-      coreMat.emissiveIntensity = 0.7 + Math.max(0, 1 - pulsePhase) * 0.8;
+      gemMat.emissiveIntensity = 0.8 + Math.max(0, 1 - pulsePhase) * 0.9;
+      centralGem.rotation.y += prefersReducedMotion ? 0 : 0.015;
+      centralGem.rotation.x += prefersReducedMotion ? 0 : 0.008;
       coreGroup.position.y = 0.35 + Math.sin(Math.PI * Math.max(0, 1 - pulsePhase)) * 0.35;
 
       // Animate PCB Traces
