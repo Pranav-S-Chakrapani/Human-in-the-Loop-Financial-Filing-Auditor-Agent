@@ -56,3 +56,114 @@ body {
     transform: none !important;
   }
 }
+
+/* Print-only / Screen-only Utilities */
+.print-only {
+  display: none !important;
+}
+
+/* ==========================================================================
+   OFFICIAL EXECUTIVE AUDIT REPORT — PRINT TO PDF STYLES
+   Produces an immaculate, certified regulatory document on print / PDF save.
+   ========================================================================== */
+@media print {
+  @page {
+    size: letter portrait;
+    margin: 12mm 14mm;
+  }
+
+  body {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    font-size: 11pt !important;
+  }
+
+  /* Hide navigation, header, footer, interactive buttons, modal backdrops */
+  header,
+  nav,
+  footer,
+  button,
+  .no-print,
+  [role="dialog"],
+  .fixed,
+  .animate-spin,
+  .animate-bounce {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  /* Expand max-width for print */
+  main, .max-w-7xl, .p-6 {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Reset dark container colors to clean executive document styling */
+  .bg-\[\#141822\]\/85,
+  .bg-\[\#141822\],
+  .bg-\[\#0B0E14\],
+  .bg-\[\#10141D\] {
+    background-color: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Force high contrast text */
+  .text-white {
+    color: #0f172a !important;
+  }
+  .text-slate-200, .text-slate-300 {
+    color: #1e293b !important;
+  }
+  .text-slate-400, .text-slate-500 {
+    color: #475569 !important;
+  }
+
+  /* Accent highlights preserved with print-friendly contrast */
+  .text-emerald-400 {
+    color: #047857 !important;
+  }
+  .text-sky-400 {
+    color: #0369a1 !important;
+  }
+  .text-rose-400 {
+    color: #b91c1c !important;
+  }
+  .text-\[var\(--signal\,\#E8B339\)\] {
+    color: #b45309 !important;
+  }
+
+  /* Crisp colored metric boxes */
+  .bg-emerald-500\/10 {
+    background-color: #ecfdf5 !important;
+    border: 1px solid #a7f3d0 !important;
+  }
+  .bg-rose-500\/10 {
+    background-color: #fff1f2 !important;
+    border: 1px solid #fecdd3 !important;
+  }
+  .bg-sky-500\/10 {
+    background-color: #f0f9ff !important;
+    border: 1px solid #bae6fd !important;
+  }
+  .bg-\[var\(--signal\,\#E8B339\)\]\/10 {
+    background-color: #fefce8 !important;
+    border: 1px solid #fde047 !important;
+  }
+
+  /* Keep cards together across pages */
+  .grid > div {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

@@ -9,7 +9,7 @@ import {
   ReportScreen,
 } from './screens';
 import { fetchCounters, fetchDevStatus, USE_MOCKS, subscribeToEvents } from './api';
-import { RefreshCw, HelpCircle, Monitor, Settings, Cpu, ShieldCheck, Activity } from 'lucide-react';
+import { RefreshCw, HelpCircle, Monitor, Settings, Cpu, ShieldCheck, Activity, Sparkles, LayoutGrid, Lock, Award } from 'lucide-react';
 import { ShortcutsModal } from './components/ShortcutsModal';
 import { DevSettingsModal } from './components/DevSettingsModal';
 import { MosaicTransition } from './components/MosaicTransition';
@@ -43,12 +43,12 @@ const NavigationBar: React.FC<{
   };
 
   const navLinks = [
-    { path: '/', label: 'Overview' },
-    { path: '/mission', label: 'Mission Control' },
-    { path: '/reviews', label: 'Review Workbench' },
-    { path: '/metrics', label: 'Metrics Grid' },
-    { path: '/audit', label: 'Audit Ledger' },
-    { path: '/report', label: 'Report' },
+    { path: '/', label: 'Overview', icon: Sparkles },
+    { path: '/mission', label: 'Mission Control', icon: Activity },
+    { path: '/reviews', label: 'Review Workbench', icon: ShieldCheck },
+    { path: '/metrics', label: 'Metrics Grid', icon: LayoutGrid },
+    { path: '/audit', label: 'Audit Ledger', icon: Lock },
+    { path: '/report', label: 'Report', icon: Award },
   ];
 
   return (
@@ -86,21 +86,22 @@ const NavigationBar: React.FC<{
             </div>
           </button>
 
-          {/* Floating Pill Navigation with whitespace-nowrap */}
-          <nav className="hidden md:flex items-center space-x-1 bg-white/[0.03] p-1 rounded-full border border-white/[0.06] shrink-0">
+          {/* Floating Pill Navigation Capsule Dock */}
+          <nav className="hidden md:flex items-center space-x-1.5 bg-[#121622]/90 p-1 rounded-2xl border border-white/[0.12] shadow-[0_4px_20px_rgba(0,0,0,0.5)] shrink-0 backdrop-blur-xl">
             {navLinks.map((link) => {
               const active = location.pathname === link.path;
+              const Icon = link.icon;
               return (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 flex items-center space-x-1.5 ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 flex items-center space-x-1.5 cursor-pointer active:scale-95 ${
                     active
                       ? 'bg-[var(--signal,#E8B339)] text-[#090C12] font-bold shadow-[0_0_15px_rgba(232,179,57,0.4)]'
-                      : 'text-slate-400 hover:text-slate-100 hover:bg-white/[0.05]'
+                      : 'text-slate-300 hover:text-white hover:bg-white/[0.08]'
                   }`}
                 >
-                  {active && <span className="w-1 h-1 rounded-full bg-[#090C12]" />}
+                  <Icon className={`w-3.5 h-3.5 ${active ? 'text-[#090C12]' : 'text-slate-400'}`} />
                   <span>{link.label}</span>
                 </Link>
               );
