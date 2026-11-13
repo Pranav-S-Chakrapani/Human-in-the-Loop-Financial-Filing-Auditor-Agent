@@ -120,6 +120,17 @@ CREATE TABLE IF NOT EXISTS http_cache (
   ts TEXT
 );
 
+CREATE TABLE IF NOT EXISTS correction_examples (
+  metric TEXT,
+  source_snippet TEXT,
+  wrong_value TEXT,
+  correct_value TEXT,
+  reason TEXT,
+  created_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_correction_examples_metric ON correction_examples(metric, created_at);
+
 -- append-only triggers (RULES #14)
 CREATE TRIGGER IF NOT EXISTS audit_no_update BEFORE UPDATE ON audit_log
   BEGIN SELECT RAISE(ABORT, 'audit_log is append-only'); END;

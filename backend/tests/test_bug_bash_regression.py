@@ -20,6 +20,12 @@ from backend.app.api.report import compute_report_metrics
 @pytest.fixture(autouse=True)
 def setup_db():
     init_db()
+    conn = get_connection()
+    try:
+        conn.execute("DELETE FROM metric_corrections")
+        conn.commit()
+    finally:
+        conn.close()
 
 @pytest.mark.asyncio
 async def test_item_1_segment_data_skipped_no_crash_no_escalation():

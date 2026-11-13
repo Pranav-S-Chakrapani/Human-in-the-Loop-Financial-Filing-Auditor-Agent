@@ -230,16 +230,18 @@ async def submit_review_decision(
         metric_id = review_row["metric_id"]
         reasons_list = json.loads(review_row["reasons"]) if review_row["reasons"] else []
 
-        cur.execute("SELECT value_dollars, confidence FROM metrics WHERE metric_id = ?", (metric_id,))
+        cur.execute("SELECT value_dollars, confidence, snippet_text, metric FROM metrics WHERE metric_id = ?", (metric_id,))
         m_row = cur.fetchone()
         orig_val = m_row["value_dollars"] if m_row else None
         conf_val = m_row["confidence"] if m_row else 0.5
+        snippet_text = m_row["snippet_text"] if (m_row and "snippet_text" in m_row.keys() and m_row["snippet_text"]) else ""
+        metric_name = m_row["metric"] if (m_row and m_row["metric"]) else metric_id.replace(f"m_{run_id}_", "")
 
         seq, row_hash = append_audit_entry(
             review_id=review_id,
             run_id=run_id,
             company=company_name,
-            metric=metric_id.replace(f"m_{run_id}_", ""),
+            metric=metric_name,
             period="FY2026",
             original_value=orig_val,
             corrected_value=req.corrected_value,
@@ -249,6 +251,25 @@ async def submit_review_decision(
             reasons=reasons_list,
             confidence=conf_val
         )
+
+        # Store correction example in correction_examples if decision is "correct"
+        if req.decision == "correct":
+            now_created_at = datetime.now(timezone.utc).isoformat()
+            cur.execute(
+                """
+                INSERT INTO correction_examples (
+                    metric, source_snippet, wrong_value, correct_value, reason, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    metric_name,
+                    snippet_text or "",
+                    str(orig_val) if orig_val is not None else "",
+                    str(req.corrected_value) if req.corrected_value is not None else "",
+                    req.note or "",
+                    now_created_at,
+                ),
+            )
 
         # Update review status to decided in SQLite
         cur.execute(

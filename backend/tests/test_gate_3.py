@@ -101,7 +101,7 @@ async def test_full_pipeline_fault_injection_pause_resume():
         await pipeline.ainvoke(Command(resume=resume_payload), config)
 
         # Loop if more reviews remain
-        max_loops = 5
+        max_loops = 10
         while max_loops > 0:
             st = await pipeline.aget_state(config)
             if not st.next:

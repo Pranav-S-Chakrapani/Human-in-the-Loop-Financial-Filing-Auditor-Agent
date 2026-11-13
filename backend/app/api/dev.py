@@ -61,6 +61,7 @@ async def reset_demo_endpoint(request: Request) -> Dict[str, Any]:
                 "reviews",
                 "audit_log",
                 "events",
+                "correction_examples",
                 "metric_corrections"
             ]
             for tbl in tables_to_clear:
