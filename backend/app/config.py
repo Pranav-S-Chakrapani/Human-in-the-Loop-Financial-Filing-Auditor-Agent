@@ -14,7 +14,7 @@ class ScoringWeights(BaseModel):
 class LLMConfig(BaseModel):
     concurrency: int = 3
     model: str = "openai/gpt-oss-120b"
-    fallback_model: str = "gemini-3.5-flash"
+    fallback_model: str = "gemini-1.5-flash"
 
 class EdgarConfig(BaseModel):
     max_rps: float = 5.0
